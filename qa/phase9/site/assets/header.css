@@ -1,0 +1,682 @@
+/* ============================================================================
+   GOD SQUAD — Announcement bar and header
+   Phase 4. Every value is a token from design-tokens.css. No raw hex, no magic
+   numbers, no !important.
+
+   The prototype's responsive layer was 55 !important declarations keyed to
+   editor-generated attributes, written desktop-first (PHASE-1 CSS-02, CSS-03).
+   This is mobile-first, class-based, and adds width with min-width queries.
+   ========================================================================== */
+
+/* ---------------------------------------------------------------- utilities */
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: absolute;
+  top: var(--space-2);
+  left: var(--space-2);
+  z-index: var(--z-toast);
+  /* --target-min tall, which Phase 2 §23.7 specifies and which the brief
+     repeats: the skip link is the first control a keyboard user reaches, and
+     it was 38px. */
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target-min);
+  padding: var(--space-3) var(--space-5);
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  font-family: var(--font-body);
+  font-size: var(--type-label-size);
+  letter-spacing: var(--type-label-ls);
+  text-transform: uppercase;
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+  transform: translateY(-200%);
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+.icon {
+  display: block;
+  width: var(--icon-md);
+  height: var(--icon-md);
+  flex: none;
+}
+
+/* ------------------------------------------------------- announcement bar */
+
+.announcement-bar {
+  position: relative;
+  z-index: var(--z-raised);
+  border-bottom: var(--border-width) solid var(--color-border-current-subtle);
+}
+
+.announcement-bar__inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--announcement-height-stacked);
+  padding: var(--space-3) var(--gutter);
+  text-align: center;
+}
+
+.announcement-bar__item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: inherit;
+  font-family: var(--font-body);
+  font-size: var(--type-caption-size);
+  font-weight: var(--type-caption-weight);
+  letter-spacing: var(--type-caption-ls);
+  text-transform: uppercase;
+  text-decoration: none;
+}
+
+/* The first message carries the accent; the rest stay in body colour so gold
+   never becomes the dominant tone of the bar (Phase 2 colour usage rules). */
+.announcement-bar__item:first-child .announcement-bar__text {
+  color: var(--accent-current);
+}
+
+.announcement-bar__item--link {
+  min-height: var(--target-min-aa);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .announcement-bar__item--link:hover .announcement-bar__text {
+    color: var(--accent-current);
+    text-decoration: underline;
+    text-underline-offset: var(--link-underline-offset);
+    text-decoration-thickness: var(--link-underline-thickness);
+  }
+}
+
+.announcement-bar__icon {
+  width: var(--icon-sm);
+  height: var(--icon-sm);
+  object-fit: contain;
+}
+
+@media (min-width: 768px) {
+  .announcement-bar__inner {
+    flex-direction: row;
+    justify-content: space-between;
+    min-height: var(--announcement-height);
+    padding-block: 0;
+    text-align: left;
+  }
+
+  /* Phase 11. The merchant's choice, and only on desktop: below --bp-md the bar
+     stacks and centres because there is no width to distribute. "Spread to the
+     edges" is the shipped composition and stays the default. */
+  .announcement-bar--align-centre .announcement-bar__inner {
+    justify-content: center;
+    gap: var(--space-6);
+    text-align: center;
+  }
+}
+
+/* ------------------------------------------------------------------ header */
+
+.header {
+  position: relative;
+  z-index: var(--z-header);
+}
+
+.header--sticky:not(.header--overlay) {
+  position: sticky;
+  top: 0;
+}
+
+/* When the header overlays the first section, the scrim is not optional:
+   without it three of the five links measured 2.4-2.9:1 over the hero sky
+   (PHASE-1 A11Y-03 / HERO-02).
+
+   No `top` is set on purpose. An absolutely positioned box with no offset keeps
+   its static position, so the header lands exactly where it would have sat in
+   flow — directly below the announcement bar — while still lifting out of flow
+   so the first section rises behind it. Setting `top: 0` instead pulls the
+   header over the announcement bar and its scrim dims that text. */
+.header--overlay {
+  position: absolute;
+  inset-inline: 0;
+  background-color: transparent;
+}
+
+/* Sticky and overlay together: overlay where the page starts, then detach into
+   a solid bar once scrolled, because past the first section there is no longer
+   any artwork for the scrim to sit on. */
+.header--overlay.header--sticky.header--scrolled {
+  position: fixed;
+  top: 0;
+}
+
+/* The scrim extends below the header so its fade happens outside the band the
+   links occupy. Ending it at the header edge is what left the brightest pixels
+   behind the nav at 1.1-1.7:1 when this was measured. */
+.header__scrim {
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  height: calc(100% + var(--scrim-header-overhang));
+  background: var(--scrim-header);
+  pointer-events: none;
+}
+
+/* Once a sticky header has left the top of the page it no longer sits over the
+   art it was scrimmed against, so it takes a solid ground instead. */
+.header--sticky.header--scrolled {
+  background-color: var(--color-bg-primary);
+  box-shadow: var(--shadow-on-dark);
+}
+
+.header--sticky.header--scrolled .header__scrim {
+  opacity: 0;
+}
+
+.header__inner {
+  position: relative;
+  z-index: var(--z-raised);
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--space-4);
+  min-height: var(--header-height-mobile);
+}
+
+.header__cluster {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.header__cluster--end {
+  justify-content: flex-end;
+}
+
+.header__branding {
+  display: flex;
+  align-items: center;
+  justify-self: center;
+}
+
+.header__logo-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target-min);
+  color: inherit;
+  text-decoration: none;
+}
+
+/* The two logo-height tokens have defaults in design-tokens.css and are
+   overridden per-instance by an inline style the section emits from its
+   settings, so a merchant can size the mark without touching the system. */
+.header__logo {
+  display: block;
+  width: auto;
+  height: var(--logo-height-mobile);
+  object-fit: contain;
+}
+
+.header__wordmark {
+  font-family: var(--font-display);
+  font-size: var(--type-h3-size);
+  font-weight: var(--weight-black);
+  letter-spacing: var(--type-display-m-ls);
+  text-transform: uppercase;
+}
+
+/* ------------------------------------------------- controls (44px targets) */
+
+.header__control {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  min-width: var(--target-min);
+  min-height: var(--target-min);
+  padding: 0;
+  background: none;
+  border: 0;
+  border-radius: var(--radius-sm);
+  color: inherit;
+  cursor: pointer;
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+/* Pointer-scoped in Phase 18. PHASE-2 §22.1 rule 5 requires it, and this is one
+   of the two controls where it actually bites: the search and menu toggles act
+   in place, so a tap that leaves them accented has no navigation to clear it. */
+@media (hover: hover) and (pointer: fine) {
+  .header__control:hover {
+    color: var(--accent-current);
+  }
+}
+
+/* ===========================================================================
+   THE ACCOUNT CONTROL
+   Phase 15. <shopify-account> is Shopify's own element, not this theme's, and
+   the theme styles it through exactly three published hooks: the
+   --shopify-account-* custom properties, ::part(signed-out-avatar), and the
+   signed-out-avatar slot. Nothing below reaches inside it with a descendant
+   selector. Shopify states it may change the element independently of the
+   theme, so a selector aimed at its internals is a rule with an expiry date.
+
+   THERE IS NO SIZE RESERVATION HERE, AND THAT IS A MEASURED RESULT.
+
+   A custom element has no dimensions until its defining script runs, so the
+   usual guard is a :not(:defined) rule reserving the box — Dawn ships one, and
+   Phase 15 shipped one too. Measured at seven viewports with the reservation
+   removed, then with ALL of this file's account sizing removed, the element
+   still occupied exactly 44x44 and the end cluster still measured 148px. Both
+   rules were dead the day they were written.
+
+   The reason is that the element carries `class="header__control"`, the class
+   every header control already uses, and that class sets min-width and
+   min-height to --target-min inside a flex cluster. So the box is reserved
+   before the component exists, by a rule that predates Phase 15 entirely.
+
+   This is better than a :not(:defined) reservation, not merely equal to it. A
+   :not(:defined) rule stops applying the moment the component upgrades, which
+   leaves the upgraded element free to be any size it likes. An author rule on
+   the element wins over the component's own :host styles, so the 44px target
+   floor holds permanently rather than only until the script lands.
+
+   The harness cannot see any of this from the other side: it never loads
+   Shopify's script, so the element is permanently un-upgraded there. Every
+   harness reading is of the reservation, never of the component. */
+
+shopify-account.header__control {
+  /* ---------------------------------------------------------------------
+     The six primaries whose meaning is unambiguous from their names. The
+     account sheet is a layer over the page, so it is dressed as the theme's
+     other layer is: the cart drawer, which is ink.
+
+     That choice is what makes the accent safe. Phase 2 section 10.1 allows gold
+     on dark surfaces only and gives --color-accent-strong for cream; on ink,
+     --color-accent measures 11.01:1 and the cream text on it 17.04:1. Had the
+     sheet been cream, every one of these would have to be the other token. */
+  --shopify-account-color-background: var(--color-bg-primary);
+  --shopify-account-color-text: var(--color-text-primary);
+  --shopify-account-color-accent: var(--color-accent);
+  --shopify-account-font-heading: var(--font-display);
+  --shopify-account-font-body: var(--font-body);
+  --shopify-account-radius-base: var(--radius-sm);
+
+  /* Derived properties, set only where the theme knows something the
+     derivation cannot: God Squad headings are uppercase Playfair at 900, which
+     no amount of deriving from a font family will produce. */
+  --shopify-account-font-heading-weight: var(--weight-black);
+  --shopify-account-font-heading-transform: uppercase;
+  --shopify-account-font-body-weight: var(--weight-regular);
+  --shopify-account-radius-button: var(--radius-sm);
+  --shopify-account-radius-input: var(--radius-sm);
+
+  /* The signed-in avatar is a filled disc carrying the customer's initials.
+     Gold disc, ink initials - the same 11.01:1 pairing, inverted. */
+  --shopify-account-signed-in-avatar-color-background: var(--color-accent);
+  --shopify-account-signed-in-avatar-color-text: var(--color-bg-primary);
+
+  /* --shopify-account-dialog-position-top is deliberately NOT set. Its
+     semantics - an absolute top, an offset from the trigger, or a gap - could
+     not be settled from the documentation, and this theme has a sticky header
+     that a wrong guess would put the sheet underneath. Shopify's default is
+     left in place; it is the first thing to check on a live store. */
+}
+
+/* The slotted content: the Phase 3 account mark, at the same size the search
+   and cart icons use, so the three read as one set. This one IS needed - the
+   class is new in Phase 15 and nothing else sizes it. */
+.header__account-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--icon-md);
+  height: var(--icon-md);
+  color: inherit;
+}
+
+.header__account-avatar .icon {
+  width: 100%;
+  height: 100%;
+}
+
+.header__cart-count {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  display: grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  padding-inline: 4px;
+  background-color: var(--color-accent);
+  color: var(--color-text-inverse);
+  font-family: var(--font-body);
+  font-size: var(--type-caption-size);
+  font-weight: var(--weight-semibold);
+  line-height: 1;
+  border-radius: var(--radius-full);
+}
+
+/* ------------------------------------------------------- primary navigation */
+
+.header__nav {
+  display: none;
+}
+
+.header__nav-list {
+  display: flex;
+  align-items: center;
+  gap: var(--nav-gap);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.header__nav-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target-min);
+  color: inherit;
+  font-family: var(--font-body);
+  font-size: var(--type-label-size);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--type-label-ls);
+  text-transform: uppercase;
+  text-decoration: none;
+  border-bottom: var(--border-width) solid transparent;
+  transition: color var(--transition-fast), border-color var(--transition-fast);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .header__nav-link:hover {
+    color: var(--accent-current);
+  }
+}
+
+/* Active state comes from link.active, not from a hard-coded underline on Home
+   as in the prototype (PHASE-1 NAV-06). */
+.header__nav-link.is-active {
+  color: var(--accent-current);
+  border-bottom-color: var(--accent-current);
+}
+
+/* ------------------------------------------------------------ mobile panel */
+
+/* Phase 18 corrected this from --transition-medium to --transition-slow. It is a
+   SCRIM, and PHASE-2 §21 assigns the two parts of a drawer different durations
+   on purpose: line 1725 gives "menu panel / drawer entry and exit" the medium
+   250ms, line 1727 gives "overlay scrim behind a drawer or modal" the slow
+   400ms, and line 1690 states 400ms is for "full-surface changes only" — which
+   is exactly what a full-viewport wash is.
+
+   .cart-drawer__overlay already had it right and cites the same table. The two
+   scrims in the theme sit behind panels opened from the same header, so a
+   customer could open the menu and then the cart and watch the identical wash
+   fade at two different speeds. */
+.header__overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-overlay);
+  background-color: var(--color-overlay);
+  opacity: 0;
+  transition: opacity var(--transition-slow);
+}
+
+.header--menu-open .header__overlay {
+  opacity: 1;
+}
+
+/* The closed panel is display:none, and that rule has to be written here.
+   .header__panel below sets display:flex, and an author class beats the user
+   agent's [hidden]{display:none} at equal specificity — so before this, the
+   panel was hidden from sight by translateX(-100%) alone and every link
+   inside it stayed in the tab order on every page. A keyboard user pressing
+   Tab from the logo walked five invisible menu links.
+
+   It does not cost the slide: assets/header.js sets hidden=false, forces a
+   reflow, and only then adds the open class, which is exactly the sequence a
+   transition out of display:none needs. */
+.header__panel[hidden] {
+  display: none;
+}
+
+.header__panel {
+  position: fixed;
+  inset-block: 0;
+  inset-inline-start: 0;
+  z-index: var(--z-drawer);
+  display: flex;
+  flex-direction: column;
+  width: var(--drawer-width);
+  max-width: 100%;
+  padding: var(--space-5) var(--gutter) var(--space-8);
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  box-shadow: var(--shadow-on-dark);
+  transform: translateX(-100%);
+  transition: transform var(--transition-medium);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* The panel is fixed to the viewport edges, so on a phone with a home
+   indicator or a notch its first and last controls sit under the system UI.
+   max() keeps the designed padding wherever there is no inset to respect. */
+@supports (padding: max(0px)) {
+  .header__panel {
+    padding-block-start: max(var(--space-5), env(safe-area-inset-top));
+    padding-block-end: max(var(--space-8), env(safe-area-inset-bottom));
+    padding-inline-start: max(var(--gutter), env(safe-area-inset-left));
+  }
+}
+
+.header--menu-open .header__panel {
+  transform: translateX(0);
+}
+
+.header__panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  min-height: var(--header-height-mobile);
+  margin-bottom: var(--space-5);
+  border-bottom: var(--border-width) solid var(--color-border);
+}
+
+.header__panel-title {
+  font-family: var(--font-body);
+  font-size: var(--type-eyebrow-size);
+  font-weight: var(--type-eyebrow-weight);
+  letter-spacing: var(--type-eyebrow-ls);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.header__panel-list {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.header__panel-link {
+  display: flex;
+  align-items: center;
+  min-height: var(--target-min);
+  padding-block: var(--space-3);
+  color: inherit;
+  font-family: var(--font-display);
+  font-size: var(--type-h3-size);
+  font-weight: var(--weight-black);
+  text-transform: uppercase;
+  text-decoration: none;
+  border-bottom: var(--border-width) solid var(--color-border-subtle);
+  transition: color var(--transition-fast);
+}
+
+/* Phase 18 split these two apart. They shared one block, which made the current
+   page and a passing cursor literally the same state, and it hid two defects.
+
+   One: the hover half was not pointer-scoped, so a tap on a phone left the item
+   accented with nothing to clear it — and below --bp-lg this panel IS the
+   navigation, so it was the touch-only surface getting the touch-hostile rule.
+
+   Two: the current page was marked by COLOUR ALONE (WCAG 1.4.1). Both siblings
+   already avoid that and one says so in writing: .header__nav-link.is-active
+   adds a bottom border, and .footer__link.is-active adds an underline under the
+   comment "so the state is not carried by colour alone". The panel is the only
+   navigation that did not. The underline is the footer's marker, reused here
+   because these rows already carry a border-bottom as a divider, so a border
+   cannot distinguish the current item from the other eight. */
+.header__panel-link.is-active {
+  color: var(--accent-current);
+  text-decoration: underline;
+  text-underline-offset: var(--link-underline-offset);
+  text-decoration-thickness: var(--link-underline-thickness);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .header__panel-link:hover {
+    color: var(--accent-current);
+  }
+}
+
+.header__panel-empty {
+  color: var(--color-text-muted);
+  font-family: var(--font-body);
+  font-size: var(--type-body-sm-size);
+}
+
+/* Stop the page behind the panel from scrolling while it is open. */
+.menu-open body {
+  overflow: hidden;
+}
+
+/* ------------------------------------------------------------ search panel
+   Phase 13. A LAYER, never a change to .header__inner's grid — which is the
+   whole reason it is a panel and not an expanding field. At 375px that row has
+   327px of content box and only 103px of it is the branding track; a usable
+   field needs about 180, so an inline field would have cost the logo.
+
+   [hidden] is honoured because nothing here sets display on the panel itself,
+   so the attribute alone keeps it out of the layout AND out of the tab order —
+   the defect Phase 11 found on the menu panel, which set display:flex and
+   therefore out-specified the user agent's [hidden] rule.
+   ========================================================================== */
+
+.header__search {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-start: 100%;
+  z-index: var(--z-raised);
+  padding: var(--space-4) var(--gutter);
+  border-block-start: var(--border-width) solid var(--color-border-current);
+  background-color: var(--color-bg-primary);
+  box-shadow: var(--shadow-elevated);
+}
+
+.header__search-form {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--space-3);
+  align-items: center;
+  width: 100%;
+  max-width: var(--container-standard);
+  margin-inline: auto;
+}
+
+.header__search-input {
+  grid-column: 1 / -1;
+  width: 100%;
+  /* §12.2's preferred control height, and 16px type so iOS does not zoom the
+     viewport the moment the field takes focus. */
+  min-height: var(--control-height);
+  padding-inline: var(--space-3);
+  border: var(--border-width) solid var(--color-border-current-interactive);
+  border-radius: var(--radius-sm);
+  background-color: transparent;
+  color: inherit;
+  font-family: var(--font-body);
+  font-size: var(--type-body-size);
+}
+
+.header__search-submit {
+  justify-self: start;
+}
+
+/* From --bp-md the field, the submit and the close sit on one row. */
+@media (min-width: 768px) {
+  .header__search-form {
+    grid-template-columns: 1fr auto auto;
+  }
+
+  .header__search-input {
+    grid-column: auto;
+  }
+}
+
+/* ------------------------------------------------------------- breakpoints */
+
+@media (min-width: 1024px) {
+  .header__inner {
+    grid-template-columns: auto 1fr auto;
+    min-height: var(--header-height-desktop);
+  }
+
+  .header__logo {
+    height: var(--logo-height-desktop);
+  }
+
+  .header__cluster--start {
+    display: none;
+  }
+
+  .header__branding {
+    justify-self: start;
+  }
+
+  .header__nav {
+    display: flex;
+    justify-content: center;
+  }
+
+  /* The panel is not offered at this width; the JS also closes it on resize so
+     focus is never stranded inside a hidden panel. */
+  .header__panel,
+  .header__overlay {
+    display: none;
+  }
+}
+
+/* ---------------------------------------------------------- reduced motion */
+
+@media (prefers-reduced-motion: reduce) {
+  .header__panel,
+  .header__overlay,
+  .header__control,
+  .header__nav-link {
+    transition: none;
+  }
+}

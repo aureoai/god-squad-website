@@ -1,0 +1,233 @@
+{
+  "sections": {
+    "hero": {
+      "type": "hero",
+      "settings": {
+        "focal_point": "centre-left",
+        "overlay": "medium",
+        "eyebrow": "Streetwear With A Purpose.",
+        "heading": "Walk By",
+        "heading_accent": "Faith.",
+        "scripture": "2 Corinthians 5:7",
+        "description": "Different People. Same Purpose.",
+        "button_label": "Shop The Collection",
+        "height": "medium",
+        "text_position": "centre",
+        "text_alignment": "left",
+        "image": "shopify://shop_images/hero-desktop.webp",
+        "mobile_image": "shopify://shop_images/hero-mobile.webp"
+      }
+    },
+    "new-drop": {
+      "type": "featured-collection",
+      "settings": {
+        "collection": "new-drop",
+        "eyebrow": "New Drop /",
+        "heading": "The Faithful",
+        "description": "Premium Essentials for a Higher Purpose.",
+        "show_view_all": true,
+        "view_all_label": "View All Products",
+        "surface": "light",
+        "layout": "with-copy-column",
+        "products_to_show": 3,
+        "columns_desktop": 3,
+        "columns_tablet": 2,
+        "columns_mobile": 2,
+        "show_price": true,
+        "show_compare_at_price": true,
+        "show_swatches": true,
+        "spacing_top": "standard",
+        "spacing_bottom": "standard",
+        "anchor_id": "shop"
+      }
+    },
+    "best-sellers": {
+      "type": "featured-collection",
+      "settings": {
+        "collection": "best-sellers",
+        "eyebrow": "Best Sellers /",
+        "heading": "The Pieces That Define The Movement",
+        "description": "Chosen by the community.",
+        "show_view_all": true,
+        "view_all_label": "Shop All Best Sellers",
+        "surface": "dark",
+        "layout": "full-width",
+        "products_to_show": 4,
+        "columns_desktop": 4,
+        "columns_tablet": 2,
+        "columns_mobile": 2,
+        "show_price": true,
+        "show_compare_at_price": true,
+        "show_swatches": true,
+        "spacing_top": "standard",
+        "spacing_bottom": "standard"
+      }
+    },
+    "our-story": {
+      "type": "our-story",
+      "settings": {
+        "eyebrow": "Our Story",
+        "heading": "Real People.\nBigger Purpose.",
+        "body": "<p>God Squad is a Philippine streetwear brand built on faith, creativity, and community. We create pieces that inspire a generation to live different — with purpose.</p>",
+        "button_label": "Discover Our Story",
+        "show_caption": true,
+        "caption": "Faith\nLives\nDifferent\nHere.",
+        "image_side": "right",
+        "surface": "dark",
+        "spacing_top": "standard",
+        "spacing_bottom": "standard",
+        "anchor_id": "story",
+        "image": "shopify://shop_images/our-story.webp"
+      },
+      "block_order": [
+        "faith",
+        "community",
+        "quality"
+      ],
+      "blocks": {
+        "faith": {
+          "type": "value",
+          "settings": {
+            "title": "Faith Driven",
+            "body": "More Than Clothing"
+          }
+        },
+        "community": {
+          "type": "value",
+          "settings": {
+            "title": "Community",
+            "body": "People With Purpose"
+          }
+        },
+        "quality": {
+          "type": "value",
+          "settings": {
+            "title": "Premium Quality",
+            "body": "Crafted To Inspire"
+          }
+        }
+      }
+    },
+    "verse-feature": {
+      "type": "verse-feature",
+      "settings": {
+        "eyebrow": "Today's Verse",
+        "reference": "2 Corinthians 5:7",
+        "quote": "“For we walk by faith,\nnot by sight.”",
+        "caption": "Walk By Faith.",
+        "message_eyebrow": "The Message",
+        "message": "<p>Faith means moving forward even when the destination isn't completely visible.</p>",
+        "link_label": "Read Full Reflection",
+        "surface": "light",
+        "spacing_top": "standard",
+        "spacing_bottom": "none",
+        "anchor_id": "verse"
+      }
+    },
+    "verse-index": {
+      "type": "verse-index",
+      "blocks": {
+        "faith": {
+          "type": "verse",
+          "settings": {
+            "category": "Faith",
+            "quote": "“Walk by faith,\nnot by sight.”",
+            "reference": "2 Corinthians 5:7",
+            "link_label": "Read Verse"
+          }
+        },
+        "purpose": {
+          "type": "verse",
+          "settings": {
+            "category": "Purpose",
+            "quote": "“For I know the plans\nI have for you.”",
+            "reference": "Jeremiah 29:11",
+            "link_label": "Read Verse"
+          }
+        },
+        "courage": {
+          "type": "verse",
+          "settings": {
+            "category": "Courage",
+            "quote": "“Be strong and\ncourageous.”",
+            "reference": "Joshua 1:9",
+            "link_label": "Read Verse"
+          }
+        },
+        "light": {
+          "type": "verse",
+          "settings": {
+            "category": "Light",
+            "quote": "“Let your light shine\nbefore others.”",
+            "reference": "Matthew 5:16",
+            "link_label": "Read Verse"
+          }
+        }
+      },
+      "block_order": [
+        "faith",
+        "purpose",
+        "courage",
+        "light"
+      ],
+      "settings": {
+        "heading": "Explore Verses",
+        "show_filter": true,
+        "surface": "light",
+        "spacing_top": "standard",
+        "spacing_bottom": "standard"
+      }
+    },
+    "words-we-wear": {
+      "type": "words-we-wear",
+      "blocks": {
+        "walk": {
+          "type": "phrase",
+          "settings": {
+            "phrase": "Walk\nBy Faith."
+          }
+        },
+        "built": {
+          "type": "phrase",
+          "settings": {
+            "phrase": "Built\nDifferent."
+          }
+        },
+        "purpose": {
+          "type": "phrase",
+          "settings": {
+            "phrase": "For A Higher\nPurpose."
+          }
+        },
+        "light": {
+          "type": "phrase",
+          "settings": {
+            "phrase": "Let Your\nLight Shine."
+          }
+        }
+      },
+      "block_order": [
+        "walk",
+        "built",
+        "purpose",
+        "light"
+      ],
+      "settings": {
+        "heading": "Words\nWe Wear.",
+        "body": "<p>Scripture isn't just something we read. It's a way of life. It shapes what we create, what we wear, and how we move.</p>",
+        "surface": "light",
+        "spacing_top": "none",
+        "spacing_bottom": "standard"
+      }
+    }
+  },
+  "order": [
+    "hero",
+    "new-drop",
+    "best-sellers",
+    "our-story",
+    "verse-feature",
+    "verse-index",
+    "words-we-wear"
+  ]
+}

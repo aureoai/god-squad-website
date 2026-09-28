@@ -1,0 +1,815 @@
+/* ============================================================================
+   GOD SQUAD — Product page
+   Phase 8. Every value is a token from design-tokens.css. No raw hex, no magic
+   numbers, no !important, and nothing here is required in order to buy.
+
+   The composition is --split-60-40 (1.6fr 0.9fr, 64/36) from --bp-lg up:
+   media left, buying right. Below the split it stacks in the order the brief
+   sets — media, title, price, variants, quantity, add to cart, buy now,
+   description — which is also DOM order, so nothing is reordered visually
+   away from how a screen reader reads it.
+
+   TWO MEDIA LAYOUTS, ONE MARKUP.
+   The merchant's media_layout setting governs the DESKTOP composition only.
+   Below --bp-lg the gallery is always a scroll-snap carousel, whatever the
+   setting says, because a stacked gallery on a phone puts the price and the
+   add-to-cart control six screens below the fold. That is a layout decision
+   the merchant should not be able to make by accident.
+   ========================================================================== */
+
+.main-product {
+  width: 100%;
+  padding-block: var(--section-pad-block);
+}
+
+/* ------------------------------------------------------------------ gallery
+   The frame carries the catalogue's one ratio (Phase 2 §27.6 rule 5), so a
+   portrait photograph and a square one cannot make two products' pages
+   different shapes — which is the brief's "different image ratios must not
+   break the layout, use controlled media containers". */
+
+.product-gallery__viewport {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  overscroll-behavior-x: contain;
+  /* The rail below is the visible affordance; a scrollbar under the
+     photograph is chrome the composition does not need. Scrolling, swiping
+     and keyboard scrolling all still work. */
+  scrollbar-width: none;
+}
+
+.product-gallery__viewport::-webkit-scrollbar {
+  display: none;
+}
+
+.product-gallery__slide {
+  flex: 0 0 100%;
+  scroll-snap-align: start;
+}
+
+.product-gallery__frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: var(--product-aspect);
+  overflow: hidden;
+  background-color: var(--color-surface-tile);
+}
+
+.product-gallery__image,
+.product-gallery__video,
+.product-gallery__media {
+  display: block;
+  width: 100%;
+  height: 100%;
+  /* object-position is deliberately NOT declared. image_tag writes the image's
+     focal point onto the element as an inline style, which outranks any rule
+     here, so declaring one would be a rule that silently never applies. The
+     crop centre belongs to Shopify admin. */
+  object-fit: cover;
+  border: 0;
+}
+
+.product-gallery__frame--empty {
+  /* No media on the product. The frame keeps the page's proportions and
+     nothing stands in for a photograph that does not exist. */
+  background-color: var(--color-surface-tile);
+}
+
+.product-gallery__rail {
+  margin-block-start: var(--space-4);
+}
+
+.product-gallery__thumbs {
+  display: flex;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.product-gallery__thumb {
+  display: block;
+  width: 72px;
+  flex: 0 0 auto;
+  aspect-ratio: var(--product-aspect);
+  overflow: hidden;
+  /* 2px reserved at rest in a transparent colour, so becoming the active
+     thumbnail changes the colour and never the size. Phase 2 §26.5 permits
+     --border-width-strong exactly where a selected state needs it. */
+  border: var(--border-width-strong) solid transparent;
+  background-color: var(--color-surface-tile);
+  transition: border-color var(--transition-fast), opacity var(--transition-fast);
+}
+
+.product-gallery__thumb-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.product-gallery__thumb.is-active {
+  border-color: currentColor;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .product-gallery__thumb:not(.is-active):hover {
+    opacity: 0.75;
+  }
+}
+
+/* ------------------------------------------------------------------- info */
+
+.main-product__info {
+  margin-block-start: var(--space-7);
+}
+
+.main-product__vendor {
+  margin: 0 0 var(--space-3);
+  color: var(--color-text-current-muted);
+  font-family: var(--font-body);
+  font-size: var(--type-caption-size);
+  font-weight: var(--type-caption-weight);
+  letter-spacing: var(--type-caption-ls);
+  text-transform: uppercase;
+}
+
+/* Jost, not Playfair. Phase 2 §5.5 in one sentence: "If a piece of text tells
+   the customer what something is, what it costs, or where to go, it is Jost."
+   A product title is the clearest case of that rule there is.
+
+   Phase 2 defines no product-page title scale — §27.1 covers only the card's
+   12px label — so this takes the story scale's size and tracking with the
+   interface family. Recorded as a token gap rather than a value invented here.
+
+   No text-wrap: balance and no hard break: §27.6 rule 2 keeps a product title
+   out of the editorial composition rules. */
+/* Phase 12. The Low stock line sits above the title, in the muted token at the
+   caption size — a statement of fact, not an alarm. No colour-coded pill: Phase
+   2 section 27.3 puts availability in words, and a red chip on a premium
+   streetwear page reads as a discount store. */
+.main-product__low-stock {
+  margin: 0 0 var(--space-3);
+  color: var(--color-text-current-muted);
+  font-family: var(--font-body);
+  font-size: var(--type-caption-size);
+  font-weight: var(--type-caption-weight);
+  letter-spacing: var(--type-caption-ls);
+  text-transform: uppercase;
+}
+
+.main-product__title {
+  margin: 0;
+  color: inherit;
+  font-family: var(--font-body);
+  font-size: var(--type-display-m-size);
+  font-weight: var(--weight-semibold);
+  line-height: var(--type-display-m-lh);
+  letter-spacing: var(--type-display-m-ls);
+  text-transform: uppercase;
+}
+
+/* Phase 2 §27.2: full contrast, never muted and never gold, and never tracked
+   — a tracked price defeats the question it answers. */
+.main-product__price {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-3);
+  margin: var(--space-4) 0 0;
+  color: inherit;
+  font-family: var(--font-body);
+  font-size: var(--type-body-lg-size);
+  font-weight: var(--type-price-weight);
+  letter-spacing: var(--type-price-ls);
+}
+
+.main-product__price [hidden] {
+  /* A flex parent would otherwise lay the hidden compare-at price out anyway:
+     display on the child wins over the hidden attribute's UA rule. */
+  display: none;
+}
+
+.price__compare {
+  color: var(--color-text-current-muted);
+  font-weight: var(--weight-regular);
+}
+
+.price__unit {
+  color: var(--color-text-current-muted);
+  font-size: var(--type-body-sm-size);
+  font-weight: var(--weight-regular);
+}
+
+/* ---------------------------------------------------------- variant picker
+   Phase 2 §27.4. Radios under labels — the selected state is a checked radio,
+   so it announces itself, which a styled div cannot do. */
+
+.variant-picker__option {
+  margin: var(--space-6) 0 0;
+  padding: 0;
+  /* A fieldset's UA border and its default min-width, which stops a flex or
+     grid child from shrinking. */
+  border: 0;
+  min-width: 0;
+}
+
+.variant-picker__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  padding: 0;
+  margin-block-end: var(--space-3);
+  font-family: var(--font-body);
+  font-size: var(--type-label-size);
+  font-weight: var(--type-label-weight);
+  letter-spacing: var(--type-label-ls);
+  text-transform: uppercase;
+}
+
+.variant-picker__legend-value {
+  color: var(--color-text-current-muted);
+}
+
+.variant-picker__values {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.variant-picker__value {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  /* SC 2.5.8 needs 24px; Phase 2 §27.4 asks for --target-min 44px, which also
+     clears SC 2.5.5. The gap between chips is --space-3 12px, so no two 24px
+     circles could intersect even if the chips were smaller. */
+  min-width: var(--target-min);
+  min-height: var(--target-min);
+  padding: var(--space-3) var(--space-4);
+  /* §12.2: the decorative border tokens composite to about 1.3:1 and fail SC
+     1.4.11's 3:1 for a control's boundary. The interactive tokens are the
+     measured ones (3.02:1 on ink, 3.13:1 on cream). §27.4 names
+     --color-border-current here; §12.2 is the later, measured correction and
+     is what this follows. The same substitution is already made for
+     .button--secondary. */
+  border: var(--border-width) solid var(--color-border-current-interactive);
+  border-radius: var(--radius-none);
+  font-family: var(--font-body);
+  font-size: var(--type-label-size);
+  font-weight: var(--type-label-weight);
+  letter-spacing: var(--type-label-ls);
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color var(--transition-fast), color var(--transition-fast);
+}
+
+/* The one place --border-width-strong is permitted (Phase 2 §26.5). The
+   padding gives back exactly the pixel the border takes on each side, so
+   choosing a value does not nudge the row. */
+.variant-picker__input:checked + .variant-picker__value {
+  border-width: var(--border-width-strong);
+  border-color: currentColor;
+  padding: calc(var(--space-3) - var(--border-width)) calc(var(--space-4) - var(--border-width));
+}
+
+/* The input itself is visually hidden but still in the document and still
+   focusable, so the ring has to be drawn on the label it controls. */
+.variant-picker__input:focus-visible + .variant-picker__value {
+  outline: var(--focus-width) solid var(--focus-ring);
+  outline-offset: var(--focus-offset);
+}
+
+/* Struck through and muted, never removed and never disabled: Phase 2 §27.4
+   requires the value to stay in the DOM and stay focusable so the customer can
+   find out that the size exists at all. The strike is the visual half; the
+   accessible name carries the words. */
+.variant-picker__value--unavailable {
+  color: var(--color-text-current-muted);
+}
+
+.variant-picker__value--unavailable .variant-picker__value-text {
+  text-decoration: line-through;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .variant-picker__value:hover {
+    border-color: currentColor;
+  }
+}
+
+/* ------------------------------------------------------------- swatches
+   A swatch is a control here, not the information it is on a card. The dot
+   keeps the card's ring treatment; the selected state is a second ring at the
+   target's edge, separated from the dot, because a ring drawn ON an ink swatch
+   sitting on an ink band would be invisible. */
+
+.variant-picker__value--swatch {
+  min-width: var(--target-min);
+  min-height: var(--target-min);
+  padding: 0;
+  border: var(--border-width-strong) solid transparent;
+  border-radius: var(--radius-full);
+}
+
+.variant-picker__input:checked + .variant-picker__value--swatch {
+  border-color: currentColor;
+  padding: 0;
+}
+
+/* --swatch-size, not a raw 28px. §27.4 sets the swatch at 16px and the theme
+   already ships the token; 28px was also exactly --icon-lg, which §18.2
+   reserves for the footer's social marks. The dot is the mark; the 44px label
+   around it is the target §27.4 asks for in the same row. */
+.variant-picker__swatch {
+  position: relative;
+  display: block;
+  width: var(--swatch-size);
+  height: var(--swatch-size);
+  border: var(--border-width) solid var(--color-text-current-muted);
+  border-radius: var(--radius-full);
+  background-color: var(--swatch-fill, transparent);
+}
+
+.variant-picker__swatch--square {
+  border-radius: var(--radius-sm);
+}
+
+.variant-picker__swatch--image {
+  background-image: var(--swatch-image);
+  background-size: cover;
+  background-position: center;
+}
+
+.variant-picker__swatch--none {
+  background-image: linear-gradient(
+    135deg,
+    transparent 46%,
+    var(--color-text-current-muted) 46%,
+    var(--color-text-current-muted) 54%,
+    transparent 54%
+  );
+}
+
+/* Availability on a swatch cannot be a line through text, because there is no
+   text. It is a diagonal rule across the dot plus the words in the accessible
+   name — colour is never the only signal (WCAG 2.2 SC 1.4.1). */
+.variant-picker__value--unavailable .variant-picker__swatch::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  background-image: linear-gradient(
+    135deg,
+    transparent calc(50% - 1px),
+    currentColor calc(50% - 1px),
+    currentColor calc(50% + 1px),
+    transparent calc(50% + 1px)
+  );
+}
+
+/* ------------------------------------------------------------------- form */
+
+.main-product__quantity {
+  margin-block-start: var(--space-6);
+}
+
+.main-product__quantity-label {
+  margin: 0 0 var(--space-3);
+  font-family: var(--font-body);
+  font-size: var(--type-label-size);
+  font-weight: var(--type-label-weight);
+  letter-spacing: var(--type-label-ls);
+  text-transform: uppercase;
+}
+
+.main-product__actions {
+  display: grid;
+  gap: var(--space-4);
+  margin-block-start: var(--space-6);
+}
+
+.main-product__submit[aria-busy='true'] {
+  cursor: progress;
+}
+
+/* Shopify's accelerated checkout lives in a closed shadow DOM: its colour,
+   typeface and label cannot be themed, and trying would breach Shopify's own
+   requirements for the branded button. These five custom properties are the
+   documented adjustment surface, and only the two that stop it looking bolted
+   on are set — the height, so it lines up with the primary button above it,
+   and the radius, so both corners match. The skeleton colour is set too,
+   because its default light grey flashes against the cream band while the
+   button loads. */
+.shopify-payment-button,
+shopify-accelerated-checkout,
+shopify-accelerated-checkout-cart {
+  --shopify-accelerated-checkout-button-block-size: var(--control-height);
+  --shopify-accelerated-checkout-button-border-radius: var(--radius-sm);
+  --shopify-accelerated-checkout-skeleton-background-color: var(--color-surface-tile);
+  display: block;
+  width: 100%;
+}
+
+/* THE BUY IT NOW BUTTON. The store owner asked for a red box, and until now the
+   theme had no rule for this button at all — the browser was drawing it, at
+   78x21px in Arial, the only visible control on the product page in neither of
+   the brand's typefaces.
+
+   WHY THIS ONE CAN BE STYLED, WHEN THE WALLET BUTTONS CANNOT. `payment_button`
+   resolves to one of two things at runtime. Where a wallet applies — Shop Pay,
+   Apple Pay, Google Pay, PayPal — Shopify injects a BRANDED button inside its
+   own iframe: that is Shopify's and the payment network's trade dress, it is not
+   in this document, and no theme CSS reaches inside it. Where no wallet applies,
+   Shopify renders an UNBRANDED button as ordinary DOM in the page and leaves it
+   to the theme to style; Shopify's own Dawn theme styles it. Only the unbranded
+   class is targeted here, so the branded buttons stay exactly as Shopify ships
+   them. An earlier note in this project said the theme "can style the container
+   but not the button" — that is true of the branded case only, and it was wrong
+   to apply it to this one.
+
+   The second selector is the QA harness's stand-in, which is a plain button
+   carrying the same class inside a `data-harness-stub` wrapper. Scoping to that
+   attribute is what keeps the rule off the branded button, which shares the
+   unscoped class name.
+
+   WHAT WAS NOT TAKEN FROM THE REFERENCE IMAGE. Flat fill, 2px radius, no
+   gradient, no bevel, no drop shadow, no pill, no icon disc. Phase 2 section 10
+   rules out all of those for this project's buttons, and a red this saturated
+   does not need help being noticed. Everything else is copied from .button on
+   purpose — the same height, type scale, tracking, uppercase and transition
+   list — so this sits directly under Add to bag as a matched pair rather than as
+   a foreign control. */
+.shopify-payment-button__button--unbranded,
+[data-harness-stub='payment-button'] .shopify-payment-button__button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: var(--target-min);
+  padding: var(--space-4) var(--space-5);
+  border: var(--border-width) solid transparent;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-buy-now);
+  color: var(--gs-cream);
+  font-family: var(--font-body);
+  font-size: var(--type-label-size);
+  font-weight: var(--type-label-weight);
+  letter-spacing: var(--type-label-ls);
+  line-height: 1.2;
+  text-transform: uppercase;
+  text-align: center;
+  cursor: pointer;
+  /* Phase 2 section 10.6: these four and nothing else. No width, no padding,
+     no transform. */
+  transition:
+    background-color var(--transition-fast),
+    color var(--transition-fast),
+    border-color var(--transition-fast),
+    opacity var(--transition-fast);
+}
+
+/* Hover is pointer-scoped (Phase 2 section 22.1 rule 5): a touch device that
+   reports no hover would otherwise keep the hover colour stuck on after a tap. */
+@media (hover: hover) and (pointer: fine) {
+  .shopify-payment-button__button--unbranded:hover,
+  [data-harness-stub='payment-button'] .shopify-payment-button__button:hover {
+    background-color: var(--color-buy-now-hover);
+  }
+}
+
+/* Press returns to the base colour, matching .button--primary. No scale: Phase 2
+   line 943 records that decision for every button in the theme. */
+.shopify-payment-button__button--unbranded:active,
+[data-harness-stub='payment-button'] .shopify-payment-button__button:active {
+  background-color: var(--color-buy-now);
+}
+
+/* Shopify adds --loading while it hands off to checkout, and [disabled] when the
+   variant cannot be bought. Both keep the red and dim it, so the button never
+   goes grey and unrecognisable mid-purchase; the cursor is what says "not now". */
+.shopify-payment-button__button--unbranded[disabled],
+.shopify-payment-button__button--unbranded.shopify-payment-button__button--loading {
+  opacity: 0.62;
+  cursor: not-allowed;
+}
+
+/* The "More payment options" link Shopify renders beneath the button. It ships
+   as a default anchor — blue and underlined — which would sit under a finished
+   red button looking like an accident. The red is NOT reused here: this is a
+   secondary route, and colouring it to match would give two red things equal
+   weight. */
+.shopify-payment-button__more-options {
+  display: block;
+  width: 100%;
+  margin-block-start: var(--space-3);
+  border: 0;
+  background: none;
+  color: var(--color-text-inverse-muted);
+  font-family: var(--font-body);
+  font-size: var(--type-body-sm-size);
+  text-align: center;
+  text-decoration: underline;
+  text-underline-offset: var(--link-underline-offset);
+  text-decoration-thickness: var(--link-underline-thickness);
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+@media (hover: hover) and (pointer: fine) {
+  .shopify-payment-button__more-options:hover {
+    color: var(--color-text-inverse);
+  }
+}
+
+/* The error the form shows when Shopify refuses the add. Empty and hidden
+   until something fails; the text is always Shopify's own description, never a
+   raw exception and never a status code. */
+.main-product__error {
+  margin-block-start: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border-inline-start: var(--border-width-strong) solid var(--color-error);
+  color: inherit;
+  font-family: var(--font-body);
+  font-size: var(--type-body-sm-size);
+  line-height: var(--type-body-sm-lh);
+}
+
+.surface-dark .main-product__error {
+  border-inline-start-color: var(--color-error-on-dark);
+}
+
+/* -------------------------------------------------------- add confirmation
+   Phase 14. Shown only when no cart drawer opened to do the confirming — the
+   merchant set the cart style to "Cart page", or switched auto-open off. Until
+   this existed, the sole sighted response to a successful add was the header
+   count changing in the corner of the screen.
+
+   It mirrors the error line's construction — same placement, same rule, same
+   type — because they are the same kind of thing said in two directions, and a
+   customer should not have to learn two shapes. The colour is the difference,
+   and it is the one carrying no meaning on its own: the sentence says
+   "Added to your cart" in words (SC 1.4.1). */
+
+.main-product__success {
+  /* Stacked, not a baseline row. The View cart control below is a padded
+     bordered box now, and `align-items: baseline` cannot align a 44px box
+     against a 14px sentence — it would hang the button off the sentence's
+     baseline and leave its border sitting through the text. Column with
+     flex-start keeps the button at its own content width under the message.
+     --space-3 is the gap the cart drawer already uses between stacked actions
+     (section-cart-drawer.css:223), so this introduces no new value. */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-3);
+  margin-block-start: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border-inline-start: var(--border-width-strong) solid var(--color-success);
+  font-family: var(--font-body);
+  font-size: var(--type-body-sm-size);
+  line-height: var(--type-body-sm-lh);
+}
+
+/* THE `hidden` ATTRIBUTE ON THIS BLOCK DID NOTHING, AND THE BLOCK WAS ON SCREEN
+   ON EVERY PRODUCT PAGE.
+
+   `[hidden] { display: none }` lives in the user agent stylesheet. The `display:
+   flex` above is an author declaration, and author beats user agent whatever the
+   specificity, so the confirmation rendered before anyone had added anything:
+   measured at 467x68 with its View cart control in the tab order, on a page
+   where the customer had done nothing. The message span was empty, so what a
+   sighted customer saw was a bordered green rule with a lone View cart link
+   under Buy it now, and what a keyboard user got was a tab stop into a
+   confirmation of nothing.
+
+   This is the theme's fourth instance of one cascade defect. The other three are
+   fixed the same way and carry the same note: header.css:459,
+   section-main-collection.css:209, component-facets.css:473.
+
+   This rule cannot ship alone. See the timing note in assets/cart.js
+   showFormSuccess — once this block is genuinely display:none, revealing it and
+   writing its text in the same turn announces nothing, and the confirmation
+   would go silent for exactly the customers it exists to serve. */
+.main-product__success[hidden] {
+  display: none;
+}
+
+.surface-dark .main-product__success {
+  border-inline-start-color: var(--color-success-on-dark);
+}
+
+/* The control is now the button system's secondary rank — the same decision the
+   cart drawer already made for this same action (cart-drawer.liquid:180). It
+   stays an <a> because it navigates: PHASE-2 section 10.5 draws the line at an
+   anchor navigating and a <button> acting, and a <button> here would need script
+   to reach the cart and would break cmd-click, middle-click and "copy link
+   address".
+
+   NO UNDERLINE DECLARATIONS HERE ANY MORE, AND THE ORDER IS WHY. This selector
+   and `.button` are both (0,1,0), and this stylesheet loads in <body> while
+   component-button.css loads in <head> (theme.liquid:152), so this rule wins
+   every tie. The `text-decoration: underline` that used to sit here would have
+   beaten `.button { text-decoration: none }` and produced an underlined
+   uppercase bordered button, which exists nowhere else in the theme. The
+   underline is not merely dropped: PHASE-2 section 11.3 requires it because
+   colour alone cannot carry a link inside a run of text (SC 1.4.1), and a
+   bordered box at 3.13:1 is a non-colour affordance that discharges the same
+   duty a different way. Losing the underline without gaining the box would be a
+   regression; this swaps one cue for another.
+
+   NOT `button--full`. The block above carries a 2px border-inline-start plus
+   16px inline padding, so anything inside it starts 18px in from the purchase
+   column's edge. A full-width button here would be 18px indented and ~34px
+   short of Add to bag directly above it — close enough to read as a mistake
+   rather than as a member of the stack. Content width does not invite that
+   comparison. */
+.main-product__success-link {
+  color: inherit;
+}
+
+/* ------------------------------------------------------------ description */
+
+.main-product__details {
+  margin-block-start: var(--space-7);
+  border-block-start: var(--border-width) solid var(--color-border-current);
+}
+
+.main-product__details-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-height: var(--target-min);
+  padding-block: var(--space-3);
+  font-family: var(--font-body);
+  font-size: var(--type-label-size);
+  font-weight: var(--type-label-weight);
+  letter-spacing: var(--type-label-ls);
+  text-transform: uppercase;
+  cursor: pointer;
+  list-style: none;
+}
+
+/* The UA's own disclosure triangle, replaced by the system's chevron so the
+   control matches every other disclosure in the theme. */
+.main-product__details-summary::-webkit-details-marker {
+  display: none;
+}
+
+.main-product__details-summary .icon {
+  width: var(--icon-md);
+  height: var(--icon-md);
+  transform: rotate(90deg);
+  transition: transform var(--transition-fast);
+}
+
+.main-product__details[open] .main-product__details-summary .icon {
+  transform: rotate(-90deg);
+}
+
+.main-product__description {
+  margin-block-start: var(--space-5);
+  /* Phase 2 §26.2 / §14.4: a reading measure, not a caption measure. */
+  max-width: var(--measure-body);
+  color: var(--color-text-current-muted);
+  font-family: var(--font-body);
+  font-size: var(--type-body-size);
+  line-height: var(--type-body-lh);
+}
+
+.main-product__description > :first-child { margin-block-start: 0; }
+.main-product__description > :last-child { margin-block-end: 0; }
+.main-product__description p { margin-block: var(--space-4) 0; }
+
+.main-product__description a {
+  color: inherit;
+  text-underline-offset: var(--link-underline-offset);
+  text-decoration-thickness: var(--link-underline-thickness);
+}
+
+/* Phase 18. The other four surfaces that style a merchant rich-text link
+   declare this same rest rule; two of them had a hover and three did not, so
+   the identical link responded on some pages and not others. Pointer-scoped
+   per PHASE-2 22.1 rule 5. */
+@media (hover: hover) and (pointer: fine) {
+  .main-product__description a:hover {
+    color: var(--accent-current);
+  }
+}
+
+/* -------------------------------------------------------------------- meta */
+
+.main-product__meta {
+  margin: var(--space-6) 0 0;
+  color: var(--color-text-current-muted);
+  font-family: var(--font-body);
+  font-size: var(--type-body-sm-size);
+  line-height: var(--type-body-sm-lh);
+}
+
+.main-product__meta-row {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.main-product__meta dt::after {
+  content: ":";
+}
+
+.main-product__meta dd {
+  margin: 0;
+}
+
+/* ------------------------------------------------------------------- story
+   The description, below both columns rather than inside the buying one. */
+
+.main-product__story {
+  margin-block-start: var(--space-7);
+}
+
+.main-product__story:empty {
+  margin-block-start: 0;
+}
+
+/* ------------------------------------------------------------- breakpoints */
+
+@media (min-width: 1024px) {
+  .main-product__inner {
+    display: grid;
+    /* --split-60-40: 1.6fr 0.9fr, which renders 64/36. Media left, buying
+       right. minmax(0, …) on the media track so a wide image cannot push the
+       buying column narrower than its own content. */
+    grid-template-columns: minmax(0, 1.6fr) minmax(22rem, 0.9fr);
+    gap: var(--grid-gap-large);
+    align-items: start;
+  }
+
+  .main-product__info {
+    margin-block-start: 0;
+  }
+
+  /* Spans both tracks, under the gallery and the buying column. The measure is
+     capped because body copy set to the full width of a 1440 page is
+     unreadable however much room there is. */
+  .main-product__story {
+    grid-column: 1 / -1;
+    max-width: var(--measure-body);
+    margin-block-start: var(--space-8);
+  }
+
+  /* Stacked is the editorial desktop composition: every photograph at full
+     width, one under another, with the buying column held in view beside them.
+     The rail is redundant there — everything is already on the page — so it is
+     not rendered rather than being a set of links to things you can see. */
+  .main-product--media-stacked .product-gallery__viewport {
+    display: grid;
+    gap: var(--space-4);
+    overflow: visible;
+    scroll-snap-type: none;
+  }
+
+  .main-product--media-stacked .product-gallery__slide {
+    flex: none;
+  }
+
+  .main-product--media-stacked .product-gallery__rail {
+    display: none;
+  }
+
+  /* Sticky only where it earns its place: the media column is taller than the
+     viewport in the stacked layout, so without this the add-to-cart control
+     scrolls away and §27.5's "above the fold at every width" fails after the
+     first screen. align-self keeps the column its own height rather than
+     stretching it to the media's, which is what makes sticky work at all. */
+  .main-product--sticky-info .main-product__info {
+    position: sticky;
+    top: var(--header-offset-desktop);
+    align-self: start;
+    /* NO max-height AND NO overflow-y. They were here because a sticky column
+       taller than the screen hides its own bottom, and a cap plus an inner
+       scroll kept every control reachable. The cure showed as a scrollbar
+       inside the page's own on any ordinary laptop -- 794px of content against
+       a 714px cap at 1440x900, against 614px at 1280x800.
+
+       The description moved out of this column (see .main-product__story), so
+       what is left is title, price and the purchase form: 437px, which fits
+       under any viewport this rule applies at. A column that fits needs no cap,
+       no scroll and no scroll-padding. If anything long is ever added back
+       here, this returns -- or better, it goes in the story band too. */
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .product-gallery__viewport {
+    scroll-behavior: auto;
+  }
+
+  .product-gallery__thumb,
+  .variant-picker__value,
+  .main-product__details-summary .icon {
+    transition: none;
+  }
+}

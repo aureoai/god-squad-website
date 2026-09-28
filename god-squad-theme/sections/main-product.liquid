@@ -1,0 +1,719 @@
+{%- comment -%}
+  GOD SQUAD — Product page
+  Phase 8. The first template in this theme that can take money.
+
+  Sources of truth:
+  - PHASE-2-DESIGN-SYSTEM.md §27 (the five ecommerce questions), §12 (forms and
+    the quantity selector), §10 (buttons), §14.6 (loading strategy), §26.2
+    (measure), §29.6 (the settings budget).
+  - PHASE-1-WEBSITE-AUDIT.md ECOM-01, ECOM-02, ECOM-04, PROD-04, DEBT-09.
+
+  SHOPIFY IS THE SOURCE OF TRUTH.
+  Nothing on this page is invented. There is no hard-coded product, price,
+  variant, size, colour, stock figure, discount, review, rating, material,
+  shipping claim or availability string anywhere in this file. Every value is
+  read from the product object, and every price goes through the money filter
+  against the store's own format — which is the defect Phase 1 PROD-04 and
+  TECHNICAL-4 recorded, where the prototype built prices by string
+  concatenation and its currency prop changed the symbol without changing the
+  number.
+
+  THE FORM IS SHOPIFY'S OWN.
+  {% form 'product', product %} generates the method, the action, the
+  form_type and utf8 inputs and the product-id input. It does NOT generate the
+  variant input — product-id is not id and adds nothing to a cart — so the
+  theme supplies <input name="id"> itself. With JavaScript off this form still
+  posts to /cart/add and Shopify redirects to the cart page, which is why
+  templates/cart.json exists in this phase.
+
+  WHAT IS DELIBERATELY NOT HERE.
+  No reviews, no ratings, no star row, no stock counter, no "only 3 left", no
+  invented materials or care instructions, no country of origin, no shipping
+  estimate, no recommendations, no wishlist, no search. Some are later phases;
+  the rest are business facts nobody has supplied. variant.inventory_quantity
+  is public on the storefront and is deliberately never rendered: it leaks
+  either stock levels or lifetime sales, and Phase 1 recorded any inventory
+  display as BUSINESS INFORMATION REQUIRED.
+{%- endcomment -%}
+
+{%- liquid
+  assign current_variant = product.selected_or_first_available_variant
+
+  comment
+    Availability comes from the variant and the product, never from whether a
+    variant resolved. selected_or_first_available_variant returns the FIRST
+    variant when every variant is sold out, so a nil check always passes and
+    would report a sold-out product as buyable.
+  endcomment
+  assign can_buy = false
+  if current_variant != blank and current_variant.available
+    assign can_buy = true
+  endif
+
+  assign on_sale = false
+  if current_variant.compare_at_price > current_variant.price
+    assign on_sale = true
+  endif
+
+  assign surface_class = 'surface-light'
+  if section.settings.surface == 'dark'
+    assign surface_class = 'surface-dark'
+  endif
+
+  assign classes = 'main-product '
+  assign classes = classes | append: surface_class
+  assign classes = classes | append: ' main-product--media-' | append: section.settings.media_layout
+  if section.settings.sticky_info
+    assign classes = classes | append: ' main-product--sticky-info'
+  endif
+
+  assign form_id = 'ProductForm-' | append: section.id
+  assign qty_id = 'Quantity-' | append: section.id
+
+  comment
+    The quantity rule is Shopify's, not the theme's. A merchant who has set a
+    minimum, maximum or increment on the variant gets it honoured; a merchant
+    who has not gets the plain floor of one. Nothing here invents a ceiling.
+  endcomment
+  comment
+    The threshold the brand owner set: 3. 0 disables the line entirely, and the
+    setting shipped at 0 until that decision was made — a threshold nobody has
+    chosen is a claim nobody has made.
+  endcomment
+  assign low_stock_at = section.settings.low_stock_threshold | default: 0
+  comment
+    One line, and it has to be: inside a liquid tag every LINE is its own
+    statement, so a condition split across lines is not a condition.
+  endcomment
+  assign show_low_stock = false
+  if low_stock_at > 0 and current_variant.inventory_management == 'shopify' and current_variant.inventory_policy == 'deny' and current_variant.available and current_variant.inventory_quantity > 0 and current_variant.inventory_quantity <= low_stock_at
+    assign show_low_stock = true
+  endif
+
+  assign qty_min = 1
+  assign qty_step = 1
+  assign qty_max = blank
+  if current_variant.quantity_rule != blank
+    assign qty_min = current_variant.quantity_rule.min | default: 1
+    assign qty_step = current_variant.quantity_rule.increment | default: 1
+    assign qty_max = current_variant.quantity_rule.max
+  endif
+
+  comment
+    The media slot, computed and then MEASURED. The gallery is the 1.6fr track
+    of --split-60-40 from --bp-lg up, inside a container capped at the theme's
+    own content width, and the full viewport below it.
+
+    Three regions, because the buying column has a 22rem floor and that floor
+    changes which track absorbs the remainder:
+
+      V < 768           the full viewport less the 24px gutters
+      768 <= V < 1024   the full viewport less the 32px gutters
+      1024 <= V < 1106  the buying column is pinned at its 352px floor, so the
+                        media takes everything else: 100vw - 96 gutters
+                        - 32 gap - 352
+      1106 <= V < C     neither track is clamped: (100vw - 128) x 1.6/2.5
+      V >= C            the container stops growing: (C - 128) x 1.6/2.5
+
+    1106 is where the floor stops binding: 128 + 352 / 0.36. Every one of these
+    was checked against the rendered box at ten widths — the first version of
+    this declared 573px where the element measured 544, and 901px where it
+    measured 840, both because it forgot that max-width includes the padding
+    under border-box. Phase 6 measured what an under-declared sizes costs.
+  endcomment
+  assign container = settings.container_width | default: 1440
+  comment
+    Integer division floors, so the cap would be declared one pixel under
+    the rendered box. One pixel changes no candidate, but under-declaring
+    is the direction that costs quality, so it rounds up.
+  endcomment
+  assign media_cap = container | minus: 128 | times: 64 | divided_by: 100 | plus: 1
+  capture media_sizes
+    echo '(min-width: '
+    echo container
+    echo 'px) '
+    echo media_cap
+    echo 'px, (min-width: 1106px) calc((100vw - 128px) * 0.64), (min-width: 1024px) calc(100vw - 480px), (min-width: 768px) calc(100vw - 64px), calc(100vw - 48px)'
+  endcapture
+-%}
+
+{{ 'section-main-product.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'product.js' | asset_url }}" defer="defer"></script>
+
+<div
+  class="{{ classes }}"
+  data-main-product
+  data-section-id="{{ section.id }}"
+  data-url="{{ product.url }}"
+  data-string-unavailable="{{ 'products.variants.unavailable' | t | escape }}"
+  {{ section.shopify_attributes }}
+>
+  <div class="main-product__inner container">
+    <div class="main-product__media">
+      {% render 'product-media-gallery',
+        product: product,
+        section_id: section.id,
+        layout: section.settings.media_layout,
+        sizes: media_sizes
+      %}
+    </div>
+
+    {%- comment -%}
+      NO tabindex, role OR aria-label HERE ANY MORE. All three existed for one
+      reason: the stylesheet made this column a scroll container, and Safari and
+      Chrome before 127 leave scroll containers out of the tab order, so a
+      keyboard-only customer could not reach what sat below its fold. The
+      description moved out, the column no longer overflows, the inner scroll is
+      gone -- and with it the reason for any of them. Left in place they would
+      be a tab stop on a plain <div> that does nothing, and a group whose label
+      is announced for no reason.
+    {%- endcomment -%}
+    <div
+      class="main-product__info"
+    >
+      {%- if section.settings.show_vendor and product.vendor != blank -%}
+        <p class="main-product__vendor">{{ product.vendor }}</p>
+      {%- endif -%}
+
+      {%- comment -%}
+        Low stock. Text only, no colour-coded pill and no figure — Phase 2
+        section 27.3 puts availability in words, and a number here would be the
+        inventory disclosure the theme has refused since Phase 8.
+
+        aria-live is deliberately absent: this line changes as a side effect of
+        choosing a variant, and the variant change is already announced. A second
+        live region would make one action speak twice.
+      {%- endcomment -%}
+      <p
+        class="main-product__low-stock"
+        data-low-stock
+        {% unless show_low_stock %}hidden{% endunless %}
+      >{{ 'products.inventory.low_stock' | t }}</p>
+
+      {%- comment -%}
+        The page's one h1. Phase 1 HTML-03 recorded the prototype's product
+        names as <div>s; here the product's own title is the document's
+        heading, which is also what the SEO section of the brief asks for.
+      {%- endcomment -%}
+      <h1 class="main-product__title">{{ product.title }}</h1>
+
+      {%- comment -%}
+        Price. Phase 2 §27.2: full contrast, never muted and never gold, with
+        the compare-at beside it in the muted token and a line-through. Both
+        shapes are always in the DOM and the sale parts are toggled with the
+        hidden attribute, so changing variant swaps text rather than rebuilding
+        markup — and hidden takes them out of the accessibility tree as well as
+        off the screen, which display:none on a wrapper would not have done for
+        the visually hidden labels inside.
+      {%- endcomment -%}
+      <p class="main-product__price price" data-price>
+        <span class="visually-hidden" data-price-label-sale {% unless on_sale %}hidden{% endunless %}>
+          {{- 'products.price.sale_price' | t -}}
+        </span>
+        <span class="price__current" data-price-current>{{ current_variant.price | money }}</span>
+        <span class="price__compare-wrap" data-price-compare-wrap {% unless on_sale %}hidden{% endunless %}>
+          <span class="visually-hidden">{{ 'products.price.regular_price' | t }}</span>
+          <s class="price__compare" data-price-compare>{{ current_variant.compare_at_price | money }}</s>
+        </span>
+        {%- comment -%}
+          Unit price, for anything sold by weight or volume. Rendered only when
+          Shopify carries the measurement; it is never constructed here.
+        {%- endcomment -%}
+        {%- comment -%}
+          The unit price follows the variant like every other price on this
+          page. It was rendered once from the variant the page opened on, with
+          no hook and no field in the variant table, so it could not update —
+          and a per-litre price left over from a different size is worse than
+          none.
+        {%- endcomment -%}
+        {%- if current_variant.unit_price_measurement != blank -%}
+          <span class="price__unit">
+            {{ current_variant.unit_price | money }}
+            <span aria-hidden="true">/</span>
+            <span class="visually-hidden">{{ 'products.price.per' | t }}</span>
+            {% if current_variant.unit_price_measurement.reference_value != 1 %}
+              {{- current_variant.unit_price_measurement.reference_value -}}
+            {% endif %}
+            {{ current_variant.unit_price_measurement.reference_unit }}
+          </span>
+        {%- endif -%}
+      </p>
+
+      {%- comment -%}
+        THE FORM. Everything from here to endform is one Shopify product form.
+        The class string repeats shopify-product-form because passing class:
+        replaces the tag's own default rather than adding to it.
+
+        The variant picker is INSIDE it. It was outside, which meant its radios
+        were not associated with the form at all — structurally wrong, even
+        though the value that is actually submitted is the hidden input below.
+        See §14 of the phase document for what the picker does and does not do
+        with scripting off.
+      {%- endcomment -%}
+      {%- form 'product',
+        product,
+        id: form_id,
+        class: 'shopify-product-form main-product__form',
+        data-product-form: 'true'
+      -%}
+        {%- comment -%}
+          NO novalidate. It was here because Dawn has it, and it switched off
+          exactly the browser constraint validation the quantity selector
+          documents as its own defence: with scripting off, min="1" is the only
+          thing standing between a typed -3 and a POST to /cart/add. The script
+          still clamps the value and still shows its own themed error, so
+          nothing is lost by letting the browser do its job as well.
+        {%- endcomment -%}
+        {%- comment -%}
+          The variant. Disabled when it cannot be bought, so a form submitted
+          with JavaScript off cannot post a sold-out variant; the script
+          re-enables it when the customer picks one that is in stock.
+        {%- endcomment -%}
+        <input
+          type="hidden"
+          name="id"
+          value="{{ current_variant.id }}"
+          data-variant-input
+          {% unless can_buy %}disabled{% endunless %}
+        >
+
+        {% render 'product-variant-picker', product: product, section_id: section.id %}
+
+        {%- if section.settings.show_quantity -%}
+          <div class="main-product__quantity">
+            <p class="main-product__quantity-label" id="QuantityLabel-{{ section.id }}">
+              {{ 'products.quantity.label' | t }}
+            </p>
+            {% render 'quantity-selector',
+              id: qty_id,
+              name: 'quantity',
+              value: qty_min,
+              min: qty_min,
+              max: qty_max,
+              step: qty_step,
+              describe: product.title
+            %}
+          </div>
+        {%- else -%}
+          {%- comment -%}
+            The quantity still has to be SUBMITTED when its control is hidden.
+
+            This is the only quantity input in the form, so without this branch
+            turning the setting off submitted no quantity at all. Shopify then
+            defaults to 1 — which is correct for most products and wrong for any
+            variant whose quantity rule sets a minimum above 1, because the add
+            is rejected with a 422 and the customer sees a failure they cannot
+            act on. Phase 8 publishes quantity_rule in the variant table, so the
+            theme supports those products; a presentation setting must not be
+            able to break them.
+
+            assets/product.js keeps this in step on a variant change by the same
+            [data-quantity-input] hook the visible control uses.
+          {%- endcomment -%}
+          <input
+            type="hidden"
+            name="quantity"
+            value="{{ qty_min }}"
+            data-quantity-input
+          >
+        {%- endif -%}
+
+        <div class="main-product__actions">
+          {%- comment -%}
+            One primary add-to-cart, always present, never behind a hover
+            reveal (Phase 2 §27.5). The disabled attribute rather than
+            aria-disabled is deliberate here and departs from §10.3: that
+            section asks for aria-disabled so a disabled control stays
+            reachable and its REASON can be read, but here the reason is the
+            control's own label — it reads "Sold out" — so nothing is put out
+            of reach. A submit button with aria-disabled would still submit on
+            Enter, and with JavaScript off it would post an unavailable variant
+            to Shopify and land the customer on an error.
+          {%- endcomment -%}
+          <button
+            type="submit"
+            name="add"
+            class="button button--primary button--full main-product__submit"
+            data-add-to-cart
+            data-label-idle="{{ 'products.form.add_to_cart' | t | escape }}"
+            data-label-busy="{{ 'products.form.adding' | t | escape }}"
+            data-label-sold-out="{{ 'products.form.sold_out' | t | escape }}"
+            {%- comment -%}
+              A third label, for a combination that has no variant at all. Not
+              the same fact as sold out: sold out means it existed and ran out,
+              which invites the customer to wait for it.
+            {%- endcomment -%}
+            data-label-unavailable="{{ 'products.variants.unavailable' | t | escape }}"
+            {% unless can_buy %}disabled{% endunless %}
+          >
+            <span data-add-to-cart-label>
+              {%- if can_buy -%}
+                {{ 'products.form.add_to_cart' | t }}
+              {%- else -%}
+                {{ 'products.form.sold_out' | t }}
+              {%- endif -%}
+            </span>
+          </button>
+
+          {%- if section.settings.show_accelerated_checkout -%}
+            {%- comment -%}
+              Shopify's own accelerated checkout. The filter emits its own
+              container and its own data-shopify attribute, so it is not
+              wrapped here — a second wrapper is what makes Shopify's script
+              bind twice. Its colours, type and label live in a closed shadow
+              DOM and cannot be brought into the God Squad palette; the five
+              documented custom properties are the only permitted adjustment
+              and the stylesheet sets two of them so the control's height and
+              radius match the primary button above it.
+
+              There is no Liquid guard that says whether it will render
+              anything. Whether accelerated checkout is enabled at all, and for
+              which payment methods, is BUSINESS INFORMATION REQUIRED — so this
+              is a setting, and the block it sits in collapses when empty.
+            {%- endcomment -%}
+            {{ form | payment_button }}
+          {%- endif -%}
+        </div>
+
+        {%- comment -%}
+          The form's own error region. Populated only from Shopify's response
+          description, never from a raw exception, and empty until something
+          fails. assertive because the customer has just pressed a button and
+          is waiting on its result.
+        {%- endcomment -%}
+        <div
+          class="main-product__error"
+          data-product-error
+          role="alert"
+          hidden
+        ></div>
+
+        {%- comment -%}
+          Phase 14. The confirmation, for the case where nothing else confirms.
+
+          When the cart drawer opens after an add, the drawer IS the feedback —
+          it shows the customer exactly what the cart now holds. But the drawer
+          is optional twice over: a merchant can set the cart style to "Cart
+          page", and can switch auto-open off. In both of those the only
+          sighted response to pressing Add to cart was the header count
+          changing by one, in the far corner of the screen, which is not a
+          confirmation a customer can be expected to notice.
+
+          role="status" rather than assertive: the customer got what they
+          asked for, so this waits its turn instead of interrupting. That also
+          makes it self-announcing, which is why assets/cart.js does NOT also
+          write to the live region when this element is present — a success
+          said twice is worse than a success said once.
+
+          The View cart link is a link to a page that exists, wearing the button
+          system's secondary rank — the same treatment the drawer already gives
+          this same action (cart-drawer.liquid:180). It is the one thing a
+          customer wants next if the addition was not what they meant, and it is
+          not an interruption because nothing moved focus.
+
+          It ships hidden, and no script is needed to keep it that way: with
+          scripting off the form posts natively and Shopify redirects to the
+          cart page, which is a stronger confirmation than any of this.
+        {%- endcomment -%}
+        <div
+          class="main-product__success"
+          data-product-success
+          role="status"
+          hidden
+        >
+          <span data-product-success-text></span>
+          {%- comment -%}
+            `main-product__success-link` stays the FIRST class and `class` stays
+            before `href`: qa/phase14/cartdoc.py:253 matches
+            `main-product__success-link[^>]*href="/cart"` and qa/phase18/focus.py
+            labels rows with className.split(' ')[0]. Both still read correctly
+            written this way.
+          {%- endcomment -%}
+          <a class="main-product__success-link button button--secondary" href="{{ routes.cart_url }}">
+            {{ 'cart.view_cart' | t }}
+          </a>
+        </div>
+      {%- endform -%}
+
+      {%- comment -%}
+        Additional information. Only fields the product actually carries, and
+        only the ones the merchant has switched on. An empty field is not
+        rendered as an empty row.
+      {%- endcomment -%}
+      {%- liquid
+        comment
+          The row is rendered if ANY variant carries a SKU, not only the one the
+          page opened on. Gated on current_variant.sku the markup was absent
+          whenever the first variant had none — and assets/product.js updates the
+          SKU by querying [data-variant-sku], so a hook that was never rendered
+          could never be filled: the SKU could not appear for any later variant.
+
+          It is hidden rather than emptied when the selected variant has no SKU,
+          because a <dt>SKU</dt> standing over an empty <dd> is a labelled row
+          that says nothing.
+        endcomment
+        assign show_sku = false
+        if section.settings.show_sku
+          for v in product.variants
+            if v.sku != blank
+              assign show_sku = true
+              break
+            endif
+          endfor
+        endif
+        assign show_type = false
+        if section.settings.show_product_type and product.type != blank
+          assign show_type = true
+        endif
+      -%}
+      {%- if show_sku or show_type -%}
+        <dl class="main-product__meta">
+          {%- if show_type -%}
+            <div class="main-product__meta-row">
+              <dt>{{ 'products.meta.type' | t }}</dt>
+              <dd>{{ product.type }}</dd>
+            </div>
+          {%- endif -%}
+          {%- if show_sku -%}
+            <div
+              class="main-product__meta-row"
+              data-variant-sku-row
+              {% if current_variant.sku == blank %}hidden{% endif %}
+            >
+              <dt>{{ 'products.meta.sku' | t }}</dt>
+              <dd data-variant-sku>{{ current_variant.sku }}</dd>
+            </div>
+          {%- endif -%}
+        </dl>
+      {%- endif -%}
+    </div>
+
+    {%- comment -%}
+      THE DESCRIPTION SITS OUTSIDE THE BUYING COLUMN, AND THAT IS WHAT REMOVED
+      THE COLUMN'S SECOND SCROLLBAR.
+
+      The column is sticky, so it was capped at one viewport with its own
+      overflow-y to keep its lower controls reachable. Measured, the cap was the
+      problem rather than the cure: the column's content came to 794px against a
+      714px cap at 1440x900, and against 614px at 1280x800 -- a scrollbar inside
+      a scrollbar on any ordinary laptop.
+
+      The overflow was never the purchase controls. Title 84 + price 26 + form
+      327 is 437px and fits every viewport with room to spare; the description
+      alone was 286px. Out here the sticky column is short enough to hold itself
+      on screen, so the cap, the inner scroll, and the tabindex that existed only
+      to make that scroll container reachable all come out rather than being
+      tuned.
+
+      It spans both tracks and keeps its own measure: body copy set to the full
+      width of a 1440 page is unreadable however much room there is.
+    {%- endcomment -%}
+    <div class="main-product__story">
+      {%- if product.description != blank -%}
+        {%- if section.settings.description_layout == 'collapsible' -%}
+          {%- comment -%}
+            A native <details>. No script, no ARIA to get wrong, and it is
+            keyboard-operable and announced correctly by default. The purchase
+            controls above are never inside it: the brief's rule is that
+            essential purchase information is not hidden, and a description is
+            not purchase information.
+          {%- endcomment -%}
+          <details class="main-product__details" open>
+            <summary class="main-product__details-summary">
+              <span>{{ 'products.description' | t }}</span>
+              {% render 'icon-chevron' %}
+            </summary>
+            <div class="main-product__description rte">{{ product.description }}</div>
+          </details>
+        {%- else -%}
+          <div class="main-product__description rte">{{ product.description }}</div>
+        {%- endif -%}
+      {%- endif -%}
+    </div>
+  </div>
+
+  {%- comment -%}
+    The variant table the picker's script resolves combinations against.
+
+    It is written here rather than using {{ product.variants | json }} for two
+    reasons. The whole-object dump publishes inventory_quantity and
+    inventory_management into the page source, which is the stock-level leak
+    this file refuses to make elsewhere; and it is several times larger than
+    the six fields the picker uses. Prices are formatted by Liquid because
+    money formatting belongs to the store's own format and cannot be done in
+    the browser.
+
+    product.variants truncates at 250. A God Squad product reaching that is not
+    a realistic case for apparel, and it is recorded as a known limitation
+    rather than papered over.
+  {%- endcomment -%}
+  <script type="application/json" data-variant-data>
+    [
+      {%- for v in product.variants -%}
+        {
+          "id": {{ v.id | json }},
+          "available": {{ v.available | json }},
+          "options": {{ v.options | json }},
+          "price": {{ v.price | money | json }},
+          "compare_at_price": {% if v.compare_at_price > v.price %}{{ v.compare_at_price | money | json }}{% else %}null{% endif %},
+          "media_id": {% if v.featured_media != blank %}{{ v.featured_media.id | json }}{% else %}null{% endif %},
+          "sku": {{ v.sku | json }},
+          {%- comment -%}
+            A boolean, never the figure. The threshold comparison happens here so
+            inventory_quantity stays server-side: publishing it would leak either
+            stock levels or lifetime sales, which Phase 8 refused and Phase 1
+            recorded as BUSINESS INFORMATION REQUIRED.
+          {%- endcomment -%}
+          "low_stock": {% if low_stock_at > 0 and v.inventory_management == 'shopify' and v.inventory_policy == 'deny' and v.available and v.inventory_quantity > 0 and v.inventory_quantity <= low_stock_at %}true{% else %}false{% endif %},
+          "quantity_rule": {% if v.quantity_rule != blank %}{ "min": {{ v.quantity_rule.min | json }}, "max": {{ v.quantity_rule.max | json }}, "increment": {{ v.quantity_rule.increment | json }} }{% else %}null{% endif %}
+        }{% unless forloop.last %},{% endunless %}
+      {%- endfor -%}
+    ]
+  </script>
+
+  {%- comment -%}
+    Product structured data, emitted exactly once on the page. Shopify injects
+    none of its own, so the theme owns it — and it is produced by Shopify's
+    structured_data filter rather than hand-built, which is what keeps every
+    price, currency, availability URL and per-variant identifier derived from
+    real product data. Nothing here can invent a rating or a review count,
+    because the filter does not emit them and no review data exists.
+  {%- endcomment -%}
+  <script type="application/ld+json">
+    {{ product | structured_data }}
+  </script>
+</div>
+
+{% schema %}
+{
+  "name": "Product information",
+  "tag": "section",
+  "class": "main-product-section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Media"
+    },
+    {
+      "type": "select",
+      "id": "media_layout",
+      "label": "Media layout",
+      "info": "Stacked runs every image down the column and needs no script — the editorial default. Carousel shows one at a time with a thumbnail rail. Every image is reachable either way.",
+      "options": [
+        {
+          "value": "stacked",
+          "label": "Stacked"
+        },
+        {
+          "value": "carousel",
+          "label": "Carousel"
+        }
+      ],
+      "default": "stacked"
+    },
+    {
+      "type": "paragraph",
+      "content": "Image shape is set once for the whole catalogue in Theme settings > Products, not here. A ratio that differs between two rows of the same shop is a bug rather than a choice."
+    },
+    {
+      "type": "header",
+      "content": "Buying"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_quantity",
+      "label": "Show the quantity selector",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_accelerated_checkout",
+      "label": "Show accelerated checkout",
+      "default": true,
+      "info": "Shopify's own Buy it now button. It only appears when accelerated checkout is enabled for the store, and its colours and typeface are set by Shopify and cannot be themed."
+    },
+    {
+      "type": "header",
+      "content": "Details"
+    },
+    {
+      "type": "select",
+      "id": "description_layout",
+      "label": "Description",
+      "options": [
+        {
+          "value": "open",
+          "label": "Always open"
+        },
+        {
+          "value": "collapsible",
+          "label": "Collapsible"
+        }
+      ],
+      "default": "open"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_vendor",
+      "label": "Show vendor",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "show_product_type",
+      "label": "Show product type",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "show_sku",
+      "label": "Show SKU",
+      "default": false,
+      "info": "Only appears on variants that have one. Stock levels are never shown: the number is public on the storefront and would reveal either inventory or lifetime sales."
+    },
+    {
+      "type": "range",
+      "id": "low_stock_threshold",
+      "label": "Low stock threshold",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "default": 3,
+      "info": "Show a \"Low stock\" line when the chosen variant has this many left or fewer. 0 shows nothing. The number itself is never published — only whether the line appears — and it applies only to variants whose stock Shopify tracks and which cannot be oversold."
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "checkbox",
+      "id": "sticky_info",
+      "label": "Keep product information in view while the images scroll",
+      "default": true,
+      "info": "Desktop only. If the information column is taller than the screen it scrolls within itself, so every control stays reachable."
+    },
+    {
+      "type": "select",
+      "id": "surface",
+      "label": "Colour scheme",
+      "info": "Cream is the approved treatment for buying. On ink the add-to-cart button inverts automatically.",
+      "options": [
+        {
+          "value": "light",
+          "label": "Cream"
+        },
+        {
+          "value": "dark",
+          "label": "Ink"
+        }
+      ],
+      "default": "light"
+    }
+  ],
+  "enabled_on": {
+    "templates": [
+      "product"
+    ]
+  }
+}
+{% endschema %}

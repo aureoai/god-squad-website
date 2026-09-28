@@ -1,0 +1,506 @@
+{%- comment -%}
+  ============================================================================
+  GOD SQUAD — verse-index.liquid
+
+  BANDS 2 and 3 of the Verse feature: the "Explore Verses" label and category
+  chips, and the grid of verse cards beneath them.
+
+  They are one section because the chips are DERIVED from the cards. The chip
+  row is not a list the merchant types twice — it is the set of distinct
+  categories the blocks actually carry, so a category with no card cannot
+  appear and a card cannot be uncategorised into a chip that does not exist.
+  Splitting them would put the derivation across a section boundary, where one
+  section cannot read the other's blocks.
+
+  THE CHIPS ARE HIDDEN UNTIL SCRIPT REVEALS THEM. Filtering is client side;
+  with JavaScript off it cannot happen, and a row of controls that does nothing
+  is worse than no row — it is a promise the page does not keep. So the markup
+  ships them hidden and assets/verse-filter.js unhides them. Without script the
+  page is every verse, which is the honest fallback.
+
+  Sources of truth: the owner's approved Verse mockup, PHASE-2-DESIGN-SYSTEM.md,
+  and sections/our-story.liquid for the house style.
+  ============================================================================
+{%- endcomment -%}
+
+{%- liquid
+  assign heading = section.settings.heading | strip
+
+  assign surface_class = 'surface-light'
+  if section.settings.surface == 'dark'
+    assign surface_class = 'surface-dark'
+  endif
+
+  comment
+    Collect the distinct categories the blocks carry, in block order.
+
+    The handles list is delimited on BOTH sides of every entry — ',faith,' not
+    'faith' — because Liquid's `contains` on a string is a substring test, and
+    an undelimited 'faith' would match inside 'faithful' and silently drop the
+    second category. The labels ride a parallel list so the chip shows what the
+    merchant typed rather than the handle.
+  endcomment
+  assign cat_handles = ','
+  assign cat_labels = ''
+  assign cat_count = 0
+  for block in section.blocks
+    assign label = block.settings.category | strip
+    if label != blank
+      assign h = label | handle
+      assign probe = ',' | append: h | append: ','
+      unless cat_handles contains probe
+        assign cat_handles = cat_handles | append: h | append: ','
+        assign cat_labels = cat_labels | append: label | append: '|'
+        assign cat_count = cat_count | plus: 1
+      endunless
+    endif
+  endfor
+  assign cat_label_list = cat_labels | split: '|'
+
+  comment
+    One category is not a filter. The chip row appears only when there is a
+    choice to make, and only when the merchant has not turned it off.
+  endcomment
+  assign show_filter = false
+  if section.settings.show_filter and cat_label_list.size > 1
+    assign show_filter = true
+  endif
+
+  assign img_sizes = '(min-width: 1280px) 25vw, (min-width: 768px) 50vw, 100vw'
+
+  assign classes = 'verse-index '
+  assign classes = classes | append: surface_class
+  assign classes = classes | append: ' verse-index--pt-' | append: section.settings.spacing_top
+  assign classes = classes | append: ' verse-index--pb-' | append: section.settings.spacing_bottom
+-%}
+
+{%- comment -%}
+  No cards and no heading means nothing to show. The editor always renders, so
+  a merchant who has just added the section can see and configure it.
+{%- endcomment -%}
+{%- if section.blocks.size == 0 and heading == blank and request.design_mode == false -%}
+  {%- comment -%} Not configured yet: render nothing, and request nothing. {%- endcomment -%}
+{%- else -%}
+
+{{ 'section-verse-index.css' | asset_url | stylesheet_tag }}
+
+{%- if show_filter -%}
+  <script src="{{ 'verse-filter.js' | asset_url }}" defer="defer"></script>
+{%- endif -%}
+
+<div class="{{ classes }}" {% if section.settings.anchor_id != blank %}id="{{ section.settings.anchor_id | handle }}"{% endif %}>
+  <div class="verse-index__inner container">
+
+    {%- comment -%} ---------------------------------------- BAND 2: the head {%- endcomment -%}
+    <div class="verse-index__head">
+      {%- if heading != blank -%}
+        <h2 class="verse-index__heading">{{ heading | escape }}</h2>
+      {%- endif -%}
+
+      {%- comment -%}
+        The long rule between the label and the chips. Decorative, so it is a
+        span with aria-hidden rather than an <hr>, which would announce a
+        thematic break that is not there.
+      {%- endcomment -%}
+      <span class="verse-index__rule" aria-hidden="true"></span>
+
+      {%- if show_filter -%}
+        {%- comment -%}
+          Buttons, not links: they change what is on this page, they do not
+          navigate, and there is no URL that represents the filtered state
+          because nothing is re-fetched.
+
+          aria-pressed, not aria-current: each chip is an independent toggle
+          whose state is "this filter is on", and the APG's button pattern uses
+          aria-pressed for exactly that. aria-current means "this is the one
+          within a set that you are on", which is a navigation idea.
+
+          The state is never colour alone (SC 1.4.1): the pressed chip also
+          carries --weight-semibold against --weight-medium, the same way
+          component-pagination.css:62-67 keeps the current page legible.
+
+          role="group" with an accessible name, so the row announces as one
+          thing rather than seven loose buttons.
+        {%- endcomment -%}
+        <div
+          class="verse-index__filter"
+          role="group"
+          aria-label="{{ 'sections.verse_index.filter_label' | t }}"
+          data-verse-filter
+          hidden
+        >
+          <button type="button" class="verse-chip" data-verse-chip="all" aria-pressed="true">
+            {{ 'sections.verse_index.all' | t }}
+          </button>
+          {%- for label in cat_label_list -%}
+            {%- if label == blank -%}{%- continue -%}{%- endif -%}
+            <button
+              type="button"
+              class="verse-chip"
+              data-verse-chip="{{ label | handle }}"
+              aria-pressed="false"
+            >
+              {{ label | escape }}
+            </button>
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+    </div>
+
+    {%- comment -%} --------------------------------------- BAND 3: the cards {%- endcomment -%}
+    {%- if section.blocks.size > 0 -%}
+      <ul class="verse-index__grid" role="list" data-verse-grid>
+        {%- for block in section.blocks -%}
+          {%- liquid
+            assign b_category = block.settings.category | strip
+            assign b_quote = block.settings.quote | strip
+            assign b_reference = block.settings.reference | strip
+            assign b_label = block.settings.link_label | strip
+            assign b_url = block.settings.link_url
+            assign b_img = block.settings.image
+
+            assign b_show_link = false
+            if b_label != blank and b_url != blank
+              assign b_show_link = true
+            endif
+
+            assign b_empty = false
+            if b_quote == blank and b_img == blank and b_reference == blank
+              assign b_empty = true
+            endif
+          -%}
+
+          {%- comment -%}
+            EVERY BLOCK RENDERS AN <li>, even an empty one, and the empty case is
+            skipped only on the live storefront. A block that renders nothing
+            renders no shopify_attributes either, so the Theme Editor has no
+            element to outline, scroll to or fire shopify:block:select against —
+            the merchant clicks Add verse, the canvas does not change, and the
+            block is reachable only from the sidebar. That is a Phase 11 defect
+            class, and this is the guard against it.
+          {%- endcomment -%}
+          {%- if b_empty and request.design_mode == false -%}
+            {%- continue -%}
+          {%- endif -%}
+
+          <li
+            class="verse-card{% if b_empty %} verse-card--empty{% endif %}"
+            {% if b_category != blank %}data-verse-category="{{ b_category | handle }}"{% endif %}
+            {{ block.shopify_attributes }}
+          >
+            <div class="verse-card__media">
+              {%- if b_img != blank -%}
+                {{
+                  b_img
+                  | image_url: width: 1200
+                  | image_tag:
+                    class: 'verse-card__image',
+                    widths: '320, 480, 640, 900, 1200',
+                    sizes: img_sizes,
+                    loading: 'lazy',
+                    decoding: 'async',
+                    alt: b_img.alt
+                }}
+              {%- else -%}
+                {%- comment -%}
+                  The stand-ins cycle rather than repeat one file, so four cards
+                  read as four photographs. Cycling on the block's own position
+                  keeps a given card on a given file across reloads.
+                {%- endcomment -%}
+                {%- liquid
+                  assign fb_files = 'story.webp,tee.webp,hoodie.webp,cap.webp' | split: ','
+                  assign fb_i = forloop.index0 | modulo: 4
+                -%}
+                {% render 'image-fallback',
+                  file: fb_files[fb_i],
+                  class: 'verse-card__image',
+                  sizes: img_sizes,
+                  width: 1200,
+                  height: 1600
+                %}
+              {%- endif -%}
+
+              {%- comment -%}
+                THE SCRIM IS MANDATORY AND IS NOT A MERCHANT CHOICE — the same
+                reasoning our-story.liquid:192-199 records. Cream copy sits over
+                a photograph the theme has never seen, and a merchant who could
+                switch it off would be switching off the only thing making the
+                quote legible. Its alpha is derived, not chosen: see
+                section-verse-index.css.
+              {%- endcomment -%}
+              <div class="verse-card__scrim" aria-hidden="true"></div>
+            </div>
+
+            <div class="verse-card__body">
+              {%- if b_category != blank -%}
+                <p class="verse-card__category">{{ b_category | escape }}</p>
+              {%- endif -%}
+
+              {%- if b_quote != blank -%}
+                <blockquote class="verse-card__quote">
+                  <p>{{ b_quote | escape | newline_to_br }}</p>
+                </blockquote>
+              {%- endif -%}
+
+              {%- if b_reference != blank -%}
+                <p class="verse-card__reference">{{ b_reference | escape }}</p>
+              {%- endif -%}
+
+              {%- if b_show_link -%}
+                {%- comment -%}
+                  The link's accessible name carries the reference as well as the
+                  label, because four links all reading "Read verse" give a
+                  screen-reader user a list of identical destinations (SC 2.4.4).
+                  The visible label stays as the design has it.
+                {%- endcomment -%}
+                <a
+                  class="verse-card__link"
+                  href="{{ b_url }}"
+                  {% if b_reference != blank %}aria-label="{{ b_label | escape }}: {{ b_reference | escape }}"{% endif %}
+                >
+                  {{ b_label | escape }}
+                  {% render 'icon-arrow', class: 'icon--sm' %}
+                </a>
+              {%- endif -%}
+            </div>
+          </li>
+        {%- endfor -%}
+      </ul>
+
+      {%- if show_filter -%}
+        {%- comment -%}
+          The filter's own live region. It is empty in the markup and stays
+          empty until a chip is pressed, because a region created together with
+          its content announces nothing — the same rule assets/cart.js records
+          for announce(). It is section-local rather than the layout's
+          #CartStatus, which belongs to the cart and must not be spoken over.
+        {%- endcomment -%}
+        {%- comment -%}
+          The attribute carries the SENTENCE, with a literal [count] the script
+          substitutes. Same construction as locales "quantity": "Quantity:
+          [count]" consumed by assets/cart.js — a sentence assembled in
+          JavaScript cannot be translated, one carried in the locale file can.
+        {%- endcomment -%}
+        <p
+          class="visually-hidden"
+          role="status"
+          data-verse-status="{{ 'sections.verse_index.count' | t | escape }}"
+        ></p>
+      {%- endif -%}
+    {%- endif -%}
+
+    {%- if request.design_mode -%}
+      {%- liquid
+        assign notices = ''
+        if section.blocks.size == 0
+          assign notices = notices | append: 'no_blocks|'
+        endif
+        assign missing_img = 0
+        assign missing_cat = 0
+        assign missing_url = 0
+        for block in section.blocks
+          if block.settings.image == blank
+            assign missing_img = missing_img | plus: 1
+          endif
+          if block.settings.category == blank
+            assign missing_cat = missing_cat | plus: 1
+          endif
+          if block.settings.link_label != blank and block.settings.link_url == blank
+            assign missing_url = missing_url | plus: 1
+          endif
+        endfor
+        if missing_img > 0
+          assign notices = notices | append: 'no_image|'
+        endif
+        if missing_cat > 0
+          assign notices = notices | append: 'no_category|'
+        endif
+        if missing_url > 0
+          assign notices = notices | append: 'no_link_url|'
+        endif
+        if section.settings.show_filter and cat_count == 1
+          assign notices = notices | append: 'one_category|'
+        endif
+      -%}
+      {%- if notices != blank -%}
+        <div class="verse-index__notice">
+          {%- if notices contains 'no_blocks' -%}
+            <p>{{ 'sections.verse_index.no_blocks' | t }}</p>
+          {%- endif -%}
+          {%- if notices contains 'no_image' -%}
+            <p>{{ 'sections.verse_index.no_image' | t }}</p>
+          {%- endif -%}
+          {%- if notices contains 'no_category' -%}
+            <p>{{ 'sections.verse_index.no_category' | t }}</p>
+          {%- endif -%}
+          {%- if notices contains 'no_link_url' -%}
+            <p>{{ 'sections.verse_index.no_link_url' | t }}</p>
+          {%- endif -%}
+          {%- if notices contains 'one_category' -%}
+            <p>{{ 'sections.verse_index.one_category' | t }}</p>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+    {%- endif -%}
+  </div>
+</div>
+
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Explore Verses",
+  "tag": "section",
+  "class": "verse-index-section",
+  "max_blocks": 12,
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Explore Verses"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_filter",
+      "label": "Show category filter",
+      "info": "The filter needs at least two different categories, and needs JavaScript. Without it every verse is shown.",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "surface",
+      "label": "Surface",
+      "options": [
+        { "value": "light", "label": "Cream" },
+        { "value": "dark", "label": "Ink" }
+      ],
+      "default": "light"
+    },
+    {
+      "type": "select",
+      "id": "spacing_top",
+      "label": "Space above",
+      "options": [
+        { "value": "none", "label": "None" },
+        { "value": "tight", "label": "Tight" },
+        { "value": "standard", "label": "Standard" }
+      ],
+      "default": "standard"
+    },
+    {
+      "type": "select",
+      "id": "spacing_bottom",
+      "label": "Space below",
+      "options": [
+        { "value": "none", "label": "None" },
+        { "value": "tight", "label": "Tight" },
+        { "value": "standard", "label": "Standard" }
+      ],
+      "default": "standard"
+    },
+    {
+      "type": "text",
+      "id": "anchor_id",
+      "label": "Anchor",
+      "info": "Lets a menu item link to this band."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "verse",
+      "name": "Verse",
+      "settings": [
+        {
+          "type": "text",
+          "id": "category",
+          "label": "Category",
+          "info": "Becomes a filter chip. Verses sharing a category share a chip."
+        },
+        {
+          "type": "textarea",
+          "id": "quote",
+          "label": "Verse",
+          "info": "Line breaks are kept."
+        },
+        {
+          "type": "text",
+          "id": "reference",
+          "label": "Reference"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image",
+          "info": "Set alt text on the image itself in Content > Files."
+        },
+        {
+          "type": "text",
+          "id": "link_label",
+          "label": "Link label"
+        },
+        {
+          "type": "url",
+          "id": "link_url",
+          "label": "Link",
+          "info": "The link stays hidden until this is set."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Explore Verses",
+      "settings": {
+        "heading": "Explore Verses",
+        "show_filter": true,
+        "surface": "light",
+        "spacing_top": "standard",
+        "spacing_bottom": "standard"
+      },
+      "blocks": [
+        {
+          "type": "verse",
+          "settings": {
+            "category": "Faith",
+            "quote": "“Walk by faith,\nnot by sight.”",
+            "reference": "2 Corinthians 5:7",
+            "link_label": "Read Verse"
+          }
+        },
+        {
+          "type": "verse",
+          "settings": {
+            "category": "Purpose",
+            "quote": "“For I know the plans\nI have for you.”",
+            "reference": "Jeremiah 29:11",
+            "link_label": "Read Verse"
+          }
+        },
+        {
+          "type": "verse",
+          "settings": {
+            "category": "Courage",
+            "quote": "“Be strong and\ncourageous.”",
+            "reference": "Joshua 1:9",
+            "link_label": "Read Verse"
+          }
+        },
+        {
+          "type": "verse",
+          "settings": {
+            "category": "Light",
+            "quote": "“Let your light shine\nbefore others.”",
+            "reference": "Matthew 5:16",
+            "link_label": "Read Verse"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

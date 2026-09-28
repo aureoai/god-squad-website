@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>DONE</title></head><body style="margin:0">
+<pre id="o" style="display:none">&lt;&lt;&lt;[{"label":"filter group","page":"s-collection-filters.html","closedDeg":90,"closed":"DOWN","size":16,"openDeg":270,"open":"UP","sweep":180},{"label":"cart note","page":"c-page-note.html","closedDeg":90,"closed":"DOWN","size":16,"openDeg":270,"open":"UP","sweep":180},{"label":"product details","page":"p-details.html","closedDeg":90,"closed":"DOWN","size":24,"openDeg":270,"open":"UP","sweep":180}]&gt;&gt;&gt;</pre>
+<script>
+var T = [{"page": "s-collection-filters.html", "det": ".facets__group", "sum": ".facets__summary", "label": "filter group"}, {"page": "c-page-note.html", "det": ".cart-note", "sum": ".cart-note__summary", "label": "cart note"}, {"page": "p-details.html", "det": ".main-product__details", "sum": ".main-product__details-summary", "label": "product details"}], out = [], i = 0;
+function angle(el, w) {
+  var m = w.getComputedStyle(el).transform;
+  if (!m || m === 'none') return 0;
+  var n = m.match(/matrix\(([^)]+)\)/);
+  if (!n) return null;
+  var p = n[1].split(',').map(parseFloat);
+  var deg = Math.round(Math.atan2(p[1], p[0]) * 180 / Math.PI);
+  return ((deg % 360) + 360) % 360;
+}
+function pointsTo(a) {
+  if (a === null) return '?';
+  if (a > 315 || a <= 45) return 'RIGHT';
+  if (a <= 135) return 'DOWN';
+  if (a <= 225) return 'LEFT';
+  return 'UP';
+}
+function step() {
+  if (i >= T.length) {
+    document.title = 'DONE';
+    document.getElementById('o').textContent = '<<<' + JSON.stringify(out) + '>>>';
+    return;
+  }
+  var t = T[i];
+  var f = document.createElement('iframe');
+  f.style.cssText = 'border:0;width:1440px;height:1200px';
+  f.src = t.page;
+  document.body.appendChild(f);
+  f.onload = function () {
+    var d = f.contentDocument, w = f.contentWindow;
+    /* The transform is TRANSITIONED. Reading it straight after flipping [open]
+       returns the start value, which is how this probe first reported the
+       filter chevron as unchanged. Phase 4 recorded the same lesson: disable
+       transitions before measuring anything animated. */
+    var kill = d.createElement('style');
+    kill.textContent = '*, *::before, *::after { transition: none !important; animation: none !important; }';
+    d.head.appendChild(kill);
+    var det = d.querySelector(t.det);
+    var rec = {label: t.label, page: t.page};
+    if (!det) { rec.error = 'no ' + t.det + ' on this page'; out.push(rec); f.remove(); i++; step(); return; }
+    var sum = det.querySelector(t.sum);
+    var icon = sum ? sum.querySelector('.icon, svg') : null;
+    if (!icon) { rec.error = 'no icon inside ' + t.sum; out.push(rec); f.remove(); i++; step(); return; }
+    det.open = false; void d.body.offsetHeight;
+    rec.closedDeg = angle(icon, w); rec.closed = pointsTo(rec.closedDeg);
+    rec.size = Math.round(icon.getBoundingClientRect().width);
+    det.open = true; void d.body.offsetHeight;
+    rec.openDeg = angle(icon, w); rec.open = pointsTo(rec.openDeg);
+    rec.sweep = (rec.openDeg === null || rec.closedDeg === null) ? null
+      : (rec.openDeg - rec.closedDeg + 360) % 360;
+    out.push(rec);
+    f.remove(); i++; step();
+  };
+  f.onerror = function () { out.push({label: t.label, error: 'load failed'}); f.remove(); i++; step(); };
+}
+step();
+</script>
+</body></html>

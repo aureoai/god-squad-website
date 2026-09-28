@@ -1,0 +1,31 @@
+{
+  "current": {
+    "color_scheme": "godsquad",
+    "type_display_font": "playfair_display_n9",
+    "type_body_font": "jost_n4",
+    "container_width": 1440,
+    "radius_sm": "2",
+    "favicon": "",
+    "product_image_ratio": "square",
+    "cart_type": "drawer",
+    "logo": "shopify://shop_images/logo-white.png",
+    "card_hover_secondary_image": false,
+    "customer_account_menu": "customer-account-main-menu",
+    "share_image": ""
+  },
+  "presets": {
+    "God Squad": {
+      "color_scheme": "godsquad",
+      "type_display_font": "playfair_display_n9",
+      "type_body_font": "jost_n4",
+      "container_width": 1440,
+      "radius_sm": "2",
+      "product_image_ratio": "square",
+      "cart_type": "drawer",
+      "logo": "",
+      "card_hover_secondary_image": false,
+      "customer_account_menu": "customer-account-main-menu",
+      "share_image": ""
+    }
+  }
+}

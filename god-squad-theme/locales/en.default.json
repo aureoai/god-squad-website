@@ -1,0 +1,242 @@
+{
+  "general": {
+    "page": "Page",
+    "tagged": "Tagged",
+    "pagination": {
+      "label": "Pagination",
+      "previous": "Previous page",
+      "next": "Next page",
+      "page_number": "Page {{ number }}"
+    },
+    "not_found": {
+      "title": "Page not found.",
+      "body": "The page you are looking for is not available. It may have moved, or the link may be out of date.",
+      "link": "Back to the home page"
+    },
+    "password_page": {
+      "opening_soon": "Opening soon.",
+      "default_message": "Something is being made here. Enter the password to take a look.",
+      "password_label": "Password",
+      "password_placeholder": "Enter password",
+      "enter": "Enter",
+      "wrong_password": "That password isn't right. Try again.",
+      "admin_link_html": "Are you the store owner? <a href=\"{{ shop_url }}/admin\">Log in here</a>."
+    }
+  },
+  "gift_cards": {
+    "issued": {
+      "title": "Your gift card",
+      "subtext": "This gift card is ready to use at checkout.",
+      "expired": "This gift card has expired.",
+      "redeemed": "This gift card has been fully used.",
+      "shop_link": "Shop the store",
+      "print": "Print this gift card",
+      "add_to_apple_wallet": "Add to Apple Wallet",
+      "disabled_gift_card": "Present this code at checkout to redeem your balance."
+    }
+  },
+  "accessibility": {
+    "skip_to_content": "Skip to content"
+  },
+  "header": {
+    "menu": "Menu",
+    "close": "Close menu",
+    "primary_nav": "Primary",
+    "mobile_nav": "Main",
+    "search": "Search",
+    "account": "Account",
+    "cart": "Cart",
+    "no_menu": "No menu has been selected for this header yet.",
+    "search_label": "Search the store",
+    "search_placeholder": "Search the store…",
+    "search_close": "Close search",
+    "fallback_nav": {
+      "home": "Home",
+      "shop": "Shop",
+      "story": "Our Story",
+      "verse": "Verse"
+    }
+  },
+  "products": {
+    "card": {
+      "sold_out": "Sold out",
+      "add_to_cart": "Add to bag",
+      "choose_options": "Choose options"
+    },
+    "price": {
+      "from": "From",
+      "sale_price": "Sale price",
+      "regular_price": "Regular price",
+      "per": "per"
+    },
+    "description": "Description",
+    "form": {
+      "add_to_cart": "Add to bag",
+      "adding": "Adding…",
+      "sold_out": "Sold out"
+    },
+    "quantity": {
+      "label": "Quantity",
+      "label_for": "Quantity for {{ title }}",
+      "decrease": "Decrease quantity",
+      "decrease_for": "Decrease quantity for {{ title }}",
+      "increase": "Increase quantity",
+      "increase_for": "Increase quantity for {{ title }}"
+    },
+    "variants": {
+      "unavailable": "Unavailable"
+    },
+    "media": {
+      "rail_label": "Product media",
+      "go_to": "Go to media {{ index }} of {{ count }}"
+    },
+    "meta": {
+      "sku": "SKU",
+      "type": "Type"
+    },
+    "inventory": {
+      "low_stock": "Low stock"
+    }
+  },
+  "sections": {
+    "featured_collection": {
+      "no_collection": "Choose a collection for this section. Nothing is shown on the live store until you do.",
+      "empty_collection": "This collection has no products yet. Add products to it in Shopify admin and they will appear here."
+    },
+    "our_story": {
+      "no_image": "Choose an Our Story image. The approved composition is the three-model community photograph; a master of at least 2000px is still needed.",
+      "no_alt": "This image has no alt text, so it is announced as decorative. Add alt text on the image in Shopify admin if it carries meaning the heading does not.",
+      "no_cta_url": "The button has a label but no link, so it is hidden. Create an Our Story page in Shopify admin and select it here."
+    },
+    "main_page": {
+      "no_content": "This page has no content yet. Add it to the page in Shopify admin and it will appear here."
+    },
+    "search": {
+      "title": "Search",
+      "input_label": "What are you looking for?",
+      "submit": "Search",
+      "prompt": "Enter a word or two above to search the store.",
+      "results_count": {
+        "one": "{{ count }} result for “{{ terms }}”",
+        "other": "{{ count }} results for “{{ terms }}”"
+      },
+      "no_results": "No results for “{{ terms }}”.",
+      "no_results_help": "Check the spelling, or try a shorter or more general word.",
+      "products": "Products",
+      "other_results": "Pages and articles",
+      "result_type": {
+        "page": "Page",
+        "article": "Article"
+      },
+      "pagination": "Search results pages"
+    },
+    "footer": {
+      "no_menu": "This column has no menu, or the menu you chose is empty. Build the menu in Navigation and it will appear here. Nothing is shown on the live store until it does.",
+      "no_policies": "No store policies are published yet, so no policy links are shown. Write them in Settings > Policies in Shopify admin and they appear here automatically, with their own titles and links.",
+      "no_social": "No social addresses have been entered yet, so no social links are shown. Add them in Theme settings > Social."
+    },
+    "main_collection": {
+      "no_filters": "No filters are set up for this store yet. Create them in Shopify admin under Apps › Search & Discovery › Filters, and they will appear here."
+    },
+    "verse_feature": {
+      "no_image": "Choose a photograph for this band. It sits between the verse and the message.",
+      "no_alt": "This image has no alt text, so it is announced as decorative. Add alt text on the image in Shopify admin if it carries meaning the verse does not.",
+      "no_link_url": "The reflection link has a label but no destination, so it is hidden. Create the page in Shopify admin and select it here."
+    },
+    "verse_index": {
+      "all": "All",
+      "filter_label": "Filter verses by category",
+      "count": "Showing [count] verses.",
+      "no_blocks": "Add a verse to fill this band.",
+      "no_image": "One or more verses have no image. Each card needs a photograph behind its quote.",
+      "no_category": "One or more verses have no category, so they will not appear under any filter chip.",
+      "no_link_url": "A verse has a link label but no destination, so its link is hidden. Add the page in Shopify admin and select it here.",
+      "one_category": "The filter is on but every verse shares one category, so the chips are hidden. Give the verses different categories to use it."
+    },
+    "words_we_wear": {
+      "no_blocks": "Add a phrase to fill this band.",
+      "no_image": "One or more phrases have no image. Each tile needs a photograph behind its words."
+    },
+    "brand_values": {
+      "no_blocks": "Add a value to fill this strip.",
+      "no_icon": "One or more values have no glyph. Each tile reads better with one."
+    }
+  },
+  "cart": {
+    "title": "Your cart",
+    "close": "Close cart",
+    "item_count": {
+      "one": "{{ count }} item",
+      "other": "{{ count }} items"
+    },
+    "subtotal": "Subtotal",
+    "estimated_total": "Estimated total",
+    "taxes_at_checkout": "Taxes and shipping are calculated at checkout.",
+    "checkout": "Checkout",
+    "view_cart": "View cart",
+    "continue_shopping": "Continue shopping",
+    "update": "Update cart",
+    "remove": "Remove",
+    "remove_title": "Remove {{ title }} from your cart",
+    "empty": {
+      "title": "Your cart is empty.",
+      "body": "Find something that speaks to your purpose.",
+      "link": "Shop the collection"
+    },
+    "status": {
+      "added": "Added to your cart.",
+      "updated": "Cart updated.",
+      "removed": "Removed from your cart.",
+      "quantity": "Quantity: [count]",
+      "note_saved": "Order note saved."
+    },
+    "errors": {
+      "generic": "Unable to update your cart. Please try again.",
+      "network": "We could not reach the store. Check your connection and try again."
+    },
+    "shipping_at_checkout": "Shipping is calculated at checkout.",
+    "note": {
+      "label": "Order note",
+      "help": "Anything we should know about this order."
+    }
+  },
+  "collection": {
+    "sort_label": "Sort by",
+    "sort_submit": "Sort",
+    "product_count": {
+      "one": "{{ count }} product",
+      "other": "{{ count }} products"
+    },
+    "empty": {
+      "title": "This collection is empty.",
+      "body": "There is nothing available here right now.",
+      "link": "Browse the store"
+    },
+    "filters": {
+      "title": "Filter",
+      "open": "Filter",
+      "close": "Close filters",
+      "apply": "Apply",
+      "clear_all": "Clear all",
+      "active_heading": "Applied filters",
+      "remove": "Remove {{ value }}",
+      "price_from": "From",
+      "price_to": "To",
+      "none_match": {
+        "title": "No pieces match these filters.",
+        "body": "Clear them and start again."
+      }
+    }
+  },
+  "footer": {
+    "copyright": "© {{ year }} {{ name }}",
+    "policies_label": "Policies",
+    "social_label": "Social",
+    "social": {
+      "facebook": "Facebook",
+      "instagram": "Instagram",
+      "tiktok": "TikTok",
+      "youtube": "YouTube"
+    }
+  }
+}

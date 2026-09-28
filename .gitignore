@@ -1,0 +1,46 @@
+# ---------------------------------------------------------------- dependencies
+# 19 MB of Theme Check and its tree. Restored with `npm install` in qa/.
+qa/node_modules/
+
+# ------------------------------------------------------------------ build output
+# Produced by `python qa/make-theme-zip.py` from god-squad-theme/. Committing it
+# means every theme change shows up twice in the diff, once readable and once as
+# an opaque binary.
+god-squad-theme.zip
+
+# ---------------------------------------------------------------- tool state
+# Shopify CLI session and cache. Never commit this — it is per-machine, and it
+# is where a theme access token would land if one were ever used.
+.shopify/
+*/.shopify/
+
+# Browser profiles the QA probes create. They were once written into the project
+# by mistake and cost 176 MB; the suites now use the system temp directory, and
+# this is the guard in case one regresses.
+prof/
+prof*/
+**/profg/
+**/profp/
+**/profv/
+
+# ------------------------------------------------------------------- secrets
+# Nothing in this project uses these today and nothing should. A Shopify theme
+# needs no key at rest: the CLI holds its own session, and a Theme Access
+# password belongs in SHOPIFY_CLI_THEME_TOKEN at the moment it is used.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+credentials.json
+
+# ---------------------------------------------------------------------- OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ------------------------------------------------------------------- editors
+.vscode/
+.idea/
+*.swp
+*~

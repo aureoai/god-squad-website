@@ -1,0 +1,461 @@
+/* ============================================================================
+   GOD SQUAD — Hero section
+   Phase 5. Every value is a token from design-tokens.css. No raw hex, no
+   magic numbers, no !important, and no JavaScript dependency.
+
+   Layout model: the media fills the section, the content sits above it in a
+   constrained container. The section is full-bleed; only its content is
+   constrained, which is the container model Phase 2 section 8 specifies and
+   the reason the prototype's boxed 1440px wrapper is not reproduced.
+   ========================================================================== */
+
+/* ------------------------------------------------- the overlaying header
+   --header-overlay-offset is published on :root by sections/header.liquid when
+   the merchant has "Overlay the first section" on and the template is the home
+   page. It says how tall the header is — NOT which section it sits over.
+
+   The header overlays whichever section is FIRST. Phase 11 made the home page
+   reorderable, so the hero is no longer guaranteed to be that section: a
+   merchant who drags Our Story above it left the hero carrying 88px of desktop
+   (122px mobile) clearance for a header that is now over something else, and a
+   visible band of empty ground at the top of the band.
+
+   So the clearance is a hero-local token, zero by default, and raised only for
+   the first section in the content slot. That is a fact about position, which
+   only a selector can know, so it is expressed as one rather than as a setting
+   the merchant would have to keep in sync with the order they just changed. */
+.hero {
+  --hero-header-clearance: 0px;
+}
+
+#MainContent > .shopify-section:first-child .hero {
+  --hero-header-clearance: var(--header-overlay-offset, 0px);
+}
+
+.hero {
+  position: relative;
+  display: grid;
+  width: 100%;
+  isolation: isolate;
+}
+
+/* ------------------------------------------------------------------ height
+   Not 100vh. On phones the dynamic toolbar makes vh jump, so the full option
+   uses svh, and every option is clamped so the hero cannot grow without limit
+   on a tall or ultra-wide screen. The minimums keep the composition readable;
+   the maximums stop the next section being pushed off the page. */
+
+.hero--h-small  { min-height: clamp(24rem, 52svh, 34rem); }   /* 384 - 544px */
+.hero--h-medium { min-height: clamp(32rem, 68svh, 45rem); }   /* 512 - 720px */
+.hero--h-large  { min-height: clamp(38rem, 82svh, 55rem); }   /* 608 - 880px */
+
+/* Full screen means the viewport minus whatever the header group occupies,
+   so the hero ends where the fold is rather than below it. */
+.hero--h-full {
+  min-height: calc(100svh - var(--hero-header-clearance, 0px) - var(--announcement-height));
+}
+
+@media (max-width: 767px) {
+  .hero--h-full {
+    min-height: calc(100svh - var(--hero-header-clearance, 0px) - var(--announcement-height-stacked));
+  }
+}
+
+/* ------------------------------------------------------------------- media */
+
+.hero__media {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-base);
+  overflow: hidden;
+}
+
+.hero__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* Vertical focus holds the faces in frame at every crop. Matches the
+     approved composition. Horizontal focus is set by the focal-point
+     modifiers below and only bites when the frame is narrower than the
+     image, which is why wide viewports look identical across all of them. */
+  object-position: var(--hero-focal-x, 50%) 30%;
+}
+
+.hero__image--placeholder {
+  background-color: var(--color-bg-primary);
+}
+
+/* Focal points. Chosen by rendering the real asset at 375 x 320 and comparing:
+   37% and 45% both keep the seated model's chest logo and the second model's
+   logo legible with no cropped third figure, so centre-left sits between them.
+   Left and right are offered for imagery with a strong edge subject. */
+.hero--focal-left         { --hero-focal-x: 20%; }
+.hero--focal-centre-left  { --hero-focal-x: 40%; }
+.hero--focal-centre       { --hero-focal-x: 50%; }
+.hero--focal-centre-right { --hero-focal-x: 62%; }
+.hero--focal-right        { --hero-focal-x: 80%; }
+
+/* ------------------------------------------------------------------- scrim
+   The minimum that keeps the words readable, per Phase 5 section 9.
+
+   Narrow viewports get a bottom-weighted wash, because the content sits low
+   over the photograph and the upper half holds the faces.
+   Wide viewports get the approved left-weighted wash from the prototype, kept
+   because the source's left third is bright: sampled column luminance peaks at
+   0.41 between 15% and 20% of the width and averages 0.29 across the left
+   third, so the photograph cannot carry cream text unaided. Rendered with the
+   scrim removed, the worst backdrop pixel behind every one of the four text
+   elements measures 1.00:1 at both 375px and 1440px. */
+
+.hero__scrim {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-raised);
+  pointer-events: none;
+}
+
+/* Narrow viewports: the upper third stays clear so the faces read as
+   photography, then the wash builds to carry the copy block. The alpha is
+   measured, not chosen. Unscrimmed, the backdrop behind the eyebrow at 375px
+   ranges from 0.000 to 0.989 relative luminance, so its worst pixel carries
+   cream at 1.00:1. Cream needs a backdrop at or below 0.153 to reach 4.5:1,
+   which over a pure-white highlight takes 0.61 alpha of ink; the ramps below
+   clear that with room to spare, and the worst measured pixel behind the
+   eyebrow is 11.98:1 on medium and 4.67:1 on subtle. */
+
+.hero--overlay-subtle .hero__scrim {
+  background: linear-gradient(180deg,
+    rgba(13, 12, 10, 0.10) 0%,
+    rgba(13, 12, 10, 0.62) 34%,
+    rgba(13, 12, 10, 0.74) 64%,
+    rgba(13, 12, 10, 0.80) 100%);
+}
+
+.hero--overlay-medium .hero__scrim {
+  background: linear-gradient(180deg,
+    rgba(13, 12, 10, 0.25) 0%,
+    rgba(13, 12, 10, 0.86) 30%,
+    rgba(13, 12, 10, 0.90) 60%,
+    rgba(13, 12, 10, 0.93) 100%);
+}
+
+.hero--overlay-strong .hero__scrim {
+  background: linear-gradient(180deg,
+    rgba(13, 12, 10, 0.45) 0%,
+    rgba(13, 12, 10, 0.92) 26%,
+    rgba(13, 12, 10, 0.95) 60%,
+    rgba(13, 12, 10, 0.97) 100%);
+}
+
+/* Wide viewports keep the approved left-weighted wash, but it has to hold its
+   alpha across the whole content column rather than fading at a fixed point.
+   The content is at most 42rem wide inside a centred container, so where it
+   ends as a percentage of the viewport changes with width: about 70% at
+   1024px, 56% at 1280px and 50% from 1440px up. The prototype's gradient had
+   dropped to 0.15 alpha by 48%, which left the right end of the heading at
+   1.43:1. These two stops track the column instead. */
+
+@media (min-width: 1024px) {
+  /* The content column ends near 70% of the viewport at this width, so the
+     hold has to reach further than it does on wider screens. What is protected
+     here is the column, not today's copy: the shipped heading only reaches 48%
+     and passes at any hold, but `heading` is a merchant field and a longer one
+     fills the column. Rendered and sampled across the full column with the hold
+     at 50%, the darkest backdrop in it carries cream at 2.43:1 and gold at
+     1.57:1 — both fail the 3:1 large-text minimum. At 66% the same pixel gives
+     9.48:1 and 6.12:1. 1024px is the only breakpoint that needs the long hold;
+     the same 50% test passes at 1280px (7.96:1) and 1440px (12.19:1). */
+  .hero { --hero-wash-hold: 66%; --hero-wash-end: 90%; }
+
+  .hero--overlay-subtle .hero__scrim {
+    background: linear-gradient(90deg,
+      rgba(13, 12, 10, 0.80) 0%,
+      rgba(13, 12, 10, 0.62) var(--hero-wash-hold),
+      rgba(13, 12, 10, 0) var(--hero-wash-end));
+  }
+
+  .hero--overlay-medium .hero__scrim {
+    background: linear-gradient(90deg,
+      rgba(13, 12, 10, 0.93) 0%,
+      rgba(13, 12, 10, 0.86) var(--hero-wash-hold),
+      rgba(13, 12, 10, 0.16) var(--hero-wash-end),
+      rgba(13, 12, 10, 0.10) 90%,
+      rgba(13, 12, 10, 0.60) 100%);
+  }
+
+  .hero--overlay-strong .hero__scrim {
+    background: linear-gradient(90deg,
+      rgba(13, 12, 10, 0.96) 0%,
+      rgba(13, 12, 10, 0.92) var(--hero-wash-hold),
+      rgba(13, 12, 10, 0.40) var(--hero-wash-end),
+      rgba(13, 12, 10, 0.30) 92%,
+      rgba(13, 12, 10, 0.80) 100%);
+  }
+
+  /* When the content is centred or right aligned the wash has to follow it,
+     otherwise the words leave the darkened side of the frame. */
+  .hero--align-centre.hero--overlay-medium .hero__scrim,
+  .hero--align-centre.hero--overlay-subtle .hero__scrim {
+    background: linear-gradient(180deg,
+      rgba(13, 12, 10, 0.22) 0%,
+      rgba(13, 12, 10, 0.55) 50%,
+      rgba(13, 12, 10, 0.78) 100%);
+  }
+
+  .hero--align-right.hero--overlay-medium .hero__scrim,
+  .hero--align-right.hero--overlay-subtle .hero__scrim {
+    background: linear-gradient(270deg,
+      rgba(13, 12, 10, 0.88) 0%,
+      rgba(13, 12, 10, 0.55) 34%,
+      rgba(13, 12, 10, 0) 62%);
+  }
+}
+
+/* ----------------------------------------------------------------- content */
+
+.hero__inner {
+  position: relative;
+  z-index: var(--z-raised);
+  display: grid;
+  /* Clearance for the overlaying header. The header publishes this custom
+     property only when it overlays;
+  it resolves to zero otherwise, so the
+     hero does not need to know the header's settings. */
+  padding-block: calc(var(--hero-header-clearance, 0px) + var(--space-7)) var(--space-8);
+}
+
+.hero--pos-top    .hero__inner { align-content: start; }
+.hero--pos-centre .hero__inner { align-content: center; }
+.hero--pos-bottom .hero__inner { align-content: end; }
+
+.hero__content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  max-width: 34rem;
+}
+
+.hero--align-centre .hero__content {
+  align-items: center;
+  margin-inline: auto;
+  text-align: center;
+}
+
+.hero--align-right .hero__content {
+  align-items: flex-end;
+  margin-inline-start: auto;
+  text-align: right;
+}
+
+/* ------------------------------------------------------------- typography */
+
+/* Cream, not gold, and this is a measured decision rather than a preference.
+   Muted gold at 13px is normal text, so it needs 4.5:1, and it needs a
+   backdrop at or below 0.081 relative luminance to get there — about half the
+   0.153 cream can live with. The merchant can choose the subtle overlay, and
+   that is where the difference bites: rendered at 375px on subtle, the worst
+   backdrop pixel behind the eyebrow carries cream at 4.67:1 and gold at
+   3.02:1. Cream passes, gold fails, and the only way to rescue gold would be a
+   heavier wash on every setting, which Phase 5 section 9 forbids. Gold
+   therefore stays on the heading accent, which is large text needing 3:1 and
+   clears it everywhere measured, worst case 8.18:1. Phase 5 section 10
+   endorses cream for supporting text. */
+.hero__eyebrow {
+  margin: 0 0 var(--space-4);
+  color: var(--color-text-primary);
+  font-family: var(--font-body);
+  font-size: var(--type-eyebrow-size);
+  font-weight: var(--type-eyebrow-weight);
+  letter-spacing: var(--type-eyebrow-ls);
+  text-transform: uppercase;
+}
+
+.hero__heading {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-family: var(--font-display);
+  font-size: var(--type-display-xl-size);
+  font-weight: var(--weight-black);
+  line-height: var(--type-display-xl-lh);
+  letter-spacing: var(--type-display-xl-ls);
+  text-transform: uppercase;
+  text-wrap: balance;
+}
+
+/* The approved lockup: cream, then gold, gold always on its own line.
+   HERO-03 in the Phase 1 audit records that the prototype's lockup was never
+   seen as intended on a desktop: the h1 stacked WALK / BY / FAITH. at 1024 and
+   above and collapsed to a single line at 768-900, because text-wrap:balance
+   was left to find the break inside a column too narrow to hold "WALK BY" at
+   112px. Making the accent a block removes the guesswork — the break is
+   structural, so the two-line lockup holds at every width the column can carry
+   "Walk By" on one line, which is every width from 320px up as measured.
+   text-wrap:balance is kept on the heading, but it now only governs how a
+   longer merchant-entered heading wraps; the lockup no longer depends on it. */
+.hero__heading-accent {
+  display: block;
+  color: var(--accent-current);
+}
+
+.hero__scripture {
+  margin: var(--space-4) 0 0;
+  color: var(--color-text-primary);
+  font-family: var(--font-body);
+  font-size: var(--type-label-size);
+  font-weight: var(--weight-regular);
+  letter-spacing: var(--type-eyebrow-ls);
+  text-transform: uppercase;
+}
+
+.hero__description {
+  margin: var(--space-6) 0 0;
+  max-width: var(--measure-narrow);
+  color: var(--color-text-secondary);
+  font-family: var(--font-body);
+  font-size: var(--type-label-size);
+  letter-spacing: var(--type-label-ls);
+  line-height: var(--type-tagline-lh);
+  text-transform: uppercase;
+}
+
+/* A hairline between the heading block and the supporting statement, the
+   editorial separator the approved design uses throughout. */
+.hero__description::before {
+  content: "";
+  display: block;
+  width: var(--space-7);
+  height: var(--border-width);
+  margin-bottom: var(--space-5);
+  background-color: var(--accent-current);
+}
+
+.hero--align-centre .hero__description::before {
+  margin-inline: auto;
+}
+
+.hero--align-right .hero__description::before {
+  margin-inline-start: auto;
+}
+
+/* --------------------------------------------------------------- the button
+   The button system moved to assets/component-button.css in Phase 6, when the
+   featured-collection section became its second consumer. Phase 5 section 16
+   recorded that promotion as the condition for a second use, and three values
+   the copy here had wrong are corrected in the shared file — the gold hover
+   fill most importantly, which Phase 2 section 10.3 prohibits on a primary.
+   Only the hero's own placement rule stays here. */
+
+.hero__cta {
+  margin-top: var(--space-7);
+}
+
+/* ------------------------------------------------------------- breakpoints */
+
+@media (min-width: 768px) {
+  .hero__content {
+    max-width: 38rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .hero__inner {
+    padding-block: calc(var(--hero-header-clearance, 0px) + var(--space-8)) var(--space-9);
+  }
+
+  .hero__content {
+    max-width: 42rem;
+  }
+}
+
+/* As the viewport widens the centred container pulls the content column
+   inward, so the wash can relax and return more of the photograph. These two
+   steps are not contrast fixes — 1280px and 1440px already pass with the 1024
+   values — they exist so the picture is not darkened further than it needs to
+   be. Measured across the full content column after relaxing: 10.90:1 at
+   1280px and 10.92:1 at 1440px for cream, 7.05:1 and 7.06:1 for gold, all far
+   above the 3:1 minimum. */
+@media (min-width: 1280px) {
+  .hero { --hero-wash-hold: 54%; --hero-wash-end: 82%; }
+}
+
+@media (min-width: 1440px) {
+  .hero { --hero-wash-hold: 48%; --hero-wash-end: 76%; }
+}
+
+/* ------------------------------------------------------------- landscape
+   A phone turned sideways. Measured before this block: the medium hero was
+   545px tall in a 375px viewport and its call to action ended at y=497 —
+   below the fold, on the one band whose purpose is to carry it.
+
+   The cause is the clamp FLOOR rather than the svh. 32rem is 512px, which is
+   more than a landscape phone's whole viewport, so the hero could never be
+   shorter than the screen. The floors are correct in portrait and are left
+   alone there.
+
+   Bounded to max-width 1023px as well as max-height 540px, so a desktop
+   window someone has made short keeps the composition it was designed with.
+
+   Everything here is a token. Nothing about the content, the order or the
+   messaging changes; the band is re-proportioned for a screen 375px tall. */
+
+@media (max-height: 540px) and (max-width: 1023px) {
+  .hero--h-small,
+  .hero--h-medium,
+  .hero--h-large,
+  .hero--h-full {
+    /* The viewport, and no floor above it. */
+    min-height: calc(100svh - var(--hero-header-clearance, 0px));
+  }
+
+  /* The top padding clears the overlaid header exactly, with no extra band.
+     The header is transparent and its controls sit along the top edge, so the
+     eyebrow starting at the header's lower boundary is the whole requirement;
+     the additional --space-4 that portrait uses for composition is 16px this
+     layout does not have to give. */
+  .hero__inner {
+    padding-block: var(--hero-header-clearance, 0px) var(--space-4);
+  }
+
+  /* The display scale is set from the viewport's WIDTH, which in landscape is
+     the dimension that is not scarce. Re-clamped against height so the lockup
+     keeps its two lines without taking a third of the screen: 9svh is 34px on
+     a 375px-tall phone and 39px on a 430px one. */
+  .hero__heading {
+    font-size: clamp(1.75rem, 9svh, 3rem);
+  }
+
+  /* The rhythm between the five parts of the lockup, one step down each.
+     Measured reason: the call to action has to clear the fold in a browser
+     that is ALSO showing its own chrome. The iframe reading of 375px is the
+     layout viewport; a landscape iPhone showing its compact toolbar leaves
+     roughly 342px visible, and the hero is sized by its CONTENT here rather
+     than by min-height, so svh units cannot recover the difference — only the
+     content can. Together with the padding above, this moves the button's
+     lower edge from 359px to inside a 342px fold. */
+  .hero__eyebrow {
+    margin-block-end: var(--space-2);
+  }
+
+  .hero__scripture {
+    margin-block-start: var(--space-2);
+  }
+
+  .hero__description {
+    margin-block-start: var(--space-3);
+  }
+
+  .hero__description::before {
+    margin-block-end: var(--space-2);
+  }
+
+  .hero__cta {
+    margin-block-start: var(--space-4);
+  }
+}
+
+/* ---------------------------------------------------------- reduced motion
+   The hero has no entrance animation: it must be understandable without one,
+   and the photography is the focus. Nothing in this file transitions, moves or
+   fades at any viewport, so there is nothing for a reduced-motion query to
+   switch off. The button's own transition and its reduced-motion rule travel
+   with the button, in assets/component-button.css. */

@@ -1,0 +1,328 @@
+{%- comment -%}
+  ============================================================================
+  GOD SQUAD — words-we-wear.liquid
+
+  BAND 4 of the Verse feature: the "Words We Wear." display heading with its
+  paragraph, and a row of dark photographic tiles each carrying a phrase and an
+  ordinal.
+
+  THE ORDINAL IS COUNTED, NOT TAKEN FROM forloop.index. forloop.index counts
+  ITERATIONS, and this loop skips blocks that are empty on the live storefront —
+  so a merchant with a blank block in second position would get tiles numbered
+  01, 03, 04. A separate counter that only advances when a tile actually renders
+  is the whole fix, and it is why `ordinal` exists below.
+
+  Sources of truth: the owner's approved Verse mockup, PHASE-2-DESIGN-SYSTEM.md,
+  and sections/our-story.liquid for the house style.
+  ============================================================================
+{%- endcomment -%}
+
+{%- liquid
+  assign heading = section.settings.heading | strip
+
+  assign surface_class = 'surface-light'
+  if section.settings.surface == 'dark'
+    assign surface_class = 'surface-dark'
+  endif
+
+  assign img_sizes = '(min-width: 1440px) 20vw, (min-width: 1024px) 25vw, 50vw'
+
+  assign classes = 'words-we-wear '
+  assign classes = classes | append: surface_class
+  assign classes = classes | append: ' words-we-wear--pt-' | append: section.settings.spacing_top
+  assign classes = classes | append: ' words-we-wear--pb-' | append: section.settings.spacing_bottom
+-%}
+
+{%- if section.blocks.size == 0 and heading == blank and request.design_mode == false -%}
+  {%- comment -%} Not configured yet: render nothing, and request nothing. {%- endcomment -%}
+{%- else -%}
+
+{{ 'section-words-we-wear.css' | asset_url | stylesheet_tag }}
+
+<div class="{{ classes }}" {% if section.settings.anchor_id != blank %}id="{{ section.settings.anchor_id | handle }}"{% endif %}>
+  <div class="words-we-wear__inner container">
+
+    <div class="words-we-wear__intro">
+      {%- if heading != blank -%}
+        {%- comment -%}
+          An h2. The home page's single h1 is the hero's, and nothing inside
+          this band is a heading — the phrases are content on tiles, not
+          section titles — so there is no child level to derive, unlike
+          our-story and featured-collection.
+        {%- endcomment -%}
+        <h2 class="words-we-wear__heading">{{ heading | escape | newline_to_br }}</h2>
+      {%- endif -%}
+
+      {%- if section.settings.body != blank -%}
+        <div class="words-we-wear__body rte">{{ section.settings.body }}</div>
+      {%- endif -%}
+    </div>
+
+    {%- if section.blocks.size > 0 -%}
+      <ul class="words-we-wear__tiles" role="list">
+        {%- assign ordinal = 0 -%}
+        {%- for block in section.blocks -%}
+          {%- liquid
+            assign phrase = block.settings.phrase | strip
+            assign t_img = block.settings.image
+            assign t_url = block.settings.link_url
+
+            assign t_empty = false
+            if phrase == blank and t_img == blank
+              assign t_empty = true
+            endif
+
+            comment
+              The stand-in for a tile with no image, resolved once here because
+              the linked and unlinked tiles below are two separate elements and
+              would otherwise each carry a copy of this. Cycling on the block's
+              own position keeps four tiles reading as four photographs.
+            endcomment
+            assign fb_files = 'story.webp,tee.webp,hoodie.webp,cap.webp' | split: ','
+            assign fb_i = forloop.index0 | modulo: 4
+            assign fb_file = fb_files[fb_i]
+          -%}
+
+          {%- comment -%}
+            Empty blocks are skipped only on the live storefront. In the editor
+            they render, because a block that emits nothing emits no
+            shopify_attributes either, and the Theme Editor then has no element
+            to outline or scroll to when the merchant clicks Add phrase.
+          {%- endcomment -%}
+          {%- if t_empty and request.design_mode == false -%}
+            {%- continue -%}
+          {%- endif -%}
+
+          {%- assign ordinal = ordinal | plus: 1 -%}
+
+          <li
+            class="words-we-wear__tile{% if t_empty %} words-we-wear__tile--empty{% endif %} surface-dark"
+            {{ block.shopify_attributes }}
+          >
+            {%- comment -%}
+              The linked and unlinked tiles are written as two complete
+              elements rather than one element whose open and close tags are
+              split across branches — the form announcement-bar.liquid:49-77
+              uses. A tag opened in one conditional and closed in another is
+              valid Liquid and unreadable HTML, and it breaks the moment
+              anything is inserted between them.
+            {%- endcomment -%}
+            {%- if t_url != blank -%}
+              <a class="words-we-wear__tile-inner" href="{{ t_url }}">
+                {%- if t_img != blank -%}
+                  {{
+                    t_img
+                    | image_url: width: 1200
+                    | image_tag:
+                      class: 'words-we-wear__image',
+                      widths: '320, 480, 640, 900, 1200',
+                      sizes: img_sizes,
+                      loading: 'lazy',
+                      decoding: 'async',
+                      alt: t_img.alt
+                  }}
+                {%- else -%}
+                  {% render 'image-fallback',
+                    file: fb_file,
+                    class: 'words-we-wear__image',
+                    sizes: img_sizes,
+                    width: 1200,
+                    height: 1600
+                  %}
+                {%- endif -%}
+                <span class="words-we-wear__scrim" aria-hidden="true"></span>
+                {%- if phrase != blank -%}
+                  <span class="words-we-wear__phrase">{{ phrase | escape | newline_to_br }}</span>
+                {%- endif -%}
+                <span class="words-we-wear__ordinal" aria-hidden="true">
+                  {%- if ordinal < 10 -%}0{% endif %}{{ ordinal }}
+                </span>
+              </a>
+            {%- else -%}
+              <div class="words-we-wear__tile-inner">
+                {%- if t_img != blank -%}
+                  {{
+                    t_img
+                    | image_url: width: 1200
+                    | image_tag:
+                      class: 'words-we-wear__image',
+                      widths: '320, 480, 640, 900, 1200',
+                      sizes: img_sizes,
+                      loading: 'lazy',
+                      decoding: 'async',
+                      alt: t_img.alt
+                  }}
+                {%- else -%}
+                  {% render 'image-fallback',
+                    file: fb_file,
+                    class: 'words-we-wear__image',
+                    sizes: img_sizes,
+                    width: 1200,
+                    height: 1600
+                  %}
+                {%- endif -%}
+                <span class="words-we-wear__scrim" aria-hidden="true"></span>
+                {%- if phrase != blank -%}
+                  <span class="words-we-wear__phrase">{{ phrase | escape | newline_to_br }}</span>
+                {%- endif -%}
+                {%- comment -%}
+                  Zero-padded with an explicit comparison rather than
+                  `prepend: '0' | slice: -2, 2`. slice with a NEGATIVE offset
+                  rendered empty here, and an ordinal that silently disappears
+                  is worse than one written the long way.
+
+                  The ordinal is decoration: it numbers tiles for the eye, adds
+                  nothing a screen reader needs, and reading "zero one" before
+                  every phrase would be noise. aria-hidden, like the arrows.
+                {%- endcomment -%}
+                <span class="words-we-wear__ordinal" aria-hidden="true">
+                  {%- if ordinal < 10 -%}0{% endif %}{{ ordinal }}
+                </span>
+              </div>
+            {%- endif -%}
+          </li>
+        {%- endfor -%}
+      </ul>
+    {%- endif -%}
+
+    {%- if request.design_mode -%}
+      {%- liquid
+        assign notices = ''
+        if section.blocks.size == 0
+          assign notices = notices | append: 'no_blocks|'
+        endif
+        assign missing_img = 0
+        for block in section.blocks
+          if block.settings.image == blank
+            assign missing_img = missing_img | plus: 1
+          endif
+        endfor
+        if missing_img > 0
+          assign notices = notices | append: 'no_image|'
+        endif
+      -%}
+      {%- if notices != blank -%}
+        <div class="words-we-wear__notice">
+          {%- if notices contains 'no_blocks' -%}
+            <p>{{ 'sections.words_we_wear.no_blocks' | t }}</p>
+          {%- endif -%}
+          {%- if notices contains 'no_image' -%}
+            <p>{{ 'sections.words_we_wear.no_image' | t }}</p>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+    {%- endif -%}
+  </div>
+</div>
+
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Words We Wear",
+  "tag": "section",
+  "class": "words-we-wear-section",
+  "max_blocks": 8,
+  "settings": [
+    {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Heading",
+      "info": "Line breaks are kept, so the heading breaks where you type it.",
+      "default": "Words\nWe Wear."
+    },
+    {
+      "type": "richtext",
+      "id": "body",
+      "label": "Body",
+      "default": "<p>Scripture isn't just something we read. It's a way of life. It shapes what we create, what we wear, and how we move.</p>"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "surface",
+      "label": "Surface",
+      "options": [
+        { "value": "light", "label": "Cream" },
+        { "value": "dark", "label": "Ink" }
+      ],
+      "default": "light"
+    },
+    {
+      "type": "select",
+      "id": "spacing_top",
+      "label": "Space above",
+      "options": [
+        { "value": "none", "label": "None" },
+        { "value": "tight", "label": "Tight" },
+        { "value": "standard", "label": "Standard" }
+      ],
+      "default": "none"
+    },
+    {
+      "type": "select",
+      "id": "spacing_bottom",
+      "label": "Space below",
+      "options": [
+        { "value": "none", "label": "None" },
+        { "value": "tight", "label": "Tight" },
+        { "value": "standard", "label": "Standard" }
+      ],
+      "default": "standard"
+    },
+    {
+      "type": "text",
+      "id": "anchor_id",
+      "label": "Anchor",
+      "info": "Lets a menu item link to this band."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "phrase",
+      "name": "Phrase",
+      "settings": [
+        {
+          "type": "textarea",
+          "id": "phrase",
+          "label": "Phrase",
+          "info": "Line breaks are kept."
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image",
+          "info": "Set alt text on the image itself in Content > Files."
+        },
+        {
+          "type": "url",
+          "id": "link_url",
+          "label": "Link",
+          "info": "Optional. The tile becomes a link when this is set."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Words We Wear",
+      "settings": {
+        "heading": "Words\nWe Wear.",
+        "body": "<p>Scripture isn't just something we read. It's a way of life. It shapes what we create, what we wear, and how we move.</p>",
+        "surface": "light",
+        "spacing_top": "none",
+        "spacing_bottom": "standard"
+      },
+      "blocks": [
+        { "type": "phrase", "settings": { "phrase": "Walk\nBy Faith." } },
+        { "type": "phrase", "settings": { "phrase": "Built\nDifferent." } },
+        { "type": "phrase", "settings": { "phrase": "For A Higher\nPurpose." } },
+        { "type": "phrase", "settings": { "phrase": "Let Your\nLight Shine." } }
+      ]
+    }
+  ]
+}
+{% endschema %}

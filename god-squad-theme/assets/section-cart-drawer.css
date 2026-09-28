@@ -1,0 +1,429 @@
+/* ============================================================================
+   GOD SQUAD — Cart drawer
+   Phase 8. Every value is a token from design-tokens.css. No raw hex, no magic
+   numbers, no !important.
+
+   Phase 2 anticipated this component: --drawer-width min(90vw, 420px),
+   --color-overlay rgba(13,12,10,.72), --z-drawer 900, --z-overlay 800 and
+   --shadow-elevated were all defined in Phase 2 for a cart drawer that did not
+   exist yet. §17.3 allows a shadow here on one condition — a z-index above
+   --z-sticky, a backdrop and a focus trap — and all three are met.
+   ========================================================================== */
+
+/* The one global rule in this file, and it is here rather than in the token
+   file because it exists only because of the drawer.
+
+   Locking the page scroll removes the scrollbar, and on Windows and Linux that
+   is 15-17px of width the layout suddenly gains — every centred band jumps
+   sideways as the drawer opens. Reserving the gutter permanently costs nothing
+   on a page that scrolls, is a no-op where the platform draws overlay
+   scrollbars (macOS, iOS, Android), and is not toggled: switching it on at the
+   same moment as the lock would cause the shift it is there to prevent. */
+html {
+  scrollbar-gutter: stable;
+}
+
+.cart-drawer {
+  position: fixed;
+  inset-inline: 0;
+  inset-block-start: 0;
+  /* The VISIBLE viewport, not the large one. A fixed element with inset:0 is
+     laid out against the large viewport on a phone whose toolbar can retract,
+     so the drawer's footer — the one holding Checkout — could sit behind the
+     browser's own chrome. dvh tracks what the customer can actually see; the
+     vh line above it is the fallback for a browser that does not know dvh,
+     which is the behaviour this replaces rather than a regression. */
+  height: 100vh;
+  height: 100dvh;
+  z-index: var(--z-drawer);
+}
+
+/* ---------------------------------------------------------------- overlay */
+
+.cart-drawer__overlay {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-overlay);
+  background-color: var(--color-overlay);
+  opacity: 0;
+  /* §21.4's assignment table gives this element one row: "Overlay scrim behind
+     a drawer or modal | opacity | --duration-slow", and §21.2 names it as that
+     token's only use. The panel keeps --transition-medium, which is what gives
+     the scrim-behind-panel reading the same table describes. */
+  transition: opacity var(--transition-slow);
+}
+
+.cart-drawer-open .cart-drawer__overlay {
+  opacity: 1;
+}
+
+/* ------------------------------------------------------------------ panel */
+
+.cart-drawer__panel {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-end: 0;
+  z-index: var(--z-drawer);
+  display: flex;
+  flex-direction: column;
+  width: var(--drawer-width);
+  max-width: 100%;
+  /* The panel is anchored to the trailing edge, which on a phone turned
+     sideways is the edge a notch can occupy. The close button and both action
+     buttons live against it. Children use this instead of a bare --space-5 so
+     there is one place to reason about it. */
+  --drawer-pad-inline-end: var(--space-5);
+  background-color: var(--color-bg-primary);
+  box-shadow: var(--shadow-on-dark);
+  /* Slides from the trailing edge. The only property that moves is transform,
+     which the compositor can do without laying the page out again. */
+  transform: translateX(100%);
+  transition: transform var(--transition-medium);
+}
+
+.cart-drawer-open .cart-drawer__panel {
+  transform: translateX(0);
+}
+
+/* ----------------------------------------------------------------- header */
+
+.cart-drawer__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-5) var(--space-5) var(--space-4);
+  border-block-end: var(--border-width) solid var(--color-border-current);
+}
+
+.cart-drawer__title {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--type-label-size);
+  font-weight: var(--type-label-weight);
+  letter-spacing: var(--type-label-ls);
+  text-transform: uppercase;
+}
+
+/* The heading takes focus when the drawer opens. It is not an interactive
+   control, so it must not look like one — but the ring still has to be visible
+   for a keyboard user, which is what :focus-visible gives: it paints for the
+   keyboard and stays quiet for the script-driven focus move a mouse user
+   triggers. */
+.cart-drawer__title:focus {
+  outline: none;
+}
+
+.cart-drawer__title:focus-visible {
+  outline: var(--focus-width) solid var(--focus-ring);
+  outline-offset: var(--focus-offset);
+}
+
+.cart-drawer__close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--target-min);
+  min-height: var(--target-min);
+  /* Pulled into the panel's own padding so the icon still reads as aligned to
+     the edge while its target stays 44px. */
+  margin-inline-end: calc(var(--space-2) * -1);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.cart-drawer__close .icon {
+  width: var(--icon-md);
+  height: var(--icon-md);
+}
+
+/* ------------------------------------------------------------------ inner
+   Everything the Section Rendering API replaces after a cart change. The
+   heading above is outside it, so focus placed there survives the swap, and
+   the live region is outside the section entirely, in the layout. */
+
+.cart-drawer__inner {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  /* Without this a flex child refuses to shrink below its content and the
+     scroller never scrolls — the footer is pushed off the bottom instead. */
+  min-height: 0;
+}
+
+.cart-drawer__form {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.cart-drawer__scroller {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  /* Stops a flick at the end of the list scrolling the page behind the drawer.
+     It complements the scroll lock rather than replacing it. */
+  overscroll-behavior: contain;
+  padding-inline: var(--space-5);
+  /* The footer is pinned below this box, not over it, so nothing is obscured
+     (WCAG 2.2 SC 2.4.11). The padding is here so a focused control at the very
+     bottom of a long list is still clear of the edge when it scrolls into
+     view. */
+  scroll-padding-block-end: var(--space-6);
+}
+
+.cart-drawer__lines {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* ----------------------------------------------------------------- footer
+   The totals, the tax note and the empty state are in component-cart-line.css,
+   shared with the cart page. Only the drawer's own chrome is here. */
+
+.cart-drawer__footer {
+  padding: var(--space-5);
+  border-block-start: var(--border-width) solid var(--color-border-current);
+  background-color: var(--color-bg-primary);
+}
+
+/* The footer is the last thing above the phone's home indicator, and Checkout
+   is in it. max() keeps the designed padding wherever there is no inset. */
+@supports (padding: max(0px)) {
+  .cart-drawer__footer {
+    padding-block-end: max(var(--space-5), env(safe-area-inset-bottom));
+  }
+
+  .cart-drawer__header {
+    padding-block-start: max(var(--space-5), env(safe-area-inset-top));
+  }
+
+  .cart-drawer__panel {
+    --drawer-pad-inline-end: max(var(--space-5), env(safe-area-inset-right));
+  }
+}
+
+.cart-drawer__header,
+.cart-drawer__footer,
+.cart-drawer__scroller {
+  padding-inline-end: var(--drawer-pad-inline-end);
+}
+
+.cart-drawer__error {
+  margin: var(--space-4) var(--space-5) 0;
+}
+
+.cart-drawer__actions {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.cart-drawer__inner .cart-empty {
+  padding-inline: var(--space-5);
+}
+
+/* -------------------------------------------------------------- utilities
+   The no-JavaScript update control. It occupies no space until a keyboard
+   reaches it, and then it is a real, visible button — a control that is
+   permanently invisible but focusable is worse than no control.
+
+   It is a MODIFIER over .visually-hidden (header.css), not a second copy of
+   that recipe: two independent copies of the clip/clip-path pair shipped on
+   every page, and a correction to one would not have reached the other.
+
+   Once the cart script is running it is removed from the document entirely
+   rather than merely hidden, because there it does nothing: quantity changes
+   are already applied as they are made, and a tab stop that leads to a no-op
+   is a cost with no benefit.
+
+   The class is `cart-js`, which assets/cart.js sets on itself — NOT the
+   layout's `js` class, which an inline script sets whether or not the cart
+   script ever arrives. Keying on `js` would have hidden the only control that
+   can apply a quantity change in precisely the case where nothing else can. */
+
+.cart-js .cart-drawer__update {
+  display: none;
+}
+
+/* The cart page's copy of this rule is NOT here. It was, and it never applied:
+   layout/theme.liquid does not render the drawer on the cart template, so the
+   page that carries .main-cart__update is the one page that never loads this
+   stylesheet. The Update button sat visible beside Checkout on every scripted
+   cart page, doing what the Ajax layer had already done. The rule now lives in
+   section-main-cart.css, which that page does load.
+
+   The general lesson, which Phase 12 learned the same way: a selector is not a
+   rule until something on the page it names has read the file it is in. */
+
+.visually-hidden--until-focus:focus-visible {
+  position: static;
+  width: auto;
+  height: auto;
+  min-height: var(--target-min);
+  margin: 0 0 var(--space-3);
+  padding: var(--space-3) var(--space-5);
+  overflow: visible;
+  clip: auto;
+  clip-path: none;
+  border: var(--border-width) solid var(--color-border-current-interactive);
+  border-radius: var(--radius-sm);
+  background: none;
+  color: inherit;
+  font-family: var(--font-body);
+  font-size: var(--type-label-size);
+  font-weight: var(--type-label-weight);
+  letter-spacing: var(--type-label-ls);
+  text-transform: uppercase;
+  cursor: pointer;
+  white-space: normal;
+}
+
+/* ------------------------------------------------------- continue shopping
+   The named form of the close X. A quiet text control under the two buttons:
+   it is the way OUT of a decision, and giving it a third button's weight would
+   compete with Checkout, which is the way through. */
+
+.cart-drawer__continue {
+  display: block;
+  width: 100%;
+  min-height: var(--target-min);
+  margin-block-start: var(--space-3);
+  padding: var(--space-2);
+  border: none;
+  background: none;
+  color: var(--color-text-current-muted);
+  font-family: var(--font-body);
+  font-size: var(--type-body-sm-size);
+  letter-spacing: var(--type-label-ls);
+  text-transform: uppercase;
+  text-align: center;
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+/* Pointer-scoped in Phase 18. This closes a drawer over the same page --
+   nothing navigates -- so a tap left it in its hover colour. */
+@media (hover: hover) and (pointer: fine) {
+  .cart-drawer__continue:hover {
+    color: inherit;
+  }
+}
+
+.cart-drawer__continue:focus-visible {
+  outline: var(--focus-width) solid var(--focus-ring);
+  outline-offset: var(--focus-offset);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cart-drawer__continue {
+    transition: none;
+  }
+}
+
+/* ------------------------------------------------------------- landscape
+   A phone turned sideways. Measured before this block, at 812x375: the header
+   was 85px, the footer 290px, and the scroller that holds the cart lines was
+   therefore 0px against a 1091px list. The cart was unreadable and unchangeable
+   in landscape; only Checkout was reachable, which is the worst possible
+   subset to leave working.
+
+   Nothing is removed. The chrome is re-proportioned — the header loses its
+   generous padding, the totals tighten, and the two actions sit side by side
+   instead of stacked, which is the one layout change landscape actually
+   invites, because width is the dimension it has to spare.
+
+   Bounded to max-width 1023px as well, so a short desktop window is untouched. */
+
+@media (max-height: 540px) and (max-width: 1023px) {
+  /* Phase 14. THE PINNED FOOTER IS ABANDONED HERE, NOT JUST TIGHTENED.
+
+     Trimming padding bought about 30px, and the Phase 9 measurement it was
+     written against — 812x375, scroller 0px, then 44px after — shows how
+     little margin that left. 44px of scroller is less than one cart line.
+
+     The underlying problem is structural: the scroller is flex:1 with
+     min-height:0, so it is the only thing that can give, and the footer is
+     intrinsically sized and cannot. Whenever header + footer exceed the panel,
+     the scroller goes to zero and the footer overflows the panel's bottom edge
+     — Checkout included. Phase 14 hit exactly that at a 283px viewport once
+     the order note was on, and no amount of padding would have saved it.
+
+     So below this height the drawer stops being a pinned-chrome layout and
+     becomes one scrolling column. Checkout is no longer always on screen; it
+     is always REACHABLE, which on a screen that cannot show both is the
+     correct trade. Nothing is hidden and nothing is clipped.
+
+     Above this height the pinned footer is untouched, which is every phone in
+     portrait, every tablet and every desktop. */
+  .cart-drawer__panel {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .cart-drawer__scroller {
+    /* Its natural height, inside the panel's scroll, rather than a box of its
+       own competing for the same pixels. */
+    flex: 0 0 auto;
+    overflow: visible;
+  }
+
+  .cart-drawer__header {
+    padding-block: var(--space-3);
+  }
+
+  .cart-drawer__footer {
+    padding-block: var(--space-4);
+  }
+
+  /* The two shorthands above would otherwise throw away the safe-area padding
+     set earlier in this file, and landscape is exactly where that padding is
+     load-bearing: the home indicator is still along the bottom edge when a
+     phone is turned sideways, and the button underneath it is Checkout. */
+  @supports (padding: max(0px)) {
+    .cart-drawer__footer {
+      padding-block-end: max(var(--space-4), env(safe-area-inset-bottom));
+    }
+
+    .cart-drawer__header {
+      padding-block-start: max(var(--space-3), env(safe-area-inset-top));
+    }
+  }
+
+  .cart-totals {
+    margin-block-end: var(--space-3);
+  }
+
+  .cart-totals__note {
+    margin-block-end: var(--space-3);
+  }
+
+  /* Both actions stay. Side by side they cost one button's height instead of
+     two, and the drawer is 420px wide even in landscape, so each still clears
+     the target minimum comfortably. */
+  .cart-drawer__actions {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-3);
+  }
+
+  /* A tighter line, so more than one is visible in what is left. Every control
+     inside it keeps its 44px target — that is not what is being compressed. */
+  .cart-drawer__scroller .cart-line {
+    padding-block: var(--space-3);
+  }
+
+  .cart-drawer__scroller .cart-line__controls {
+    margin-block-start: var(--space-3);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cart-drawer__overlay,
+  .cart-drawer__panel {
+    transition: none;
+  }
+}

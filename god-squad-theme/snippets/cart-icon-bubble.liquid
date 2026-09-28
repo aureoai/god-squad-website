@@ -1,0 +1,29 @@
+{%- comment -%}
+  GOD SQUAD — Cart icon and count
+  Phase 8. The inside of the header's cart control.
+
+  Two consumers, which is why it is a snippet: sections/header.liquid renders
+  it inline, and sections/cart-icon-bubble.liquid renders it alone as the
+  target the cart script swaps in after every cart change. Dawn keeps two
+  copies of this markup in parallel and they drift; one snippet cannot.
+
+  Usage:
+  {% render 'cart-icon-bubble' %}
+
+  THE COUNT IS cart.item_count, NEVER A LITERAL.
+  Phase 1 NAV-09 recorded the prototype's badge as the character 0, painted on
+  whether or not anything was in a cart that did not exist. An empty cart shows
+  no badge at all here, so nothing announces "0 items" — the control's own name
+  is still "Cart", which is the whole message when the cart is empty.
+{%- endcomment -%}
+
+{% render 'icon-cart' %}
+<span class="visually-hidden">{{ 'header.cart' | t }}</span>
+{%- if cart.item_count > 0 -%}
+  <span class="header__cart-count" data-cart-count aria-hidden="true">
+    {{- cart.item_count -}}
+  </span>
+  <span class="visually-hidden" data-cart-count-text>
+    {{- 'cart.item_count' | t: count: cart.item_count -}}
+  </span>
+{%- endif -%}

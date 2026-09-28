@@ -1,0 +1,342 @@
+/* ============================================================================
+   GOD SQUAD — section-verse-index.css
+
+   BANDS 2 and 3: the Explore Verses head, its category chips, and the card grid.
+
+   Breakpoints are literal pixels because a media query cannot read a custom
+   property. 768 and 1280 match --bp-md and --bp-xl in design-tokens.css.
+   ========================================================================== */
+
+.verse-index {
+  --vi-space-top: var(--section-pad-block);
+  --vi-space-bottom: var(--section-pad-block);
+
+  /* THE PRESSED CHIP IS THE SURFACE INVERTED, and it has to be stated for both
+     grounds. Fixing it as "ink fill, cream label" would be invisible on the ink
+     option — ink on ink is 1:1 and the band would have no active state at all.
+     Both pairs below are 17.04:1. */
+  --vi-chip-on-bg: var(--gs-ink);
+  --vi-chip-on-fg: var(--gs-cream);
+
+  padding-block-start: var(--vi-space-top);
+  padding-block-end: var(--vi-space-bottom);
+}
+
+.verse-index.surface-dark {
+  --vi-chip-on-bg: var(--gs-cream);
+  --vi-chip-on-fg: var(--gs-ink);
+}
+
+.verse-index--pt-standard { --vi-space-top: var(--section-pad-block); }
+.verse-index--pt-tight    { --vi-space-top: var(--section-pad-block-tight); }
+.verse-index--pt-none     { --vi-space-top: 0px; }
+.verse-index--pb-standard { --vi-space-bottom: var(--section-pad-block); }
+.verse-index--pb-tight    { --vi-space-bottom: var(--section-pad-block-tight); }
+.verse-index--pb-none     { --vi-space-bottom: 0px; }
+
+/* ------------------------------------------------------------ BAND 2: head */
+
+/* Base is stacked: on a phone the heading, the rule and the chips each get
+   their own line, because a label plus seven chips on one row cannot fit 375px
+   without either shrinking the chips below the 44px target or clipping them. */
+.verse-index__head {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-4);
+  margin-block-end: var(--space-7);
+}
+
+@media (min-width: 1280px) {
+  .verse-index__head {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--space-6);
+  }
+}
+
+.verse-index__heading {
+  flex: none;
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--type-label-size);
+  font-weight: var(--type-label-weight);
+  letter-spacing: var(--type-label-ls);
+  line-height: var(--type-label-lh);
+  text-transform: uppercase;
+}
+
+/* The long thin rule. Decorative only — the Liquid marks it aria-hidden. It
+   takes the leftover width on a wide row and collapses to a full-width rule
+   when the head is stacked. */
+.verse-index__rule {
+  flex: 1 1 auto;
+  min-inline-size: var(--space-7);
+  block-size: var(--border-width);
+  background-color: var(--color-border-current);
+}
+
+/* ----------------------------------------------------------------- the chips */
+
+/* Hidden in the markup, unhidden by verse-filter.js. The rule is explicit
+   because an author `display` on this element would beat the user agent's
+   [hidden] and the row would ship visible-but-inert to everyone with
+   JavaScript off. */
+.verse-index__filter[hidden] {
+  display: none;
+}
+
+.verse-index__filter {
+  flex: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+@media (max-width: 767px) {
+  /* On a phone the row scrolls sideways rather than wrapping to three lines.
+     The gutter-width padding and the negative margin let the first and last
+     chip sit flush with the page edge while still scrolling past it. */
+  .verse-index__filter {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    margin-inline: calc(var(--gutter) * -1);
+    padding-inline: var(--gutter);
+    /* Momentum scrolling should not swallow a vertical page swipe. */
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+  }
+  .verse-index__filter::-webkit-scrollbar { display: none; }
+  .verse-chip { flex: none; }
+}
+
+.verse-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--target-min);
+  padding: var(--space-3) var(--space-5);
+  border: var(--border-width) solid transparent;
+  border-radius: var(--radius-sm);
+  background-color: transparent;
+  color: inherit;
+  font-family: var(--font-body);
+  font-size: var(--type-label-size);
+  /* The resting weight. The pressed chip goes to semibold, so the state is
+     never carried by colour alone (SC 1.4.1) — the same belt-and-braces
+     component-pagination.css uses for the current page. */
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--type-label-ls);
+  line-height: 1.2;
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color var(--transition-fast),
+    color var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .verse-chip:hover {
+    border-color: var(--color-border-current-interactive);
+  }
+}
+
+.verse-chip[aria-pressed='true'] {
+  background-color: var(--vi-chip-on-bg);
+  color: var(--vi-chip-on-fg);
+  border-color: var(--vi-chip-on-bg);
+  font-weight: var(--weight-semibold);
+}
+
+/* ----------------------------------------------------------- BAND 3: cards */
+
+.verse-index__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-5);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 768px)  { .verse-index__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1280px) { .verse-index__grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+
+/* The filter's own hiding rule. Without this the script sets `hidden` and
+   nothing happens, because the grid item's author display beats the user
+   agent's [hidden]. */
+.verse-card[hidden] {
+  display: none;
+}
+
+.verse-card {
+  position: relative;
+  display: flex;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  /* A shape before an image exists, and a floor if one never does. */
+  min-block-size: 20rem;
+  background-color: var(--color-bg-primary);
+  /* The card is always an ink ground with cream copy, on either band surface:
+     the photograph behind it is dark and the scrim drives it darker, so the
+     copy colour cannot follow the band. */
+  color: var(--gs-cream);
+}
+
+@media (min-width: 768px) {
+  .verse-card { aspect-ratio: 3 / 4; min-block-size: 0; }
+}
+
+.verse-card__media {
+  position: absolute;
+  inset: 0;
+}
+
+.verse-card__image {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+
+/* THE SCRIM, AND WHY THESE NUMBERS.
+
+   The copy is cream over a photograph the theme has never seen, so the worst
+   case is a WHITE photograph. Composited over white, ink at alpha a gives a
+   background whose contrast against cream (#F3EFE6) is:
+
+       a 0.55 -> 3.77:1   fails
+       a 0.65 -> 5.39:1   the floor for AA on body-size text
+       a 0.72 -> 7.02:1   used here
+       a 0.92 -> 14.28:1
+
+   So 0.72 across the whole zone the copy occupies, with margin over the 4.5:1
+   floor rather than sitting on it. It ramps from transparent at the top so the
+   photograph is still a photograph, reaching 0.72 by 45% — above the copy, which
+   is bottom-anchored — and deepening to 0.92 at the foot where the reference
+   and the link sit at caption size.
+
+   A scrim is a gradient, and Phase 2 permits it: the prohibition on gradients
+   is about fills and buttons, and the scrim tokens in design-tokens.css are
+   themselves linear-gradients. This one is local rather than a token because
+   neither --scrim-top-heavy nor --scrim-bottom reaches 0.65 anywhere in the
+   band the copy occupies. */
+.verse-card__scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(13, 12, 10, 0) 0%,
+    rgba(13, 12, 10, 0.35) 25%,
+    rgba(13, 12, 10, 0.72) 45%,
+    rgba(13, 12, 10, 0.92) 100%
+  );
+}
+
+.verse-card__body {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-end;
+  inline-size: 100%;
+  padding: var(--space-5);
+  gap: var(--space-3);
+}
+
+.verse-card__category {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--type-caption-size);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--type-caption-ls);
+  text-transform: uppercase;
+}
+
+.verse-card__quote {
+  margin: 0;
+  padding: 0;
+}
+
+.verse-card__quote p {
+  margin: 0;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: var(--type-h3-size);
+  font-weight: var(--weight-regular);
+  line-height: var(--type-h3-lh);
+}
+
+.verse-card__reference {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--type-caption-size);
+  letter-spacing: var(--type-caption-ls);
+  text-transform: uppercase;
+  /* Not --color-text-current-muted: the card's ground is the scrim, not the
+     band, so the band's muted value is the wrong one. A fixed alpha against a
+     known-dark scrim keeps this above 4.5:1. */
+  color: rgba(243, 239, 230, 0.78);
+}
+
+.verse-card__link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--target-min);
+  color: inherit;
+  font-family: var(--font-body);
+  font-size: var(--type-label-size);
+  font-weight: var(--type-label-weight);
+  letter-spacing: var(--type-label-ls);
+  text-transform: uppercase;
+  text-decoration: underline;
+  text-underline-offset: var(--link-underline-offset);
+  text-decoration-thickness: var(--link-underline-thickness);
+}
+
+.verse-card__link .icon {
+  flex: none;
+  inline-size: var(--icon-sm);
+  block-size: var(--icon-sm);
+}
+
+/* THE FOCUS RING ON A CARD IS THE EXCEPTION THIS THEME ALREADY WROTE DOWN.
+
+   The card is a dark ground, so --focus-ring resolves to gold; the ring is
+   drawn with outline-offset, so it paints OUTSIDE the link, over an unknown
+   photograph. component-product-card.css:222-227 records the same problem for
+   the sold-out badge and the same answer: a ring over a photograph cannot be
+   measured, so it does not go over one. The offset is pulled inward and the
+   ring is backed by ink, which is 17.04:1 against gold whatever is behind it. */
+.verse-card__link:focus-visible {
+  outline-color: var(--gs-gold);
+  outline-offset: 0;
+  background-color: var(--gs-ink);
+  text-decoration-color: var(--gs-gold);
+}
+
+/* An empty block in the Theme Editor. It renders so the merchant has something
+   to click; it never reaches the storefront, because the Liquid skips empty
+   blocks when request.design_mode is false. */
+.verse-card--empty {
+  min-block-size: 12rem;
+  border: var(--border-width) dashed var(--color-border-interactive);
+}
+
+/* ------------------------------------------------------- the editor notice */
+
+.verse-index__notice {
+  margin-block-start: var(--space-5);
+  padding: var(--space-4);
+  border: var(--border-width) dashed var(--color-border-current-interactive);
+  font-family: var(--font-body);
+  font-size: var(--type-body-sm-size);
+  line-height: var(--type-body-sm-lh);
+  color: var(--color-text-current-muted);
+}
+
+.verse-index__notice p { margin: 0 0 var(--space-2); }
+.verse-index__notice p:last-child { margin-block-end: 0; }

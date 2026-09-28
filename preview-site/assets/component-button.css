@@ -1,0 +1,196 @@
+/* ============================================================================
+   GOD SQUAD — Button system
+   Phase 6. Promoted here from assets/section-hero.css, which carried a partial
+   copy because the hero was the only section with a button. Phase 5 section 16
+   recorded the promotion as the first thing the second consumer must do, and
+   the featured-collection section is that consumer.
+
+   This is the full Phase 2 section 10 system, not a copy of what the hero had.
+   Three things the hero's copy had wrong, corrected here against the spec:
+
+   1. HOVER FILL. The hero's primary turned gold on hover. Phase 2 section 10.3
+      states "Primary and Accent must never share a hover fill" — a cream
+      primary that turns gold collapses the two variants into one and makes
+      gold the dominant interface colour, which the brief rules out. Primary on
+      dark now lifts to --color-text-secondary, which is the documented value.
+   2. INLINE PADDING. The hero used --space-6 32px. Phase 2 section 10.4 sets
+      --space-5 24px, normalised from the prototype's 26px.
+   3. VARIANTS. Only primary-on-dark existed. Primary-on-light, secondary and
+      accent are defined here so a section on either surface can reach for the
+      right one instead of inventing it.
+
+   Surface awareness is not done with modifier classes. Each variant reads the
+   surface-context custom properties that .surface-dark / .surface-light set in
+   design-tokens.css, so the same markup is correct on either band.
+
+   Every hover rule sits inside @media (hover: hover) and (pointer: fine).
+   Phase 2 section 22.1 makes that mandatory: without it a touch tap can leave
+   a button stuck in its hover fill after navigation, with no pointer present
+   to explain it.
+
+   No outline is declared anywhere in this file. design-tokens.css owns the
+   focus ring through a :where() rule, which contributes zero specificity, so a
+   component-level outline would silently win. Phase 2 section 10.3 makes that
+   a review check.
+   ========================================================================== */
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  min-height: var(--target-min);
+  padding: var(--space-4) var(--space-5);
+  border: var(--border-width) solid transparent;
+  border-radius: var(--radius-sm);
+  background-color: transparent;
+  font-family: var(--font-body);
+  font-size: var(--type-label-size);
+  font-weight: var(--type-label-weight);
+  letter-spacing: var(--type-label-ls);
+  line-height: 1.2;
+  text-transform: uppercase;
+  text-decoration: none;
+  text-align: center;
+  cursor: pointer;
+  /* Phase 2 section 10.6: only these four properties transition. Never width,
+     padding or transform. */
+  transition:
+    background-color var(--transition-fast),
+    color var(--transition-fast),
+    border-color var(--transition-fast),
+    opacity var(--transition-fast);
+}
+
+/* The trailing arrow. --icon-md 24px is the control size; inside a 12px label
+   the affordance is --icon-sm 16px. */
+.button .icon {
+  width: var(--icon-sm);
+  height: var(--icon-sm);
+}
+
+/* ------------------------------------------------------------------ primary
+   "The inverse of its surface, so it reads as a solid block cut out of the
+   band" — Phase 2 section 10.2. On cream that is ink; on ink that is cream.
+   Both are 17.04:1. */
+
+.surface-light .button--primary {
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .surface-light .button--primary:hover {
+    /* #2A2823, the value the prototype's own runtime emitted for this button.
+       12.83:1. */
+    background-color: var(--color-surface-raised);
+  }
+}
+
+.surface-light .button--primary:active {
+  background-color: var(--color-bg-primary);
+}
+
+.surface-dark .button--primary {
+  background-color: var(--color-text-primary);
+  color: var(--color-text-inverse);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .surface-dark .button--primary:hover {
+    /* --gs-cream-200. 15.41:1 against ink. NOT gold: see note 1 above. */
+    background-color: var(--color-text-secondary);
+  }
+}
+
+.surface-dark .button--primary:active {
+  background-color: var(--color-text-primary);
+}
+
+/* ---------------------------------------------------------------- secondary
+   Transparent with a boundary. --color-border-current is a decorative
+   hairline at 1.2-1.4:1 and fails SC 1.4.11, which needs 3:1 for a control's
+   visual boundary, so secondary uses the interactive border tokens instead
+   (3.02:1 on ink, 3.13:1 on cream). */
+
+.button--secondary {
+  color: currentColor;
+  border-color: var(--color-border-current-interactive);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .surface-light .button--secondary:hover {
+    background-color: var(--color-border-inverse);
+  }
+
+  .surface-dark .button--secondary:hover {
+    background-color: var(--color-border);
+  }
+}
+
+/* Scoped to the surfaces to match the hover rules above. An unscoped
+   .button--secondary:active is (0,2,0) and loses to a (0,3,0) surface-scoped
+   hover, so a pointer press — which is necessarily also a hover — would keep
+   the hover wash and the pressed state would never paint, while a keyboard
+   activation would paint it. Primary and accent never had the problem because
+   their hover and active rules are written at the same specificity. */
+.surface-light .button--secondary:active,
+.surface-dark .button--secondary:active {
+  background-color: transparent;
+}
+
+/* ------------------------------------------------------------------- accent
+   Dark surfaces only. Gold on cream is 1.55:1, so the button's own boundary
+   would vanish into the band even though its ink label would pass. Phase 2
+   section 10.1 prohibits it, and the selector enforces the prohibition: there
+   is no .surface-light rule for this variant, so it simply does not paint. */
+
+.surface-dark .button--accent {
+  background-color: var(--color-accent);
+  color: var(--color-text-inverse);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .surface-dark .button--accent:hover {
+    background-color: var(--color-accent-hover);
+  }
+}
+
+.surface-dark .button--accent:active {
+  background-color: var(--color-accent);
+}
+
+/* ----------------------------------------------------------------- disabled
+   Opacity is the visual cue and never the only one: Phase 2 section 10.3
+   requires a disabled control to be paired with a reason in text and to stay
+   announceable, which is why aria-disabled rather than the disabled attribute
+   is the expected authoring pattern. */
+
+.button[aria-disabled='true'],
+.button:disabled {
+  opacity: 0.45;
+  cursor: default;
+  pointer-events: none;
+}
+
+/* ---------------------------------------------------------------- full width
+   Phase 2 section 10.4, quoted in full: "Full-width buttons are permitted on
+   mobile only where the button is the sole action in a stacked block; never in
+   the header, never in a product card row."
+
+   The product card's optional quick action uses this class at every width, not
+   only on mobile. That is not a breach of the rule above but a separate
+   sanction: section 27.5 specifies the quick action as "full card width". The
+   card is not a "product card row" in the sense section 10.4 forbids — that
+   phrase means a row of buttons inside a card — and the control is the card's
+   sole action. Any OTHER full-width use is mobile-only. */
+
+.button--full {
+  width: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .button {
+    transition: none;
+  }
+}

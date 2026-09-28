@@ -1,0 +1,6 @@
+=== external bundle sizes (downloaded) ===
+     10751 B raw       4263 B gz  https://unpkg.com/react@18.3.1/umd/react.production.min.js
+    131835 B raw      42818 B gz  https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js
+   3137752 B raw     653872 B gz  https://unpkg.com/@babel/standalone@7.29.0/babel.min.js
+     69150 B raw      19037 B gz  support.js (local)
+     15632 B raw       4081 B gz  God Squad Website.html (local)

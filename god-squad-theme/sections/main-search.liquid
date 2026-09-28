@@ -1,0 +1,482 @@
+{%- comment -%}
+  GOD SQUAD — Search results
+  Phase 10. The page the header's search control has been pointing at since
+  Phase 4.
+
+  Sources of truth:
+  - PHASE-1-WEBSITE-AUDIT.md SHOP-09, which lists the storefront routes with no
+    template behind them. sections/main-cart.liquid answered the cart entry on
+    that list in Phase 8 and named search as still outstanding; this is that
+    entry.
+  - PHASE-2-DESIGN-SYSTEM.md §9.3 (the product grid), §12 (forms), §10
+    (buttons, and the one primary per band), §13 (the card).
+
+  WHY THIS IS A BLOCKER AND NOT A FEATURE.
+  sections/header.liquid renders its search control whenever show_search is on,
+  and sections/header-group.json ships it on, so every page of the store
+  carries a link to routes.search_url. Shopify serves its own error page for a
+  storefront route whose template is missing, so until templates/search.json
+  exists that control is a dead end on every page. The form is the deliverable;
+  the results rendering is what makes the form worth pressing.
+
+  SHOPIFY IS THE SOURCE OF TRUTH.
+  Nothing is ranked, weighted, filtered, boosted or excluded here. The results
+  are whatever the storefront search endpoint returns for the term the customer
+  typed, in the order it returns them. There is no synonym list, no "did you
+  mean", no popular-searches row and no merchandised fallback, because each of
+  those is either a business decision nobody has made or invented content.
+
+  WHAT IS DELIBERATELY NOT HERE.
+  No predictive search: it is out of Phase 10 scope, it needs a script and a
+  second render target, and the plain form has to be correct first in any case
+  — a predictive layer is an enhancement over this markup, not a replacement
+  for it. No filters and no sort control: search.filters and search.sort_options
+  are real, but a filter rail is a surface of its own and would arrive here
+  half-built. No recently-searched list, which would need storage this theme
+  does not have.
+
+  ZERO JavaScript.
+{%- endcomment -%}
+
+{%- liquid
+  assign search_types = section.settings.search_types
+  assign per_page = section.settings.results_per_page
+
+  assign cols_d = section.settings.columns_desktop
+  assign cols_t = section.settings.columns_tablet
+  assign cols_m = section.settings.columns_mobile
+
+  assign surface_class = 'surface-light'
+  if section.settings.surface == 'dark'
+    assign surface_class = 'surface-dark'
+  endif
+
+  comment
+    A search is only "performed" once q is in the URL, but q can be in the URL
+    and empty — pressing the submit button with nothing typed does exactly
+    that. Shopify still reports performed there, and rendering "0 results for
+    """ is a worse answer than the invitation the page opens with, so the
+    blank term falls back to the unsearched state.
+  endcomment
+  assign has_query = false
+  if search.performed and search.terms != blank
+    assign has_query = true
+  endif
+
+  assign has_results = false
+  if has_query and search.results_count > 0
+    assign has_results = true
+  endif
+
+  comment
+    Group headings, and the heading level under them, come from search.types —
+    what was actually searched — and not from what this page of results happens
+    to contain. A page-by-page derivation would put the card titles at h3 on
+    page one, where a page result appears alongside them, and at h2 on page two
+    where it does not, so the same query would change its own outline as the
+    customer paged through it. search.types is fixed for the whole query.
+  endcomment
+  assign group_headings = false
+  if has_query and search.types.size > 1
+    assign group_headings = true
+  endif
+  assign result_heading_level = 2
+  if group_headings
+    assign result_heading_level = 3
+  endif
+
+  comment
+    The sizes attribute.
+
+    The derivation is Phase 6's, in sections/featured-collection.liquid, minus
+    the copy-column branches this section has no equivalent of. Its measurement
+    is what rules out the obvious 100vw / count: the grid's column count is a
+    CEILING, .product-grid floors every track at --product-col-min 272px, and
+    where a viewport cannot carry the requested count the grid drops a column
+    and the survivors stretch. Phase 6 measured two 292px tracks painted
+    against a declared 196px at 1024 before that was accounted for. Each tier
+    therefore emits two clauses: the requested count from the width at which it
+    first fits, and one fewer below it.
+
+    Chrome is the gutter on both sides, from the Phase 2 ladder — 24, 32 and 48
+    per side.
+  endcomment
+  comment
+    The sizes attribute is derived by snippets/grid-sizes.liquid, shared with
+    the other grid that uses this exact arithmetic.
+
+    It used to be ninety duplicated lines here. Phase 10 found that the desktop
+    clause fired below its own breakpoint, booked it as a blocker, and fixed it
+    in ONE of the copies; the other carried the bug for two more phases. Fixing
+    an instance is not fixing a rule.
+  endcomment
+  assign chrome_d = 96
+  capture sizes_attr
+    render 'grid-sizes', cols_d: cols_d, cols_t: cols_t, cols_m: cols_m, chrome_d: chrome_d
+  endcapture
+
+  comment
+    Built with append, not with "#{...}". Shopify's Liquid does not interpolate
+    inside a string literal, and the Phase 10 header defect showed what that
+    costs: a valid declaration carrying garbage.
+  endcomment
+  assign classes = 'main-search '
+  assign classes = classes | append: surface_class
+-%}
+
+{%- comment -%}
+  A template-bound section always renders, so its own stylesheet sits at the top
+  unwrapped — the same shape as sections/main-cart.liquid.
+
+  The card component's stylesheet does not, because the grid is conditional:
+  the landing state of this page is a form and one line of copy, with not a
+  single .product-card on it, and the card sheet is the largest in the theme.
+  It is emitted inside the results branch instead, which is the reasoning
+  Phase 6 applied to an unconfigured collection row.
+{%- endcomment -%}
+{{ 'section-main-search.css' | asset_url | stylesheet_tag }}
+
+<div class="{{ classes }}" {{ section.shopify_attributes }}>
+  <div class="main-search__inner container">
+    <h1 class="main-search__title">{{ 'sections.search.title' | t }}</h1>
+
+    {%- comment -%}
+      role="search" makes this a search landmark. The header's control is a
+      link, not a form, so there is exactly one search landmark on the page and
+      it does not need a distinguishing name.
+
+      method="get", because a search is a request for a representation and its
+      result has to be linkable, bookmarkable and reloadable. A POST here would
+      make every result page unshareable and re-submit on back.
+    {%- endcomment -%}
+    <form class="main-search__form" action="{{ routes.search_url }}" method="get" role="search">
+      {%- comment -%}
+        type is the documented contract for which object types the storefront
+        search endpoint returns — product, page and article, comma separated.
+        It defaults to ALL types, so without this input a merchant who chose
+        Products only would still be served pages and articles, and the list
+        below would contradict the setting that produced it.
+
+        options[prefix]=last performs a partial word match on the final term, so
+        a half-typed last word still matches: the documented example is "winter
+        snow" reaching snowboard. Without it the last word has to be complete,
+        which on a phone is the word most likely not to be.
+
+        options[unavailable_products] is deliberately not sent. Its default is
+        "last", which puts sold-out products after available ones — the order
+        this page wants — and snippets/product-card.liquid already renders the
+        sold-out state as text on the tile. Sending "hide" instead would be a
+        merchandising decision, and it is not one this phase gets to make.
+      {%- endcomment -%}
+      <input type="hidden" name="type" value="{{ search_types }}">
+      <input type="hidden" name="options[prefix]" value="last">
+
+      {%- comment -%}
+        A visible label, not a placeholder. Phase 2 §12.6 forbids
+        placeholder-only labels outright and §12.3's filled row requires the
+        label to stay visible above the field: placeholder text disappears at
+        the moment the customer starts typing, which is the moment it was there
+        to help with. No placeholder is set either, because one that repeated
+        this label would only add noise.
+      {%- endcomment -%}
+      <label class="main-search__label" for="SearchInput">
+        {{ 'sections.search.input_label' | t }}
+      </label>
+
+      <div class="main-search__field">
+        {%- comment -%}
+          escape, not raw. search.terms is customer input echoed straight back
+          out, and an attribute value is the one place on this page where
+          nothing else escapes it for us.
+
+          The two | t calls below pass search.terms unfiltered instead.
+          Shopify's storefront locale documentation states that translated
+          content is escaped by default — every HTML character is converted to
+          its entity equivalent — and the only opt-out is the _html key suffix,
+          which neither of those keys carries. Escaping the argument as well
+          would print the entities rather than the customer's words.
+
+          No autocomplete attribute. §12.4 asks for one on every field, and its
+          examples are the autofill tokens — name, given-name, address-line1.
+          There is no autofill token for a site search term, and
+          autocomplete="off" would only suppress the browser's own history for
+          this field, which is the wrong trade on the one field a returning
+          customer is most likely to retype.
+        {%- endcomment -%}
+        <input
+          class="main-search__input"
+          id="SearchInput"
+          type="search"
+          name="q"
+          value="{{ search.terms | escape }}"
+        >
+
+        {%- comment -%}
+          No width or height rule of its own: a grid item stretches to its
+          column, so the button runs the full width of the stacked layout below
+          --bp-md and matches the field's 48px on the row above it.
+        {%- endcomment -%}
+        <button class="button button--primary" type="submit">
+          {% render 'icon-search' %}
+          {{ 'sections.search.submit' | t }}
+        </button>
+      </div>
+    </form>
+
+    {%- if has_query == false -%}
+      <p class="main-search__prompt">{{ 'sections.search.prompt' | t }}</p>
+
+    {%- elsif has_results == false -%}
+      {%- comment -%}
+        A zero-result page says the term back, so the customer can see what was
+        actually searched — a typo is invisible once the field has scrolled out
+        of view — and then says what to try, which is generic advice about
+        spelling and word length. It does not apologise, recommend anything, or
+        offer a "did you mean": there is no data behind a suggestion and an
+        invented one would send people to the wrong product.
+      {%- endcomment -%}
+      <p class="main-search__empty-title">
+        {{ 'sections.search.no_results' | t: terms: search.terms }}
+      </p>
+      <p class="main-search__empty-body">{{ 'sections.search.no_results_help' | t }}</p>
+
+    {%- else -%}
+      {{ 'component-product-card.css' | asset_url | stylesheet_tag }}
+
+      {%- comment -%}
+        The column counts are merchant settings, so they arrive as scoped custom
+        properties rather than as inline style on the grid: an inline
+        declaration would outrank every media query and pin the mobile count to
+        all three tiers.
+      {%- endcomment -%}
+      {% style %}
+        #shopify-section-{{ section.id }} .product-grid { --product-cols: {{ cols_m }}; }
+        @media (min-width: 768px) {
+          #shopify-section-{{ section.id }} .product-grid { --product-cols: {{ cols_t }}; }
+        }
+        @media (min-width: 1024px) {
+          #shopify-section-{{ section.id }} .product-grid { --product-cols: {{ cols_d }}; }
+        }
+      {% endstyle %}
+
+      <p class="main-search__summary">
+        {{- 'sections.search.results_count' | t: count: search.results_count, terms: search.terms -}}
+      </p>
+
+      {%- paginate search.results by per_page -%}
+        {%- liquid
+          comment
+            search.results is a mixed array — products, pages and articles in
+            relevance order — and paginate slices it without regard to type, so
+            any one page can carry any mix. A product belongs in the product
+            grid and a page does not, so the slice is rendered twice, each pass
+            taking only its own type. Counting first is what keeps an empty
+            <ul> or an empty group heading off the page when a slice happens to
+            be all of one kind.
+          endcomment
+          assign product_results = 0
+          assign other_results = 0
+          for item in search.results
+            if item.object_type == 'product'
+              assign product_results = product_results | plus: 1
+            else
+              assign other_results = other_results | plus: 1
+            endif
+          endfor
+        -%}
+
+        {%- if product_results > 0 -%}
+          <div class="main-search__group">
+            {%- if group_headings -%}
+              <h2 class="main-search__group-heading">{{ 'sections.search.products' | t }}</h2>
+            {%- endif -%}
+
+            {%- comment -%}
+              forloop.first is the wrong test for the eager tile here. The loop
+              runs over the mixed slice, so on a query whose top result is a
+              page it would be true for that page and no product would ever be
+              loaded eagerly — leaving the tile most likely to be the largest
+              contentful paint behind a lazy fetch. The count of tiles actually
+              emitted is the test instead.
+            {%- endcomment -%}
+            {%- assign tiles_emitted = 0 -%}
+            <ul class="product-grid" role="list">
+              {%- for item in search.results -%}
+                {%- if item.object_type == 'product' -%}
+                  {%- assign tiles_emitted = tiles_emitted | plus: 1 -%}
+                  {%- assign eager_tile = false -%}
+                  {%- if tiles_emitted == 1 -%}
+                    {%- assign eager_tile = true -%}
+                  {%- endif -%}
+                  <li class="product-grid__item">
+                    {% render 'product-card',
+                      product: item,
+                      heading_level: result_heading_level,
+                      sizes: sizes_attr,
+                      eager: eager_tile
+                    %}
+                  </li>
+                {%- endif -%}
+              {%- endfor -%}
+            </ul>
+          </div>
+        {%- endif -%}
+
+        {%- if other_results > 0 -%}
+          <div class="main-search__group">
+            {%- if group_headings -%}
+              <h2 class="main-search__group-heading">{{ 'sections.search.other_results' | t }}</h2>
+            {%- endif -%}
+
+            <ul class="main-search__other-list" role="list">
+              {%- for item in search.results -%}
+                {%- unless item.object_type == 'product' -%}
+                  <li class="main-search__other">
+                    {%- comment -%}
+                      The type label is text, not an icon and not a colour: a
+                      customer has to be able to tell a policy page from a
+                      journal entry before they press it.
+                    {%- endcomment -%}
+                    <p class="main-search__other-type">
+                      {%- if item.object_type == 'article' -%}
+                        {{ 'sections.search.result_type.article' | t }}
+                      {%- else -%}
+                        {{ 'sections.search.result_type.page' | t }}
+                      {%- endif -%}
+                    </p>
+
+                    <h{{ result_heading_level }} class="main-search__other-title">
+                      <a class="main-search__other-link" href="{{ item.url }}">{{ item.title }}</a>
+                    </h{{ result_heading_level }}>
+
+                    {%- comment -%}
+                      An excerpt for articles only. article.excerpt_or_content is
+                      a field the merchant writes for exactly this purpose. A
+                      page has no equivalent — truncating page.content would
+                      print the first twenty-five words of a shipping policy
+                      under its own title, which tells a customer nothing they
+                      could not read from the title.
+                    {%- endcomment -%}
+                    {%- if item.object_type == 'article' and item.excerpt_or_content != blank -%}
+                      <p class="main-search__other-excerpt">
+                        {{- item.excerpt_or_content | strip_html | truncatewords: 25 -}}
+                      </p>
+                    {%- endif -%}
+                  </li>
+                {%- endunless -%}
+              {%- endfor -%}
+            </ul>
+          </div>
+        {%- endif -%}
+
+        {%- if paginate.pages > 1 -%}
+          {%- comment -%}
+            Built by hand rather than with default_pagination. That filter emits
+            its own markup and its own English — its previous and next links are
+            guillemet entities plus the words — and no locale file can reach any
+            of it. This theme's rule is that every storefront-visible string is a
+            | t lookup, so the filter cannot be used here at all. Building the
+            nav also puts rel, aria-current and the accessible name of each
+            numbered link under this file's control rather than the filter's.
+          {%- endcomment -%}
+          {%- comment -%}
+            The label is assigned first. Shopify rejects a filter on a render
+            argument outright — "Filters cannot be used on arguments passed to
+            the render tag" — and the Mini-Liquid harness does not model that
+            rule, so it rendered happily and Theme Check is what caught it.
+          {%- endcomment -%}
+          {%- assign pagination_label = 'sections.search.pagination' | t -%}
+          {% render 'pagination', paginate: paginate, label: pagination_label %}
+        {%- endif -%}
+      {%- endpaginate -%}
+    {%- endif -%}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Search results",
+  "tag": "section",
+  "class": "main-search-section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Search"
+    },
+    {
+      "type": "select",
+      "id": "search_types",
+      "label": "What search looks through",
+      "info": "Products always come back as a grid of product cards. Pages and articles come back as a titled list below it. Everything searched is your own Shopify content; nothing is set in the theme.",
+      "options": [
+        { "value": "product", "label": "Products only" },
+        { "value": "product,page,article", "label": "Products, pages and articles" }
+      ],
+      "default": "product"
+    },
+    {
+      "type": "range",
+      "id": "results_per_page",
+      "label": "Results per page",
+      "min": 12,
+      "max": 48,
+      "step": 4,
+      "default": 24,
+      "info": "A count that divides evenly into the desktop column count fills its rows."
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "surface",
+      "label": "Colour scheme",
+      "info": "The theme switches text, border, accent and focus colours to suit the band. Muted gold is a dark-surface accent; on cream a darker gold is substituted automatically.",
+      "options": [
+        { "value": "light", "label": "Cream" },
+        { "value": "dark", "label": "Ink" }
+      ],
+      "default": "light"
+    },
+    {
+      "type": "header",
+      "content": "Grid"
+    },
+    {
+      "type": "paragraph",
+      "content": "These are maximums. A tile never drops below a readable width, so if a viewport cannot carry the count you choose, the grid drops a column rather than squeezing one."
+    },
+    {
+      "type": "range",
+      "id": "columns_desktop",
+      "label": "Columns, desktop",
+      "min": 2,
+      "max": 4,
+      "step": 1,
+      "default": 4
+    },
+    {
+      "type": "range",
+      "id": "columns_tablet",
+      "label": "Columns, tablet",
+      "min": 1,
+      "max": 3,
+      "step": 1,
+      "default": 2
+    },
+    {
+      "type": "range",
+      "id": "columns_mobile",
+      "label": "Columns, mobile",
+      "min": 1,
+      "max": 3,
+      "step": 1,
+      "default": 2
+    }
+  ],
+  "enabled_on": {
+    "templates": ["search"]
+  }
+}
+{% endschema %}

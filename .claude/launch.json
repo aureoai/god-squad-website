@@ -1,0 +1,30 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "godsquad-static",
+      "runtimeExecutable": "python",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8765",
+        "--bind",
+        "127.0.0.1"
+      ],
+      "port": 8765
+    },
+    {
+      "name": "godsquad-shopify",
+      "runtimeExecutable": "shopify",
+      "runtimeArgs": [
+        "theme",
+        "dev",
+        "--store",
+        "godsquad-intl.myshopify.com",
+        "--port",
+        "9292"
+      ],
+      "port": 9292
+    }
+  ]
+}

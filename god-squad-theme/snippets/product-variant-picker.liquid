@@ -1,0 +1,145 @@
+{%- comment -%}
+  GOD SQUAD — Variant picker
+  Phase 8. Phase 2 §27.4, "Question 4 — How do I choose a variant?", built.
+
+  Accepts:
+  - product     {Object}  required.
+  - section_id  {String}  required. Namespaces every id and radio group, so two
+                          product sections on one page cannot collide.
+  - swatch_shape {String} optional, 'circle' (default) or 'square'.
+
+  Usage:
+  {% render 'product-variant-picker', product: product, section_id: section.id %}
+
+  THE PICKER IS BUILT FROM options_with_values, NOT FROM variants.
+  Shopify's own performance guidance is explicit: product.variants truncates
+  silently at 250 and costs render time on every request, while
+  options_with_values is the object designed for this. Each product_option_value
+  carries its own `selected` and `available`, so the server renders the correct
+  initial state with no JavaScript involved.
+
+  RADIOS, NOT A SELECT.
+  Phase 2 §27.4: "Never a native <select> on a product page where the options
+  are fewer than eight." A radio group also gives the selected state an
+  accessible name change for free, which the same section requires — a checked
+  radio announces itself, a styled <div> does not.
+
+  UNAVAILABLE VALUES STAY IN THE DOM.
+  §27.4 again: "Struck-through chip ... still focusable, with the state in its
+  accessible name. Never removed from the DOM." So an unavailable value is not
+  given the disabled attribute — that would take it out of the tab order and
+  hide the fact that the option exists at all. It is struck through, its label
+  says so in words, and the add-to-cart control is what refuses the purchase.
+
+  WHAT `available` MEANS HERE.
+  product_option_value.available is true when SOME variant carrying that value
+  is available — not that the combination the customer has built is. The
+  combination is resolved against the variant data the section publishes, by
+  assets/product.js. Server-rendered state is therefore correct on load and
+  refined on interaction, never the other way round.
+{%- endcomment -%}
+
+{%- unless product.has_only_default_variant -%}
+  {%- liquid
+    assign shape = swatch_shape | default: 'circle'
+  -%}
+  <div class="variant-picker" data-variant-picker>
+    {%- for option in product.options_with_values -%}
+      {%- liquid
+        comment
+          A value renders as a swatch only when Shopify itself carries swatch
+          data for it. Phase 1 DATA-03 recorded the prototype's three
+          hard-coded hexes; nothing here invents a colour.
+        endcomment
+        assign has_swatches = false
+        for value in option.values
+          if value.swatch.color or value.swatch.image
+            assign has_swatches = true
+            break
+          endif
+        endfor
+
+        assign group = section_id | append: '-option-' | append: option.position
+      -%}
+      <fieldset
+        class="variant-picker__option{% if has_swatches %} variant-picker__option--swatch{% endif %}"
+        data-option-position="{{ option.position }}"
+      >
+        <legend class="variant-picker__legend">
+          <span class="variant-picker__legend-name">{{ option.name }}</span>
+          {%- comment -%}
+            The chosen value in words beside the option name. For a swatch row
+            it is the only place the colourway is readable; for a text row it
+            is redundant on screen but is what makes the fieldset's own
+            announcement complete. It is updated by the picker's JavaScript.
+          {%- endcomment -%}
+          <span class="variant-picker__legend-value" data-option-value-for="{{ option.position }}">
+            {{- option.selected_value -}}
+          </span>
+        </legend>
+
+        <div class="variant-picker__values">
+          {%- for value in option.values -%}
+            {%- liquid
+              assign input_id = group | append: '-' | append: forloop.index
+              assign unavailable = false
+              unless value.available
+                assign unavailable = true
+              endunless
+            -%}
+            <input
+              class="variant-picker__input visually-hidden"
+              type="radio"
+              id="{{ input_id }}"
+              name="{{ group }}"
+              value="{{ value.name | escape }}"
+              data-option-position="{{ option.position }}"
+              {% if value.selected %}checked{% endif %}
+              {% if unavailable %}data-unavailable="true"{% endif %}
+            >
+            <label
+              class="variant-picker__value{% if has_swatches %} variant-picker__value--swatch{% endif %}{% if unavailable %} variant-picker__value--unavailable{% endif %}"
+              for="{{ input_id }}"
+            >
+              {%- if has_swatches -%}
+                {%- if value.swatch.color -%}
+                  <span
+                    class="variant-picker__swatch variant-picker__swatch--{{ shape }}"
+                    style="--swatch-fill: {{ value.swatch.color }};"
+                    aria-hidden="true"
+                  ></span>
+                {%- elsif value.swatch.image -%}
+                  <span
+                    class="variant-picker__swatch variant-picker__swatch--{{ shape }} variant-picker__swatch--image"
+                    style="--swatch-image: url({{ value.swatch.image | image_url: width: 80 }});"
+                    aria-hidden="true"
+                  ></span>
+                {%- else -%}
+                  {%- comment -%}
+                    A mixed option: Shopify allows some values in an option to
+                    carry swatch data and others not. The value still has to be
+                    choosable, so it falls back to its name on screen.
+                  {%- endcomment -%}
+                  <span class="variant-picker__swatch variant-picker__swatch--{{ shape }} variant-picker__swatch--none" aria-hidden="true"></span>
+                {%- endif -%}
+                <span class="visually-hidden">{{ value.name }}</span>
+              {%- else -%}
+                <span class="variant-picker__value-text">{{ value.name }}</span>
+              {%- endif -%}
+
+              {%- comment -%}
+                The same element the script manages, carrying the same hook.
+                Without the attribute the script could not find this note, so
+                it appended a second one the moment it ran and a screen reader
+                heard "Small, Unavailable, Unavailable".
+              {%- endcomment -%}
+              {%- if unavailable -%}
+                {{ ' ' }}<span class="visually-hidden" data-unavailable-note>{{ 'products.variants.unavailable' | t }}</span>
+              {%- endif -%}
+            </label>
+          {%- endfor -%}
+        </div>
+      </fieldset>
+    {%- endfor -%}
+  </div>
+{%- endunless -%}

@@ -1,0 +1,16 @@
+{%- comment -%}
+  Renders the menu (hamburger) icon.
+
+  Source: phase-3-assets/icons/icon-menu.svg, drawn in Phase 3 to the Phase 2
+  contract — 24x24 canvas, stroke 1.5, currentColor, round caps and joins.
+  Three rules on the 6/12/18 grid, matching the prototype's hamburger.
+
+  Accepts:
+  - class: {String} optional extra class names
+
+  Usage:
+  {% render 'icon-menu' %}
+
+  Decorative: the wrapping button carries the accessible name and aria-expanded.
+{%- endcomment -%}
+<svg class="icon icon--menu {{ class }}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3.75 6.5h16.5"/><path d="M3.75 12h16.5"/><path d="M3.75 17.5h16.5"/></svg>

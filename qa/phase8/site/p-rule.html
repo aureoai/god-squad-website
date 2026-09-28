@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="en" class="no-js"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>God Squad — Phase 8 harness</title>
+<link rel="stylesheet" href="assets/design-tokens.css">
+<link rel="stylesheet" href="assets/base.css">
+<link rel="stylesheet" href="assets/header.css">
+<link rel="stylesheet" href="assets/component-container.css">
+<link rel="stylesheet" href="assets/component-button.css">
+<link rel="stylesheet" href="assets/component-pagination.css">
+<link rel="stylesheet" href="assets/component-quantity.css">
+<link rel="stylesheet" href="assets/component-cart-line.css">
+<script>document.documentElement.classList.replace('no-js','js');</script>
+<script>window.Shopify = window.Shopify || {routes: {root: '/'}};</script>
+<script src="assets/header.js" defer></script>
+<script src="assets/cart.js" defer></script>
+</head><body class="template-product">
+<a class="skip-link" href="#MainContent">Skip to content</a>
+<div id="shopify-section-header" class="shopify-section"><header
+  class="header surface-dark"
+  data-header
+  
+><div class="header__inner container"><div class="header__cluster header__cluster--start">
+      <button
+        type="button"
+        class="header__control header__menu-toggle"
+        aria-expanded="false"
+        aria-controls="MobileMenu"
+        data-menu-toggle
+      >
+        <svg class="icon icon--menu " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3.75 6.5h16.5"/><path d="M3.75 12h16.5"/><path d="M3.75 17.5h16.5"/></svg>
+
+        <span class="visually-hidden">Menu</span>
+      </button>
+    </div><div class="header__branding"><a
+          class="header__logo-link"
+          href="/"
+          
+        ><img class="header__logo" src="img/logo.png" srcset="img/logo.png 120w, img/logo.png 180w, img/logo.png 240w, img/logo.png 360w, img/logo.png 480w, img/logo.png 600w" sizes="(min-width: 1024px) 240px, 160px" width="500" height="500" style="--logo-height-desktop: 78px; --logo-height-mobile: 56px;" alt="God Squad">
+        </a></div><nav class="header__nav" aria-label="Primary">
+      <ul class="header__nav-list" role="list"><li class="header__nav-item">
+              <a
+                class="header__nav-link"
+                href="/"
+                
+              >Home</a>
+            </li><li class="header__nav-item">
+              <a
+                class="header__nav-link"
+                href="/collections/all"
+                
+              >Shop</a>
+            </li><li class="header__nav-item">
+              <a
+                class="header__nav-link"
+                href="/#story"
+                
+              >Our Story</a>
+            </li><li class="header__nav-item">
+              <a
+                class="header__nav-link"
+                href="/#verse"
+                
+              >Verse</a>
+            </li></ul>
+    </nav><div class="header__cluster header__cluster--end"><a class="header__control" href="/search" data-search-trigger>
+          <svg class="icon icon--search " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="6.25"/><path d="M15.6 15.6 20.5 20.5"/></svg>
+
+          <span class="visually-hidden">Search</span>
+        </a><shopify-account
+          class="header__control header__account"
+          menu="customer-account-main-menu"
+        >
+          <span class="header__account-avatar" slot="signed-out-avatar">
+            <svg class="icon icon--account " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="8.25" r="3.75"/><path d="M4.75 19.75a7.25 7.25 0 0 1 14.5 0"/></svg>
+
+            <span class="visually-hidden">Account</span>
+          </span>
+        </shopify-account><a
+          class="header__control header__cart"
+          href="/cart"
+          data-cart-bubble
+          aria-controls="CartDrawer"
+        >
+          <svg class="icon icon--cart " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.5 7.75h13l-1.1 11.3a1.4 1.4 0 0 1-1.4 1.2H8a1.4 1.4 0 0 1-1.4-1.2Z"/><path d="M9 10V6.9a3 3 0 0 1 6 0V10"/></svg>
+
+<span class="visually-hidden">Cart</span>
+        </a></div>
+  </div><div class="header__search" id="HeaderSearch" data-search-panel hidden>
+    <form
+      class="header__search-form"
+      action="/search"
+      method="get"
+      role="search"
+    >
+      <label class="visually-hidden" for="HeaderSearchInput">
+        Search the store
+      </label>
+      <input
+        class="header__search-input"
+        id="HeaderSearchInput"
+        type="search"
+        name="q"
+        placeholder="Search the store…"
+        data-search-input
+      ><input type="hidden" name="type" value="product">
+      <button type="submit" class="button button--primary header__search-submit">
+        Search
+      </button>
+      <button type="button" class="header__control" data-search-close>
+        <svg class="icon icon--close " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.4 6.4 17.6 17.6"/><path d="M17.6 6.4 6.4 17.6"/></svg>
+
+        <span class="visually-hidden">Close search</span>
+      </button>
+    </form>
+  </div><div class="header__panel" id="MobileMenu" data-menu-panel hidden>
+    <div class="header__panel-header">
+      <span class="header__panel-title">Menu</span>
+      <button type="button" class="header__control" data-menu-close>
+        <svg class="icon icon--close " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.4 6.4 17.6 17.6"/><path d="M17.6 6.4 6.4 17.6"/></svg>
+
+        <span class="visually-hidden">Close menu</span>
+      </button>
+    </div>
+
+    <nav class="header__panel-nav" aria-label="Main">
+      <ul class="header__panel-list" role="list"><li>
+              <a
+                class="header__panel-link"
+                href="/"
+                
+              >Home</a>
+            </li><li>
+              <a
+                class="header__panel-link"
+                href="/collections/all"
+                
+              >Shop</a>
+            </li><li>
+              <a
+                class="header__panel-link"
+                href="/#story"
+                
+              >Our Story</a>
+            </li><li>
+              <a
+                class="header__panel-link"
+                href="/#verse"
+                
+              >Verse</a>
+            </li></ul>
+    </nav></div>
+
+  <div class="header__overlay" data-menu-overlay hidden></div>
+</header>
+
+
+</div>
+<main id="MainContent" tabindex="-1">
+<div id="shopify-section-main" class="shopify-section"><link rel="stylesheet" href="assets/section-main-product.css">
+<script src="assets/product.js" defer="defer"></script>
+
+<div
+  class="main-product surface-light main-product--media-stacked main-product--sticky-info"
+  data-main-product
+  data-section-id="main"
+  data-url="/products/bundle"
+  data-string-unavailable="Unavailable"
+  
+>
+  <div class="main-product__inner container">
+    <div class="main-product__media">
+      <div
+    class="product-gallery product-gallery--stacked"
+    data-product-gallery
+    data-gallery-layout="stacked"
+  >
+    <div class="product-gallery__viewport" data-gallery-viewport><div
+          class="product-gallery__slide is-active"
+          id="main-media-501"
+          data-media-id="501"
+          data-media-type="image"
+        >
+          <div class="product-gallery__frame"><img class="product-gallery__image" src="img/tee.webp" srcset="img/tee.webp 360w, img/tee.webp 480w, img/tee.webp 640w, img/tee.webp 800w, img/tee.webp 960w, img/tee.webp 1200w, img/tee.webp 1400w, img/tee.webp 1600w, img/tee.webp 1800w" sizes="(min-width: 1440px) 840px, (min-width: 1106px) calc((100vw - 128px) * 0.64), (min-width: 1024px) calc(100vw - 480px), (min-width: 768px) calc(100vw - 64px), calc(100vw - 48px)" width="900" height="900" loading="eager" fetchpriority="high" decoding="async" alt="Three Pack"></div>
+        </div></div></div>
+    </div><div
+      class="main-product__info"
+    ><p
+        class="main-product__low-stock"
+        data-low-stock
+        hidden
+      >Low stock</p><h1 class="main-product__title">Three Pack</h1><p class="main-product__price price" data-price>
+        <span class="visually-hidden" data-price-label-sale hidden>Sale price</span>
+        <span class="price__current" data-price-current>&#8369;3,000.00</span>
+        <span class="price__compare-wrap" data-price-compare-wrap hidden>
+          <span class="visually-hidden">Regular price</span>
+          <s class="price__compare" data-price-compare>&#8369;0.00</s>
+        </span><span class="price__unit">
+            &#8369;1,000.00
+            <span aria-hidden="true">/</span>
+            <span class="visually-hidden">per</span>
+            
+            item
+          </span></p><form method="post" action="/cart/add" accept-charset="UTF-8" enctype="multipart/form-data" id="ProductForm-main" class="shopify-product-form main-product__form" data-product-form="true"><input type="hidden" name="form_type" value="product"><input type="hidden" name="utf8" value="✓"><input
+          type="hidden"
+          name="id"
+          value="9501"
+          data-variant-input
+          
+        >
+
+        <div class="main-product__quantity">
+            <p class="main-product__quantity-label" id="QuantityLabel-main">
+              Quantity
+            </p>
+            <div
+  class="quantity"
+  data-quantity
+  
+>
+  <button
+    type="button"
+    class="quantity__button"
+    data-quantity-step="-1"
+    aria-disabled="true"
+  >
+    <svg class="icon icon--minus " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4.75 12h14.5"/></svg>
+
+    <span class="visually-hidden">Decrease quantity for Three Pack</span>
+  </button>
+
+  <label class="visually-hidden" for="Quantity-main">Quantity for Three Pack</label>
+  <input
+    class="quantity__input"
+    id="Quantity-main"
+    type="number"
+    name="quantity"
+    value="2"
+    min="2"
+    step="2"
+    max="6"
+    inputmode="numeric"
+    autocomplete="off"
+    
+    
+    data-quantity-input
+  >
+
+  <button
+    type="button"
+    class="quantity__button"
+    data-quantity-step="1"
+    
+  >
+    <svg class="icon icon--plus " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 4.75v14.5"/><path d="M4.75 12h14.5"/></svg>
+
+    <span class="visually-hidden">Increase quantity for Three Pack</span>
+  </button>
+</div>
+
+          </div><div class="main-product__actions"><button
+            type="submit"
+            name="add"
+            class="button button--primary button--full main-product__submit"
+            data-add-to-cart
+            data-label-idle="Add to bag"
+            data-label-busy="Adding…"
+            data-label-sold-out="Sold out"data-label-unavailable="Unavailable"
+            
+          >
+            <span data-add-to-cart-label>Add to bag</span>
+          </button><div data-shopify="payment-button" class="shopify-payment-button" data-harness-stub="payment-button"><button type="button" class="shopify-payment-button__button">Buy it now</button></div></div><div
+          class="main-product__error"
+          data-product-error
+          role="alert"
+          hidden
+        ></div><div
+          class="main-product__success"
+          data-product-success
+          role="status"
+          hidden
+        >
+          <span data-product-success-text></span><a class="main-product__success-link button button--secondary" href="/cart">
+            View cart
+          </a>
+        </div></form></div><div class="main-product__story"><div class="main-product__description rte"><p>Heavyweight cotton, cut boxy and built to last. Printed in small runs.</p></div></div>
+  </div><script type="application/json" data-variant-data>
+    [{
+          "id": 9501,
+          "available": true,
+          "options": ["Default Title"],
+          "price": "&#8369;3,000.00",
+          "compare_at_price": null,
+          "media_id": null,
+          "sku": "","low_stock": false,
+          "quantity_rule": { "min": 2, "max": 6, "increment": 2 }
+        }]
+  </script><script type="application/ld+json">
+    {
+  "@context": "http://schema.org/",
+  "@type": "Product",
+  "@id": "/products/bundle",
+  "name": "Three Pack",
+  "url": "/products/bundle",
+  "description": "Heavyweight cotton, cut boxy and built to last. Printed in small runs.",
+  "image": [
+    "img/tee.webp"
+  ],
+  "brand": {
+    "@type": "Brand",
+    "name": "God Squad"
+  },
+  "offers": [
+    {
+      "@type": "Offer",
+      "@id": "/products/bundle?variant=9501",
+      "availability": "http://schema.org/InStock",
+      "price": "3000.00",
+      "priceCurrency": "PHP",
+      "url": "/products/bundle?variant=9501"
+    }
+  ]
+}
+  </script>
+</div>
+
+
+</div>
+</main>
+<div id="shopify-section-cart-drawer" class="shopify-section"><link rel="stylesheet" href="assets/section-cart-drawer.css">
+
+<div
+  class="cart-drawer surface-dark"
+  id="CartDrawer"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="CartDrawerTitle"
+  data-cart-drawer
+  data-auto-open="true"
+  hidden
+><div class="cart-drawer__overlay" data-cart-overlay aria-hidden="true"></div>
+
+  <div class="cart-drawer__panel">
+    <div class="cart-drawer__header"><h2 class="cart-drawer__title" id="CartDrawerTitle" tabindex="-1">
+        Your cart
+      </h2>
+      <button type="button" class="cart-drawer__close" data-cart-close>
+        <svg class="icon icon--close " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.4 6.4 17.6 17.6"/><path d="M17.6 6.4 6.4 17.6"/></svg>
+
+        <span class="visually-hidden">Close cart</span>
+      </button>
+    </div><div class="visually-hidden" role="status" aria-live="polite" data-cart-drawer-status></div><p class="cart-drawer__error" data-cart-error role="alert" hidden></p>
+
+    <div class="cart-drawer__inner" data-cart-drawer-inner><div class="cart-empty">
+  <p class="cart-empty__title">Your cart is empty.</p>
+  <p class="cart-empty__body">Find something that speaks to your purpose.</p>
+  <a class="button button--accent" href="/">
+    Shop the collection
+    <svg class="icon icon--arrow " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 12h15.5"/><path d="M13.5 6 19.5 12l-6 6"/></svg>
+
+  </a>
+</div>
+</div>
+  </div>
+</div>
+
+
+</div>
+<div id="CartStatus" class="visually-hidden" role="status" aria-live="polite" data-cart-no-inert></div>
+<div hidden data-cart-no-inert data-cart-strings
+  data-added="Added to your cart."
+  data-updated="Cart updated."
+  data-removed="Removed from your cart."
+  data-note-saved="Order note saved."
+  data-quantity-announce="Quantity: [count]"
+  data-error-generic="Unable to update your cart. Please try again."
+  data-error-network="We could not reach the store. Check your connection and try again."></div>
+</body></html>

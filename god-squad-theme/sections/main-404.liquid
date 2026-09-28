@@ -1,0 +1,103 @@
+{%- comment -%}
+  GOD SQUAD — Not found
+  Phase 10. The surface every mistyped URL, dead link, deleted product and
+  shared sold-out URL lands on.
+
+  Sources of truth:
+  - PHASE-1-WEBSITE-AUDIT.md SHOP-09, which lists 404 among the templates
+    Shopify serves and this theme had never designed, and records that Shopify
+    returns an error page for any storefront route whose template is missing.
+  - PHASE-2-DESIGN-SYSTEM.md §8 (the container model), §10.1 (the accent
+    variant lives on dark surfaces only).
+  - snippets/cart-empty-state.liquid, for the destination decision below.
+
+  THE DEFAULT DESTINATION IS THE HOME PAGE, NOT A COLLECTION.
+  This is the same "where do we send them" question the empty cart already
+  answered, and the answer does not change because the dead end is a URL rather
+  than an empty cart. cart-empty-state.liquid records the reason:
+  routes.all_products_collection_url is the obvious answer and it is wrong here,
+  because it depends on a collection template this theme has not always had —
+  and sending a customer who has just hit one error page to a second one is the
+  worst outcome this file can produce. The home page exists unconditionally.
+  The merchant can point the button anywhere, which is what the url setting is
+  for, and is how this resolves the day a collection template ships.
+
+  THE COPY IS GENERIC UI COPY, NOT BRAND COPY.
+  The heading and the message are locale strings, not brand voice: nothing here
+  is a tagline, a scripture, a joke about being lost, or a claim of any kind.
+  The button label is the one merchant-editable string and it carries no schema
+  default, so an untouched theme keeps reading the label out of
+  locales/en.default.json — a schema default would freeze one language into
+  settings_data.json and every other locale would render English.
+
+  WHAT IS DELIBERATELY NOT HERE.
+  No search form: the header already carries the store's search control on this
+  page like every other, and a second one would be a duplicate of a control the
+  customer can see. No product recommendations and no "you might like" row —
+  there is no data behind either and inventing one is invention. No list of
+  suggested destinations, because every destination in this project is
+  BUSINESS INFORMATION REQUIRED (Phase 1 Appendix A) and the merchant's menu in
+  the header is the supported answer. No automatic redirect: URL redirects are
+  a Shopify admin feature, and a client-side one takes the address bar away
+  from someone who may simply have mistyped one character.
+
+  ZERO JavaScript.
+{%- endcomment -%}
+
+{%- liquid
+  assign back_url = section.settings.button_url
+  if back_url == blank
+    assign back_url = routes.root_url
+  endif
+
+  assign back_label = section.settings.button_label | strip
+  if back_label == blank
+    assign back_label = 'general.not_found.link' | t
+  endif
+-%}
+
+{{ 'section-main-404.css' | asset_url | stylesheet_tag }}
+
+{%- comment -%}
+  surface-dark is fixed rather than a setting. Phase 2 §10.1 gives the accent
+  variant no light-surface rule at all, so the one call to action on this page
+  paints only on ink — and §9 of the house conventions limits a main-* section
+  to the decisions a merchant actually has, which here is where the button
+  goes, not what colour the page is.
+{%- endcomment -%}
+<div class="main-404 surface-dark" {{ section.shopify_attributes }}>
+  <div class="main-404__inner container">
+    <h1 class="main-404__title">{{ 'general.not_found.title' | t }}</h1>
+    <p class="main-404__body">{{ 'general.not_found.body' | t }}</p>
+
+    <a class="button button--accent main-404__action" href="{{ back_url }}">
+      {{ back_label }}
+      {% render 'icon-arrow' %}
+    </a>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Not found",
+  "tag": "section",
+  "class": "main-404-section",
+  "settings": [
+    {
+      "type": "url",
+      "id": "button_url",
+      "label": "Where the button goes",
+      "info": "Leave empty to use the home page, which is the same default the empty cart uses. Point it at a collection only once that collection's page is working, or this page sends people to a second error. If you change it, change the button label below too — the default label names the home page."
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label",
+      "info": "Leave empty to use the theme's own wording, which is translated with the rest of the store. Anything typed here replaces it in every language."
+    }
+  ],
+  "enabled_on": {
+    "templates": ["404"]
+  }
+}
+{% endschema %}

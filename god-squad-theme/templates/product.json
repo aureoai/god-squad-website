@@ -1,0 +1,22 @@
+{
+  "sections": {
+    "main": {
+      "type": "main-product",
+      "settings": {
+        "media_layout": "stacked",
+        "show_quantity": true,
+        "show_accelerated_checkout": true,
+        "description_layout": "open",
+        "show_vendor": false,
+        "show_product_type": false,
+        "show_sku": false,
+        "low_stock_threshold": 3,
+        "sticky_info": true,
+        "surface": "light"
+      }
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

@@ -1,0 +1,263 @@
+/* ============================================================================
+   GOD SQUAD — Collection page
+   Phase 10. The catalogue browse surface. Every value is a token from
+   design-tokens.css. No raw hex, no magic numbers, no !important.
+
+   The band is full-bleed and its content is constrained — the Phase 2
+   section 8 container model.
+
+   There is no grid rule and no card rule in this file. .product-grid and
+   .product-card are component-product-card.css, which the section links, and
+   duplicating either here would mean two places to fix the same measured
+   mobile gap. What is here is the page frame, the banner, the toolbar, the
+   pagination and the empty state.
+
+   No spacing modifiers either. A section bound to a JSON template is not
+   placed by a merchant, so its rhythm is not a merchant choice — the same
+   stance section-main-cart.css takes. Nor is there a header-clearance rule:
+   sections/header.liquid overlays the first section only when
+   template.name == 'index', so on this template --header-overlay-offset
+   resolves to zero and the clearance would add nothing.
+   ========================================================================== */
+
+.main-collection {
+  width: 100%;
+  padding-block: var(--section-pad-block);
+  /* svh, not vh. On a phone the retracting toolbar makes vh jump, so a vh
+     minimum can leave the page taller than the screen for no reason. Same
+     reasoning as the cart page and the hero. */
+  min-height: 60svh;
+}
+
+/* The banner is the first thing in the band and sits flush against the header,
+   so the band's own top padding would put a gap above it. The padding moves to
+   the inner column in that case, which is where the title then starts. */
+.main-collection--has-banner {
+  padding-block-start: 0;
+}
+
+.main-collection--has-banner .main-collection__inner {
+  padding-block-start: var(--section-pad-block);
+}
+
+/* ----------------------------------------------------------------- banner */
+
+.main-collection__banner {
+  width: 100%;
+}
+
+/* No aspect-ratio. The token file carries no banner ratio, and a ratio chosen
+   here would crop every merchant's collection image to a shape nobody on this
+   project has seen. The image keeps its own proportions; the cap only stops a
+   tall upload from filling the screen before a single product is visible, and
+   object-fit takes the crop from the middle when it bites. */
+.main-collection__banner-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-block-size: 60svh;
+  object-fit: cover;
+}
+
+/* ------------------------------------------------------------------ header */
+
+/* Phase 18. The header had no rule at all, so what sat below it depended on a
+   merchant setting: measured at 1440, a collection WITH filters ran
+   header -> 0px -> facets, and the same collection WITHOUT them ran
+   header -> 40px -> toolbar. The first control row was flush against the
+   description in one case and correctly spaced in the other.
+
+   The margin belongs here and not on .facets. Below --bp-md that element
+   becomes .facets--drawer, which is position:fixed with inset-block:0 and only
+   zeroes margin-block-end — a top margin there would displace the fixed drawer
+   rather than space the page.
+
+   This collapses against .main-collection__toolbar's own top margin, so the
+   unfiltered page is unchanged at 40px; only the filtered one moves. */
+.main-collection__header {
+  margin-block-end: var(--space-7);
+}
+
+.main-collection__title {
+  margin: 0;
+  color: inherit;
+  font-family: var(--font-display);
+  font-size: var(--type-display-m-size);
+  font-weight: var(--weight-black);
+  line-height: var(--type-display-m-lh);
+  letter-spacing: var(--type-display-m-ls);
+  text-transform: uppercase;
+}
+
+.main-collection__description {
+  margin-block-start: var(--space-5);
+  /* Phase 2 section 26.2: a reading measure, not a caption measure. */
+  max-width: var(--measure-body);
+  color: var(--color-text-current-muted);
+  font-family: var(--font-body);
+  font-size: var(--type-body-size);
+  line-height: var(--type-body-lh);
+}
+
+/* A collection description is merchant HTML, so the elements it may contain
+   are handled rather than assumed away. */
+.main-collection__description > :first-child { margin-block-start: 0; }
+.main-collection__description > :last-child { margin-block-end: 0; }
+.main-collection__description p { margin-block: var(--space-4) 0; }
+
+.main-collection__description a {
+  color: inherit;
+  text-underline-offset: var(--link-underline-offset);
+  text-decoration-thickness: var(--link-underline-thickness);
+}
+
+/* Phase 18. The other four surfaces that style a merchant rich-text link
+   declare this same rest rule; two of them had a hover and three did not, so
+   the identical link responded on some pages and not others. Pointer-scoped
+   per PHASE-2 22.1 rule 5. */
+@media (hover: hover) and (pointer: fine) {
+  .main-collection__description a:hover {
+    color: var(--accent-current);
+  }
+}
+
+/* ----------------------------------------------------------------- toolbar */
+
+.main-collection__toolbar {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-4);
+  margin-block: var(--space-7);
+  padding-block: var(--space-5);
+  border-block: var(--border-width) solid var(--color-border-current);
+}
+
+.main-collection__count {
+  margin: 0;
+  color: var(--color-text-current-muted);
+  font-family: var(--font-body);
+  font-size: var(--type-caption-size);
+  font-weight: var(--type-caption-weight);
+  letter-spacing: var(--type-caption-ls);
+  text-transform: uppercase;
+}
+
+.main-collection__sort {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.main-collection__sort-label {
+  color: inherit;
+  font-family: var(--font-body);
+  font-size: var(--type-label-size);
+  font-weight: var(--type-label-weight);
+  letter-spacing: var(--type-label-ls);
+  text-transform: uppercase;
+}
+
+/* appearance: none is deliberately NOT used. Replacing the disclosure arrow
+   means shipping a background image, and every way of tinting one to the
+   surface beneath it means either a hard-coded colour outside the token system
+   or a second image for the other surface. The native control is kept and only
+   its box, its type and its boundary are themed.
+
+   background-color is transparent rather than unset so the surface shows
+   through: the user agent's default field colour is near-white, which would
+   put cream text on white inside an ink band. The arrow follows `color` in
+   the browsers that draw one.
+
+   --color-border-current-interactive, not --color-border-current: this is a
+   control boundary and WCAG 2.2 SC 1.4.11 needs 3:1 for one, which the
+   decorative separator tokens composite well below. */
+.main-collection__sort-select {
+  min-height: var(--control-height);
+  padding-block: var(--space-2);
+  padding-inline: var(--space-4);
+  border: var(--border-width) solid var(--color-border-current-interactive);
+  border-radius: var(--radius-sm);
+  background-color: transparent;
+  color: inherit;
+  font-family: var(--font-body);
+  font-size: var(--type-body-sm-size);
+  line-height: var(--type-body-sm-lh);
+  cursor: pointer;
+}
+
+/* The one place in this file that reaches for absolute tokens rather than the
+   -current family, because the drop-down list is browser chrome and not part
+   of the band. Some engines paint that list with the select's own colour over
+   the system popup background, which on the ink surface means cream option
+   text over white. Pinning both ends keeps the pairing the theme has verified:
+   ink on cream is 17.04:1 either way round. */
+.main-collection__sort-select option {
+  background-color: var(--color-bg-secondary);
+  color: var(--color-text-inverse);
+}
+
+/* The no-script submit button is retired by setting the hidden attribute on
+   it, and on this element the attribute alone does not hide it.
+   [hidden] { display: none } lives in the user agent stylesheet, which every
+   author declaration outranks, and .button in component-button.css declares
+   display: inline-flex. The attribute is still the right mechanism — it
+   removes the control from the accessibility tree as well as from the page —
+   so the display rule is restored here rather than the hiding moved to a
+   class. */
+.main-collection__sort-submit[hidden] {
+  display: none;
+}
+
+/* ------------------------------------------------------------------- empty */
+
+.main-collection__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-4);
+  padding-block: var(--space-8);
+}
+
+/* Phase 18 took this down to the interface-heading row. It carried the same
+   four type declarations as its own page's <h1> — measured as Playfair 40px 900
+   uppercase on both — so an empty collection rendered the page title twice, once
+   as the real <h1> and once as this <p> immediately beneath it.
+
+   PHASE-2 §6.1 gives --type-h3 Family = body, Weight = 600, Transform =
+   sentence, Usage "Interface heading", which is what this is. The search page's
+   equivalent was already the subordinate size and is now the same family too,
+   so all three empty states read as one treatment. */
+.main-collection__empty-title {
+  margin: 0;
+  color: inherit;
+  font-family: var(--font-body);
+  font-size: var(--type-h3-size);
+  font-weight: var(--weight-semibold);
+  line-height: var(--type-h3-lh);
+}
+
+.main-collection__empty-body {
+  margin: 0;
+  max-width: var(--measure-narrow);
+  color: var(--color-text-current-muted);
+  font-family: var(--font-body);
+  font-size: var(--type-body-size);
+  line-height: var(--type-body-lh);
+}
+
+/* ------------------------------------------------------------- breakpoints
+   The toolbar's two halves sit on one line from --bp-md 768 up. Below it they
+   stack, because the sort label, the select and the no-script submit button
+   are already three controls competing for a phone row and the count would be
+   a fourth thing on it. Mobile-first, so the stack is the base rule and the
+   row is what the query adds. */
+
+@media (min-width: 768px) {
+  .main-collection__toolbar {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}

@@ -1,0 +1,113 @@
+{%- comment -%}
+  GOD SQUAD — css-variables
+
+  The bridge between the Theme Editor and the token system. Phase 1 section 29.2
+  specifies this snippet by name; before Phase 10 its contents sat inline in
+  layout/theme.liquid.
+
+  It emits ONE style element, after the stylesheets, carrying only the tokens a
+  merchant is allowed to move. Everything else in assets/design-tokens.css stays
+  developer-owned, which is what keeps the Theme Editor incapable of breaking the
+  contrast system.
+
+  ---------------------------------------------------------------------------
+  WHY THE COLOURS ARE A SCHEME AND NOT THREE PICKERS
+
+  Phase 2 section 30 raised two guardrails and assigned both to Phase 10:
+
+    G1  The colours cannot be free pickers. A Shopify `color` setting is
+        unconstrained, and settings_schema.json has no validation hook and no
+        on-save callback, so there is no mechanism to check a ratio at save
+        time. A merchant nudging warm cream darker silently invalidates every
+        measured pairing in the system.
+
+    G2  A gold scheme must ship its light-surface partner. --color-accent-strong
+        #82672B is a fixed hex, not computed from the gold. Changing gold alone
+        left the light-surface accent behind and silently broke the pairing the
+        whole system depends on — muted gold measures 1.55:1 on warm cream and
+        may never carry a mark there.
+
+  Both are answered the same way: the merchant chooses a whole SCHEME, and each
+  scheme sets its dark-surface gold and its light-surface partner together, so
+  the two can never desynchronise.
+
+  Every ratio quoted below was re-measured in Phase 10 against WCAG 2.2 relative
+  luminance and matches Phase 2 section 3 exactly.
+
+  ---------------------------------------------------------------------------
+  THE `part` PARAMETER
+
+  The scheme has two effects on the document head and they cannot sit together:
+  the theme-color meta belongs early, and the style element must come AFTER the
+  stylesheets or its :root declarations lose to the ones in design-tokens.css.
+
+  Rather than resolve the scheme twice in two places — the exact desynchronising
+  that G2 exists to prevent — the snippet is rendered twice and told which part
+  to emit:
+
+    {% render 'css-variables', part: 'meta' %}    early in <head>
+    {% render 'css-variables', part: 'style' %}   after the stylesheets
+{%- endcomment -%}
+
+{%- liquid
+  comment
+    One scheme ships today: the approved brand palette. The select exists so a
+    second is additive rather than a refactor, but adding one is NOT an
+    engineering decision — it needs brand approval of the colour values and a
+    measurement pass across the section 3 matrix. Anything less reintroduces
+    exactly the risk G1 exists to remove.
+  endcomment
+  assign scheme = settings.color_scheme | default: 'godsquad'
+
+  case scheme
+    when 'godsquad'
+      assign c_ink = '#0D0C0A'
+      assign c_cream = '#F3EFE6'
+      assign c_gold = '#D8C08A'
+      assign c_gold_strong = '#82672B'
+    else
+      assign c_ink = '#0D0C0A'
+      assign c_cream = '#F3EFE6'
+      assign c_gold = '#D8C08A'
+      assign c_gold_strong = '#82672B'
+  endcase
+
+  assign which = part | default: 'style'
+-%}
+
+{%- if which == 'meta' -%}
+  <meta name="theme-color" content="{{ c_ink }}">
+{%- else -%}
+{% style %}
+  :root {
+    /* The approved palette. Measured: cream on ink 17.04:1, ink on cream
+       17.04:1, gold on ink 11.01:1, gold-strong on cream 4.66:1. */
+    --gs-ink: {{ c_ink }};
+    --gs-cream: {{ c_cream }};
+    --gs-gold: {{ c_gold }};
+
+    /* G2. The light-surface partner travels with the gold it belongs to, in the
+       same scheme, so the two cannot drift apart. */
+    --gs-gold-strong: {{ c_gold_strong }};
+
+    --container-standard: {{ settings.container_width | default: 1440 }}px;
+    --radius-sm: {{ settings.radius_sm | default: 2 }}px;
+
+    {%- comment -%}
+      One ratio for the whole catalogue (Phase 2 section 27.6.5). The token
+      already exists in both shapes; this picks which one every product card in
+      the theme reads.
+    {%- endcomment -%}
+    {%- if settings.product_image_ratio == 'portrait' %}
+    --product-aspect: var(--product-aspect-wide);
+    {%- endif %}
+
+    {%- if settings.type_display_font %}
+    --font-display: {{ settings.type_display_font.family }}, {{ settings.type_display_font.fallback_families }};
+    {%- endif %}
+    {%- if settings.type_body_font %}
+    --font-body: {{ settings.type_body_font.family }}, {{ settings.type_body_font.fallback_families }};
+    {%- endif %}
+  }
+{% endstyle %}
+{%- endif -%}

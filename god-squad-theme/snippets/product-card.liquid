@@ -1,0 +1,326 @@
+{%- comment -%}
+  GOD SQUAD — Product card
+  Phase 6. The one card the whole theme uses. Every product grid renders this.
+
+  Sources of truth:
+  - PHASE-2-DESIGN-SYSTEM.md section 13 (the card), section 27 (the five
+    ecommerce questions), section 11.5 (product links), section 22.4 (hover).
+  - PHASE-1-WEBSITE-AUDIT.md for the defects it must not reproduce.
+
+  Accepts:
+  - product      {Object}  required. A Shopify product. Nothing is invented.
+  - heading_level {Number} optional, default 3. The card title's heading level.
+  - sizes        {String}  optional. The sizes attribute for the media. The
+                           caller knows the grid, so the caller computes it.
+  - eager        {Boolean} optional, default false. Load this image eagerly.
+  - show_price   {Boolean} optional, default true.
+  - show_compare_at {Boolean} optional, default true.
+  - show_swatches {Boolean} optional, default true.
+  - quick_add    {Boolean} optional, default false. See QUICK ADD below.
+
+  Usage:
+  {% render 'product-card', product: product, sizes: grid_sizes %}
+
+  FIVE PHASE 1 DEFECTS ANSWERED STRUCTURALLY
+
+  DATA-01  The prototype's three products were object literals inside a script
+           class, with no handle, URL, variant, inventory or compare-at price.
+           Everything here comes from the Shopify product object.
+  DATA-02  Prices were string concatenation (cur + '1,290'), so the currency
+           enum changed the symbol without converting the amount. Price goes
+           through the money filter against the store's own format.
+  HTML-03  Product names were <div>s, so heading navigation could not reach a
+           single product. The title is a real heading, level configurable.
+  UI-02    The card could not be reused for products with different aspect
+           ratios. The media box is a fixed ratio from one theme setting.
+  A11Y-05  Swatches were unnamed empty spans. They are decorative here and the
+           colourway names are real text, read from the product's own options.
+
+  THE ANCHOR
+  One anchor per card, wrapping the media and the title, with no other
+  interactive element inside it (Phase 2 section 11.5). The swatches and the
+  price sit outside it. The focus ring is drawn around the whole card by the
+  stylesheet's :focus-within rule, which is what section 11.5 asks for.
+
+  QUICK ADD
+  Off by default and off in every shipped configuration. When a caller does
+  pass quick_add, this renders a real Shopify cart form that works with
+  JavaScript disabled — a native POST to routes.cart_add_url. It is not
+  decorative and it is not hover-revealed (Phase 2 sections 13.7 and 27.5 both
+  forbid that). A product with more than one variant gets a link to its page
+  instead of a silent default-variant add. Phase 8 owns the cart; if it adds a
+  drawer, it replaces this form's behaviour rather than this card's structure.
+{%- endcomment -%}
+
+{%- liquid
+  assign heading_level = heading_level | default: 3
+  assign card_sizes = sizes | default: '(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw'
+
+  if show_price == nil
+    assign show_price = true
+  endif
+  if show_compare_at == nil
+    assign show_compare_at = true
+  endif
+  if show_swatches == nil
+    assign show_swatches = true
+  endif
+
+  assign img = product.featured_image
+
+  comment
+    The secondary image, for the hover swap. Global setting, off by default —
+    Phase 2 section 22.4 specifies the approved hover as a 1.03 scale plus a
+    title underline, so a swap is offered rather than imposed.
+
+    The second image is the first one that is NOT the featured image, rather
+    than images[1]: a merchant can promote any image to featured in admin
+    without reordering the others, and images[1] would then be the SAME picture
+    the card is already showing. Nothing renders when a product has only one.
+  endcomment
+  assign second_img = blank
+  if settings.card_hover_secondary_image
+    for candidate in product.images
+      unless candidate == img
+        assign second_img = candidate
+        break
+      endunless
+    endfor
+  endif
+
+  comment
+    Alt text. Shopify defaults an image's alt to the product title, and the
+    title is already inside this same link, so using it again makes the link
+    announce the product name twice. When the alt carries something the title
+    does not, it is kept. Nothing is invented either way.
+  endcomment
+  assign alt_text = img.alt
+  if alt_text == product.title
+    assign alt_text = ''
+  endif
+
+  comment
+    Sale state. A varying price shows "From X" and no compare-at: a range
+    beside a strike-through is not information. A single price compares
+    against compare_at_price_max, which for a non-varying product is the one
+    compare-at value the merchant set.
+  endcomment
+  assign on_sale = false
+  unless product.price_varies
+    if product.compare_at_price_max > product.price
+      assign on_sale = true
+    endif
+  endunless
+
+  assign loading_attr = 'lazy'
+  if eager
+    assign loading_attr = 'eager'
+  endif
+
+  comment
+    Colourways, if the product has any. The option is chosen here rather than
+    inside the markup so the markup stays a straight render with no control
+    flow to reason about. Only an option whose values carry native Shopify
+    swatches qualifies, which is what keeps every colour real store data.
+  endcomment
+  assign swatch_option = nil
+  assign swatch_names = ''
+  if show_swatches
+    for option in product.options_with_values
+      assign swatch_count = 0
+      assign names = ''
+      for value in option.values
+        if value.swatch.color or value.swatch.image
+          assign swatch_count = swatch_count | plus: 1
+          if names == blank
+            assign names = value.name
+          else
+            assign names = names | append: ', ' | append: value.name
+          endif
+        endif
+      endfor
+      if swatch_count > 1
+        assign swatch_option = option
+        assign swatch_names = names
+        break
+      endif
+    endfor
+  endif
+-%}
+
+<article class="product-card{% unless product.available %} product-card--sold-out{% endunless %}">
+  <a class="product-card__link" href="{{ product.url }}">
+    <div class="product-card__media">
+      {%- if img != blank -%}
+        {{
+          img
+          | image_url: width: 1200
+          | image_tag:
+            class: 'product-card__image',
+            widths: '180, 240, 320, 400, 480, 600, 760, 900, 1100, 1200',
+            sizes: card_sizes,
+            loading: loading_attr,
+            decoding: 'async',
+            alt: alt_text
+        }}
+
+        {%- if second_img != blank -%}
+          {%- comment -%}
+            Decorative: alt is empty because this is the same product the link
+            already names, and a second alt would make the link announce the
+            product twice. It is never the LCP candidate, so it is always lazy.
+            It carries no width/height-driven layout of its own — the stylesheet
+            lays both images over the one aspect-ratio box — so it cannot shift
+            anything when it arrives.
+          {%- endcomment -%}
+          {{
+            second_img
+            | image_url: width: 1200
+            | image_tag:
+              class: 'product-card__image product-card__image--secondary',
+              widths: '180, 240, 320, 400, 480, 600, 760, 900, 1100, 1200',
+              sizes: card_sizes,
+              loading: 'lazy',
+              decoding: 'async',
+              alt: ''
+          }}
+        {%- endif -%}
+      {%- else -%}
+        {%- comment -%}
+          No image. The tile ground still renders so the grid keeps its rhythm,
+          and nothing stands in for a photograph that does not exist.
+        {%- endcomment -%}
+        <span class="product-card__image product-card__image--empty" aria-hidden="true"></span>
+      {%- endif -%}
+
+      {%- unless product.available -%}
+        {%- comment -%}
+          Phase 2 section 27.3: availability is a badge only when no add-to-cart
+          control is visible, which is the case in a grid. Text, never colour
+          alone.
+
+          The badge has to live inside the media box to sit over the
+          photograph, and the media comes before the title, so a screen reader
+          reading this link in order would say "Sold out, Utility Cap". The
+          visible badge is therefore marked decorative and the same words are
+          repeated after the title, which puts the state where a person would
+          say it. It is still inside the one anchor, so the sold-out fact is
+          still part of the link's accessible name, which section 13.4
+          requires.
+        {%- endcomment -%}
+        <span class="product-card__badge" aria-hidden="true">{{ 'products.card.sold_out' | t }}</span>
+      {%- endunless -%}
+    </div>
+
+    <h{{ heading_level }} class="product-card__title">{{ product.title }}</h{{ heading_level }}>
+    {%- unless product.available -%}
+      {{ ' ' }}<span class="visually-hidden">{{ 'products.card.sold_out' | t }}</span>
+    {%- endunless -%}
+  </a>
+
+  {%- if show_price -%}
+    <p class="product-card__price">
+      {%- if product.price_varies -%}
+        <span class="product-card__price-prefix">{{ 'products.price.from' | t }}</span>
+        <span class="product-card__price-current">{{ product.price_min | money }}</span>
+      {%- elsif on_sale and show_compare_at -%}
+        {%- comment -%}
+          The strike-through is not the only signal: each figure carries a
+          visually hidden label, so a screen reader hears which is which.
+        {%- endcomment -%}
+        <span class="visually-hidden">{{ 'products.price.sale_price' | t }}</span>
+        <span class="product-card__price-current">{{ product.price | money }}</span>
+        <span class="visually-hidden">{{ 'products.price.regular_price' | t }}</span>
+        <s class="product-card__price-compare">{{ product.compare_at_price_max | money }}</s>
+      {%- else -%}
+        <span class="product-card__price-current">{{ product.price | money }}</span>
+      {%- endif -%}
+    </p>
+  {%- endif -%}
+
+  {%- if swatch_option != nil -%}
+    {%- comment -%}
+      Information, not controls (Phase 2 section 27.4: "The card shows swatches
+      as information, not as a control"). Because they are not controls, their
+      size is not governed by SC 2.5.8, and because the colour is never the
+      name, the colourway names sit beside the dots as visually hidden text.
+      Phase 1 DATA-03 recorded the prototype's three identical hard-coded hexes
+      as the thing this replaces.
+    {%- endcomment -%}
+    <div class="product-card__swatches">
+      {%- comment -%}
+        The names come from the list built above, which contains only the values
+        that actually render a dot. Separating on forloop.last instead would put
+        a trailing comma after the last name whenever the option's final value
+        has no swatch configured — a mixed option Shopify allows.
+      {%- endcomment -%}
+      <span class="visually-hidden">{{ swatch_option.name }}: {{ swatch_names }}</span>
+      {%- for value in swatch_option.values -%}
+        {%- if value.swatch.color -%}
+          <span class="product-card__swatch" style="--swatch-fill: {{ value.swatch.color }};" aria-hidden="true"></span>
+        {%- elsif value.swatch.image -%}
+          <span class="product-card__swatch product-card__swatch--image" style="--swatch-image: url({{ value.swatch.image | image_url: width: 40 }});" aria-hidden="true"></span>
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+  {%- endif -%}
+
+  {%- if quick_add -%}
+    <div class="product-card__actions">
+      {%- if product.variants.size > 1 -%}
+        <a class="button button--secondary button--full" href="{{ product.url }}">
+          {{ 'products.card.choose_options' | t }}
+          <span class="visually-hidden">{{ product.title }}</span>
+        </a>
+      {%- elsif product.available -%}
+        {%- comment -%}
+          The three hooks assets/cart.js needs. Without them the form still
+          posted — cart.js finds the button through its [type="submit"] fallback
+          — but it had no [data-add-to-cart-label] to write "Adding…" into and no
+          error box to put a failure in. A failed quick add reached the layout's
+          live region, so a screen-reader user heard it, and a sighted customer
+          saw the card sit there unchanged. Phase 8 owns the cart; these are its
+          contract, not this card's invention.
+
+          Phase 14 corrected the third hook's NAME. It was data-cart-error,
+          which is the attribute the drawer and the cart page use for their own
+          failure lines — a different contract, read by a different function.
+          The consequence ran both ways: a failed quick add still showed the
+          customer nothing, because showFormError looks inside the form for
+          [data-product-error]; and showCartError, which selected every
+          [data-cart-error] in the document, printed a cart-line failure onto
+          every product tile on the page. Both are fixed — the attribute here,
+          and the selector there.
+        {%- endcomment -%}
+        <form action="{{ routes.cart_add_url }}" method="post" enctype="multipart/form-data">
+          <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
+          <input type="hidden" name="quantity" value="1">
+          <button
+            class="button button--secondary button--full"
+            type="submit"
+            name="add"
+            data-add-to-cart
+            data-label-idle="{{ 'products.card.add_to_cart' | t | escape }}"
+            data-label-busy="{{ 'products.form.adding' | t | escape }}"
+          >
+            <span data-add-to-cart-label>{{ 'products.card.add_to_cart' | t }}</span>
+            <span class="visually-hidden">{{ product.title }}</span>
+          </button>
+          <p class="product-card__error" data-product-error role="alert" hidden></p>
+        </form>
+      {%- else -%}
+        {%- comment -%}
+          A real button, not a span wearing the button classes: Phase 2 section
+          10.5 forbids the latter, and aria-disabled on an element with no role
+          announces nothing. aria-disabled rather than the disabled attribute
+          keeps it in the tab order, which section 10.3 asks for so the reason
+          can be reached — the reason being the Sold out text the card already
+          carries above.
+        {%- endcomment -%}
+        <button class="button button--secondary button--full" type="button" aria-disabled="true">
+          {{ 'products.card.sold_out' | t }}
+        </button>
+      {%- endif -%}
+    </div>
+  {%- endif -%}
+</article>

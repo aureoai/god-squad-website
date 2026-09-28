@@ -1,0 +1,461 @@
+/* ============================================================================
+   GOD SQUAD — Cart line
+   Phase 8. One line of the cart, shared by the drawer and the cart page, which
+   is what makes it a component rather than markup inside one of them.
+
+   Both surfaces it appears on are ink, but nothing here names a surface: every
+   colour comes through the surface-context properties, so a merchant who
+   inverts either one does not get an unreadable cart.
+   ========================================================================== */
+
+.cart-line {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  gap: var(--space-4);
+  padding-block: var(--space-5);
+  border-block-start: var(--border-width) solid var(--color-border-current);
+}
+
+.cart-line:first-child {
+  border-block-start: 0;
+}
+
+/* ------------------------------------------------------------------ media */
+
+.cart-line__media {
+  grid-column: 1;
+  grid-row: 1 / span 2;
+}
+
+/* The image is inside a link that repeats the title link beside it, so it is
+   taken out of the tab order and out of the accessibility tree: two links to
+   the same product, one of them unnamed, is a keyboard user pressing Tab twice
+   for nothing. The visible link is still the whole thumbnail for a pointer. */
+.cart-line__media-link {
+  display: block;
+}
+
+/* height:auto is load-bearing, not tidiness. Shopify's image_tag emits width
+   and height ATTRIBUTES on the <img>, which the browser turns into
+   presentational hints for both dimensions. A rule that sets only width leaves
+   the intrinsic height in force, and aspect-ratio is then ignored entirely —
+   it only applies when one of the two is auto. Measured: the 76px cart
+   thumbnail rendered 76x900 and made every cart line 948px tall. */
+.cart-line__image {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: var(--product-aspect);
+  object-fit: cover;
+  background-color: var(--color-surface-tile);
+}
+
+.cart-line__image--empty {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: var(--product-aspect);
+  background-color: var(--color-surface-tile);
+}
+
+/* ----------------------------------------------------------------- detail */
+
+.cart-line__detail {
+  grid-column: 2;
+  min-width: 0;
+}
+
+/* The box is 24px tall even though the text is 14px. WCAG 2.2 SC 2.5.8 wants
+   24x24 for a pointer target, and neither exception rescues this one: the link
+   is not in a sentence and its height is not constrained by the line-height of
+   any non-target text around it. Measured at 14px before this was added. */
+.cart-line__title {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target-min-aa);
+  color: inherit;
+  font-family: var(--font-body);
+  font-size: var(--type-label-size);
+  font-weight: var(--type-label-weight);
+  letter-spacing: var(--type-label-ls);
+  /* Phase 18. This carried every part of the label role EXCEPT leading, so a
+     wrapped product name fell back to `normal` — 14.0px against the 17.4px the
+     same name gets on a product card. Measured at 375px, where the current
+     fixture title already wraps to two lines, so this was live on phones. */
+  line-height: var(--type-label-lh);
+  text-transform: uppercase;
+  text-decoration: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .cart-line__title:hover {
+    text-decoration: underline;
+    text-underline-offset: var(--link-underline-offset);
+    text-decoration-thickness: var(--link-underline-thickness);
+  }
+}
+
+.cart-line__variant,
+.cart-line__property {
+  margin: var(--space-2) 0 0;
+  color: var(--color-text-current-muted);
+  font-family: var(--font-body);
+  font-size: var(--type-body-sm-size);
+  line-height: var(--type-body-sm-lh);
+}
+
+.cart-line__discounts {
+  margin: var(--space-2) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cart-line__discount {
+  color: var(--accent-current);
+  font-family: var(--font-body);
+  font-size: var(--type-body-sm-size);
+  line-height: var(--type-body-sm-lh);
+}
+
+/* Shopify's own line error — most often a quantity that exceeded stock between
+   adding and checking out. Text and a rule, never colour alone. */
+.cart-line__error {
+  margin: var(--space-2) 0 0;
+  padding-inline-start: var(--space-3);
+  border-inline-start: var(--border-width-strong) solid var(--color-error-on-dark);
+  font-family: var(--font-body);
+  font-size: var(--type-body-sm-size);
+  line-height: var(--type-body-sm-lh);
+}
+
+/* No .surface-light override, for the reason recorded above .cart-drawer__error
+   in this same file: both cart surfaces hardcode surface-dark
+   (cart-drawer.liquid:53, main-cart.liquid:37) and neither schema exposes a
+   surface setting, so --color-error-on-dark is always the one that applies.
+   Phase 18 removed the sibling rules and missed this one; it is the same dead
+   branch. If a surface setting is ever added to either section, this rule and
+   the one above come back together. */
+
+/* --------------------------------------------------------------- controls */
+
+.cart-line__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  /* --space-4 16px between the stepper and Remove. SC 2.5.8's spacing
+     exception measures 24px circles centred on each target's bounding box; at
+     44px tall with 16px between them, no two circles can intersect and the
+     main rule is met outright anyway. */
+  gap: var(--space-4);
+  margin-block-start: var(--space-4);
+}
+
+.cart-line__remove {
+  display: inline-flex;
+  align-items: center;
+  /* A word, not a glyph. Phase 2 §18.1 closes the icon set to decorative
+     additions and contains no bin mark, and in a 420px drawer a word is less
+     ambiguous than an icon at 44px. It is also a real link to Shopify's own
+     removal URL, so it works with no script at all. */
+  min-height: var(--target-min);
+  color: var(--color-text-current-muted);
+  font-family: var(--font-body);
+  font-size: var(--type-body-sm-size);
+  text-decoration: underline;
+  text-underline-offset: var(--link-underline-offset);
+  text-decoration-thickness: var(--link-underline-thickness);
+  transition: color var(--transition-fast);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .cart-line__remove:hover {
+    color: inherit;
+  }
+}
+
+/* ------------------------------------------------------------------ price */
+
+.cart-line__price {
+  grid-column: 2;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-3);
+  margin-block-start: var(--space-3);
+  font-family: var(--font-body);
+  font-size: var(--type-price-size);
+  font-weight: var(--type-price-weight);
+  /* §27.6 rule 1: tracking never touches numerals. */
+  letter-spacing: var(--type-price-ls);
+}
+
+.cart-line__price-original {
+  color: var(--color-text-current-muted);
+  font-weight: var(--weight-regular);
+}
+
+/* ---------------------------------------------------------------- compact
+   The drawer. The image narrows; nothing else changes, because every control
+   in the line is already at its accessible minimum. */
+
+.cart-line--compact {
+  grid-template-columns: 76px minmax(0, 1fr);
+  gap: var(--space-3);
+}
+
+/* ------------------------------------------------------------- wide layout
+   On the cart page there is room to put the line price in its own column,
+   which is what makes a column of prices scannable. */
+
+@media (min-width: 768px) {
+  .cart-line:not(.cart-line--compact) {
+    grid-template-columns: 120px minmax(0, 1fr) auto;
+    column-gap: var(--space-6);
+  }
+
+  .cart-line:not(.cart-line--compact) .cart-line__price {
+    grid-column: 3;
+    grid-row: 1;
+    margin-block-start: 0;
+    justify-content: flex-end;
+    text-align: end;
+  }
+}
+
+/* ============================================================================
+   CART TOTALS
+   Shared by the drawer's footer and the cart page's summary. They were two
+   byte-identical copies under renamed selectors until the Phase 8 review
+   pointed out that a correction to one would never reach the other.
+   ========================================================================== */
+
+.cart-totals {
+  margin: 0 0 var(--space-4);
+}
+
+.cart-totals__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-4);
+  font-family: var(--font-body);
+  font-size: var(--type-body-sm-size);
+  color: var(--color-text-current-muted);
+}
+
+.cart-totals__row + .cart-totals__row {
+  margin-block-start: var(--space-2);
+}
+
+.cart-totals__row dd {
+  margin: 0;
+  /* §27.6 rule 1: tracking never touches numerals. */
+  letter-spacing: var(--type-price-ls);
+}
+
+.cart-totals__row--discount dt,
+.cart-totals__row--discount dd {
+  color: var(--accent-current);
+}
+
+/* The number the customer is actually about to pay, so it is the one at full
+   contrast. Phase 2 §27.2: price is never muted and never gold. */
+.cart-totals__row--final {
+  margin-block-start: var(--space-3);
+  padding-block-start: var(--space-3);
+  border-block-start: var(--border-width) solid var(--color-border-current);
+  color: inherit;
+  font-size: var(--type-body-lg-size);
+  font-weight: var(--type-price-weight);
+}
+
+.cart-totals__note {
+  margin: 0 0 var(--space-4);
+  color: var(--color-text-current-muted);
+  font-family: var(--font-body);
+  font-size: var(--type-caption-size);
+  line-height: var(--type-body-sm-lh);
+}
+
+/* ============================================================================
+   EMPTY CART
+   Shared by the same two surfaces.
+   ========================================================================== */
+
+.cart-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  flex: 1;
+  gap: var(--space-4);
+  padding-block: var(--space-8);
+}
+
+/* Phase 18 took this down to the interface-heading row. It carried the same
+   four type declarations as its own page's <h1> — measured as Playfair 40px 900
+   uppercase on both — so an empty cart rendered the page title twice, once
+   as the real <h1> and once as this <p> immediately beneath it.
+
+   PHASE-2 §6.1 gives --type-h3 Family = body, Weight = 600, Transform =
+   sentence, Usage "Interface heading", which is what this is. The search page's
+   equivalent was already the subordinate size and is now the same family too,
+   so all three empty states read as one treatment. */
+.cart-empty__title {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--type-h3-size);
+  font-weight: var(--weight-semibold);
+  line-height: var(--type-h3-lh);
+}
+
+.cart-empty__body {
+  margin: 0;
+  max-width: var(--measure-narrow);
+  color: var(--color-text-current-muted);
+  font-family: var(--font-body);
+  font-size: var(--type-body-size);
+  line-height: var(--type-body-lh);
+}
+
+/* ============================================================================
+   THE VISIBLE FAILURE LINE
+   A failed quantity change or removal reported only to a live region leaves a
+   sighted customer watching a number snap back with no explanation. Both cart
+   surfaces carry one of these, outside the node the section render replaces.
+   Text plus a rule, never colour alone (SC 1.4.1).
+   ========================================================================== */
+
+/* The CART surfaces' failure line. Phase 18 removed .product-card__error from
+   this grouping: it was also defined in component-product-card.css, which loads
+   later, and at equal specificity the later rule wins PER PROPERTY rather than
+   wholesale. The card took margin, font-size and the border from its own rule
+   and the padding and line-height from this one, so it rendered boxed — the
+   exact treatment the comment above its own rule says it is not.
+
+   Phase 12 grouped them for a good reason, "one look for this did not work,
+   wherever it happens". The reason did not survive contact with the two
+   contexts: a failure inside a 300px product tile and a failure across a cart
+   panel are not the same object, and forcing one rule to serve both is what
+   produced a card with 16px of padding on a side it never asked for.
+
+   No .surface-light override. It cannot match: both cart surfaces hardcode
+   surface-dark (cart-drawer.liquid:53, main-cart.liquid:37) and neither schema
+   exposes a surface setting, so --color-error-on-dark below is always the
+   correct one. The override was five lines that never applied. If a surface
+   setting is ever added to either section, this is the rule that has to come
+   back with it. */
+.cart-drawer__error,
+.main-cart__error {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border-inline-start: var(--border-width-strong) solid var(--color-error-on-dark);
+  color: inherit;
+  font-family: var(--font-body);
+  font-size: var(--type-body-sm-size);
+  line-height: var(--type-body-sm-lh);
+}
+
+/* ============================================================================
+   THE CART NOTE
+   Phase 14. Shopify's own cart note, rendered by snippets/cart-note.liquid on
+   both cart surfaces — which is why it is here, beside the totals and the
+   empty state, rather than in either surface's own stylesheet.
+
+   It is a native <details>. The summary is the label; the field is the body.
+   ========================================================================== */
+
+.cart-note {
+  margin-block-end: var(--space-5);
+  border-block: var(--border-width) solid var(--color-border-current-subtle);
+}
+
+.cart-note__summary {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  /* The Phase 9 floor. A disclosure the customer has to hit on a phone is a
+     primary control on this surface. */
+  min-height: var(--target-min);
+  padding-block: var(--space-3);
+  cursor: pointer;
+  color: var(--color-text-current-muted);
+  font-family: var(--font-body);
+  font-size: var(--type-label-size);
+  font-weight: var(--type-label-weight);
+  letter-spacing: var(--type-label-ls);
+  text-transform: uppercase;
+  list-style: none;
+}
+
+/* Safari paints its own disclosure triangle without this. */
+.cart-note__summary::-webkit-details-marker {
+  display: none;
+}
+
+.cart-note__summary:focus-visible {
+  outline: var(--focus-width) solid var(--focus-ring);
+  outline-offset: var(--focus-offset);
+}
+
+.cart-note__summary-label {
+  flex: 1 1 auto;
+}
+
+/* Phase 18 added the base rotation this was missing. Without it the chevron —
+   drawn pointing right — sat pointing right when closed and swung to LEFT when
+   open, which says nothing about a disclosure. Down at rest, up when open, the
+   same 180° PHASE-2 §18 line 1489 permits and the same pair the product page
+   already used. See component-facets.css for the full note; this is the second
+   of the two disclosures that had the flip without the anchor. */
+.cart-note__summary .icon {
+  flex: 0 0 auto;
+  width: var(--icon-sm);
+  height: var(--icon-sm);
+  transform: rotate(90deg);
+  transition: transform var(--transition-fast);
+}
+
+.cart-note[open] .cart-note__summary .icon {
+  transform: rotate(-90deg);
+}
+
+.cart-note__body {
+  padding-block-end: var(--space-4);
+}
+
+.cart-note__field {
+  display: block;
+  width: 100%;
+  padding: var(--space-3);
+  border: var(--border-width) solid var(--color-border-current-interactive);
+  border-radius: var(--radius-sm);
+  background-color: transparent;
+  color: inherit;
+  font-family: var(--font-body);
+  /* 16px. Below it iOS zooms the viewport the moment the field takes focus,
+     and a zoomed cart is a cart the customer has to pan to read. */
+  font-size: var(--type-body-size);
+  line-height: var(--type-body-lh);
+  /* Vertical only: a horizontally resizable field inside a 420px drawer can be
+     dragged straight out of its own panel. */
+  resize: vertical;
+}
+
+.cart-note__field:focus-visible {
+  outline: var(--focus-width) solid var(--focus-ring);
+  outline-offset: var(--focus-offset);
+}
+
+.cart-note__help {
+  margin: var(--space-2) 0 0;
+  color: var(--color-text-current-muted);
+  font-family: var(--font-body);
+  font-size: var(--type-caption-size);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cart-note__summary .icon {
+    transition: none;
+  }
+}

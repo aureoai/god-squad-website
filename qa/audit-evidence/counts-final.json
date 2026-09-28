@@ -1,0 +1,21 @@
+{
+ "total": 200,
+ "severity": {
+  "CRITICAL": 5,
+  "HIGH": 49,
+  "MEDIUM": 85,
+  "LOW": 61
+ },
+ "priority": {
+  "P0": 3,
+  "P1": 65,
+  "P2": 80,
+  "P3": 52
+ },
+ "blockers": 3,
+ "ux": 93,
+ "a11y": 27,
+ "seo": 22,
+ "perf": 20,
+ "mobile": 28
+}

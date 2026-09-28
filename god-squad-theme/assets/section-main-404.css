@@ -1,0 +1,60 @@
+/* ============================================================================
+   GOD SQUAD — Not found
+   Phase 10. The page frame for the 404 template. Every value is a token from
+   design-tokens.css. No raw hex, no magic numbers, no !important, and no
+   JavaScript.
+
+   It adds no component of its own: the one control is the shared button system
+   in component-button.css, which the layout already loads for every page.
+
+   No header-clearance rule. sections/header.liquid only sets the overlay when
+   template.name == 'index', so --header-overlay-offset resolves to zero here
+   and the section below the header is already in normal flow.
+   ========================================================================== */
+
+.main-404 {
+  width: 100%;
+  padding-block: var(--section-pad-block);
+  /* svh, not vh — the same reasoning the cart page records: on a phone the
+     retracting toolbar makes vh jump, so a vh minimum can leave the page
+     taller than the screen for no reason. */
+  min-height: 60svh;
+  /* The block is a heading, a line of text and one button. Anchored to the top
+     of a page carrying a 60svh floor it would sit above a large empty area
+     with nothing to fill it, so the floor centres its own content rather than
+     just reserving height. */
+  display: grid;
+  align-content: center;
+}
+
+/* -------------------------------------------------------------------- copy */
+
+.main-404__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--type-display-m-size);
+  font-weight: var(--weight-black);
+  line-height: var(--type-display-m-lh);
+  letter-spacing: var(--type-display-m-ls);
+  text-transform: uppercase;
+}
+
+.main-404__body {
+  margin: var(--space-5) 0 0;
+  /* Phase 2 section 26.2: a single explanatory line is held to the narrow
+     measure rather than the full container width. */
+  max-width: var(--measure-narrow);
+  color: var(--color-text-current-muted);
+  font-family: var(--font-body);
+  font-size: var(--type-body-lg-size);
+  line-height: var(--type-body-lg-lh);
+}
+
+/* ------------------------------------------------------------------ action */
+
+.main-404__action {
+  margin-block-start: var(--space-7);
+}
+
+/* No min-width rules follow. Nothing on this page changes shape with the
+   viewport: one column, one measure, one button that is never full width. */

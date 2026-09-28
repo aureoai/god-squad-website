@@ -1,0 +1,57 @@
+{%- comment -%}
+  GOD SQUAD — image-fallback
+  Renders a photograph bundled in assets/ as a stand-in for a merchant image
+  that has not been chosen yet.
+
+  WHY THIS EXISTS.
+  An image_picker setting cannot carry a default, so on a store whose Files
+  library is empty every photographic slot in the theme resolves to blank. Each
+  section then degraded to an empty dark frame — correct for a live store the
+  merchant is still filling, but it makes the theme unrecognisable against the
+  design it implements, which is the state anyone evaluating or testing it sees
+  first.
+
+  A merchant image always wins. Every caller keeps its own `if image != blank`
+  branch and reaches this snippet only in the else, so uploading a photograph in
+  the Theme Editor replaces the stand-in with no code change.
+
+  Accepts:
+  - file     {String}  required. Asset filename, e.g. 'hero.webp'.
+  - class    {String}  required. The class the section's stylesheet targets.
+  - sizes    {String}  optional. Passed through unchanged.
+  - width    {Number}  REQUIRED. Intrinsic width, so the slot reserves space.
+  - height   {Number}  REQUIRED. Intrinsic height.
+  - loading  {String}  optional, default 'lazy'.
+  - priority {Boolean} optional. Adds fetchpriority="high"; the hero uses it.
+  - alt      {String}  optional, default empty.
+
+  NO srcset. One bundled file has one intrinsic size, so declaring candidate
+  widths for it would name files that do not exist — the browser would fetch a
+  404 or, worse, pick the same file and believe it had chosen a smaller one.
+  This is the one place in the theme where a single-candidate image is correct,
+  because the merchant path above it is fully responsive.
+
+  The alt default is empty on purpose: a stand-in photograph carries no meaning
+  the surrounding copy does not already carry, so announcing it would add noise
+  to a screen reader for an image that is about to be replaced.
+{%- endcomment -%}
+{%- comment -%}
+  width and height are UNCONDITIONAL, and the contract above makes them
+  required. Emitted inside an {% if %} they were invisible to Theme Check, which
+  reported ImgWidthAndHeight because it cannot evaluate the condition — and the
+  rule it reports is a real one: an img with no intrinsic size reserves no space
+  and the page reflows when it loads. All seven call sites already pass both, so
+  requiring them costs nothing, and a caller that forgets now renders a visibly
+  empty attribute instead of silently shifting the layout.
+{%- endcomment -%}
+<img
+  class="{{ class }}"
+  src="{{ file | asset_url }}"
+  {% if sizes != blank %}sizes="{{ sizes }}"{% endif %}
+  width="{{ width }}"
+  height="{{ height }}"
+  loading="{{ loading | default: 'lazy' }}"
+  {% if priority %}fetchpriority="high"{% endif %}
+  decoding="async"
+  alt="{{ alt | default: '' | escape }}"
+>

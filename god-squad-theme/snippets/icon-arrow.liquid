@@ -1,0 +1,19 @@
+{%- comment -%}
+  Renders the trailing arrow used on call-to-action buttons and editorial links.
+
+  Source: phase-3-assets/icons/icon-arrow.svg, drawn in Phase 3 to the Phase 2
+  contract — 24x24 canvas, stroke 1.5, currentColor, round caps and joins.
+
+  Accepts:
+  - class: {String} optional extra class names
+
+  Usage:
+  {% render 'icon-arrow', class: 'icon--sm' %}
+
+  This replaces the prototype's literal "→" glyph. Phase 2 section 10.4 records
+  why: Jost carries neither U+2192 nor U+20B1, so the glyph falls back to a
+  per-platform face and the arrow's weight and baseline shift between devices.
+  Trailing affordances are inline SVG in currentColor, hidden from assistive
+  technology, because the button's label already says where it goes.
+{%- endcomment -%}
+<svg class="icon icon--arrow {{ class }}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 12h15.5"/><path d="M13.5 6 19.5 12l-6 6"/></svg>

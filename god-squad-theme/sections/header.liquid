@@ -1,0 +1,541 @@
+{%- comment -%}
+  GOD SQUAD — Header
+  Phase 4. Lives in the header section group.
+
+  Sources of truth:
+  - PHASE-2-DESIGN-SYSTEM.md section 19 and PHASE-2-DESIGN-TOKENS.css for
+    heights, logo sizing, spacing, states and targets.
+  - PHASE-1-WEBSITE-AUDIT.md for the defects this section must not reproduce.
+  - PHASE-3-ASSET-SYSTEM.md for the icon set and the logo position.
+
+  Four Phase 1 findings are answered structurally rather than by styling:
+
+  NAV-01  Below 900px the prototype had no navigation at all: the links were
+          hidden and the hamburger was an inert span. Here the menu is a real
+          <button> controlling a real panel, with aria-expanded, Escape, focus
+          return and a focus trap.
+  A11Y-01 Search, account and cart were bare <img> with tabIndex -1. Here they
+          are a <button> and two <a> elements, each with an accessible name and
+          a target of at least --target-min (44px).
+  A11Y-03 Three nav links measured 2.4-2.9:1 over the hero sky. When the header
+          overlays a section, --scrim-header is applied unconditionally. The
+          scrim is not optional, because the contrast failure was not optional.
+  NAV-06  The active state was a hard-coded gold underline on Home. Here it
+          comes from link.active and carries aria-current="page".
+
+  Navigation destinations are NOT hard-coded. Phase 1 Appendix A records every
+  destination as BUSINESS INFORMATION REQUIRED; a linklist resolves that
+  correctly, because the merchant sets the menu in the admin.
+{%- endcomment -%}
+
+{%- liquid
+  assign menu = section.settings.menu
+  assign has_menu = false
+  if menu != blank and linklists[menu].links.size > 0
+    assign has_menu = true
+  endif
+
+  comment
+    THE FALLBACK NAV, USED ONLY WHEN NO MENU IS ASSIGNED.
+
+    Navigation is merchant data: the handle is pinned in header-group.json and
+    the links are built in Shopify admin under Content > Menus. Until that menu
+    exists, linklists[menu] is empty, has_menu is false, and the header used to
+    render no nav at all — on a fresh store that reads as a broken theme rather
+    than as an unconfigured one.
+
+    So the design's own four items stand in. A real menu always wins: every
+    consumer below branches on has_menu and reaches this only in the else.
+
+    EVERY URL HERE RESOLVES TO A TEMPLATE THIS THEME SHIPS. That is the whole
+    constraint, and it is why Shop points at routes.all_products_collection_url
+    (/collections/all, which renders collection.json) and NOT at /collections,
+    which is the collection LIST route and needs a list-collections template
+    this theme does not have. The two are different routes and conflating them
+    serves Shopify's error page. The anchors are real: templates/index.json
+    sets anchor_id "story" and "verse" on the sections that carry them.
+  endcomment
+  assign fb_urls = routes.root_url
+  assign fb_urls = fb_urls | append: '|' | append: routes.all_products_collection_url
+  assign fb_urls = fb_urls | append: '|' | append: routes.root_url | append: '#story'
+  assign fb_urls = fb_urls | append: '|' | append: routes.root_url | append: '#verse'
+  assign fb_urls = fb_urls | split: '|'
+
+  comment
+    Each label is translated into its own variable first. Chaining | t onto an
+    append would hand the filter the whole concatenated string instead of a
+    single key, and the lookup would miss.
+  endcomment
+  assign t_home = 'header.fallback_nav.home' | t
+  assign t_shop = 'header.fallback_nav.shop' | t
+  assign t_story = 'header.fallback_nav.story' | t
+  assign t_verse = 'header.fallback_nav.verse' | t
+
+  assign fb_titles = t_home
+  assign fb_titles = fb_titles | append: '|' | append: t_shop
+  assign fb_titles = fb_titles | append: '|' | append: t_story
+  assign fb_titles = fb_titles | append: '|' | append: t_verse
+  assign fb_titles = fb_titles | split: '|'
+
+  assign overlay = false
+  if section.settings.overlay_first_section and template.name == 'index'
+    assign overlay = true
+  endif
+
+  assign header_classes = 'header surface-dark'
+  if section.settings.sticky
+    assign header_classes = header_classes | append: ' header--sticky'
+  endif
+  if overlay
+    assign header_classes = header_classes | append: ' header--overlay'
+  endif
+-%}
+
+{%- if overlay -%}
+  {%- comment -%}
+    The header publishes the clearance it needs so the section beneath it can
+    keep content clear of the navigation without knowing anything about the
+    header's settings. Consumed by sections/hero.liquid via
+    var(--header-overlay-offset, 0px), which resolves to zero when the header
+    sits in normal flow.
+  {%- endcomment -%}
+  <style>
+    :root { --header-overlay-offset: var(--header-height-mobile); }
+    @media (min-width: 1024px) {
+      :root { --header-overlay-offset: var(--header-height-desktop); }
+    }
+  </style>
+{%- endif -%}
+
+<header
+  class="{{ header_classes }}"
+  data-header
+  {% if overlay %}data-header-overlay{% endif %}
+>
+  {%- if overlay -%}
+    {%- comment -%} Mandatory backing. See A11Y-03 above. {%- endcomment -%}
+    <div class="header__scrim" aria-hidden="true"></div>
+  {%- endif -%}
+
+  <div class="header__inner container">
+    {%- comment -%} Left: menu button on small screens {%- endcomment -%}
+    <div class="header__cluster header__cluster--start">
+      <button
+        type="button"
+        class="header__control header__menu-toggle"
+        aria-expanded="false"
+        aria-controls="MobileMenu"
+        data-menu-toggle
+      >
+        {% render 'icon-menu' %}
+        <span class="visually-hidden">{{ 'header.menu' | t }}</span>
+      </button>
+    </div>
+
+    {%- comment -%} Centre-left: the wordmark {%- endcomment -%}
+    <div class="header__branding">
+      {%- if settings.logo != blank -%}
+        <a
+          class="header__logo-link"
+          href="{{ routes.root_url }}"
+          {% if template.name == 'index' %}aria-current="page"{% endif %}
+        >
+          {%- liquid
+            assign logo_alt = settings.logo.alt | default: shop.name
+            assign logo_h_desktop = section.settings.logo_height_desktop
+            assign logo_h_mobile = section.settings.logo_height_mobile
+            comment
+              Built with append, not with "#{...}". Shopify's Liquid does not
+              interpolate inside a string literal — the documented way to build
+              one is the append filter — so the previous form emitted the
+              literal text "#{logo_h_desktop}px" into the style attribute.
+
+              That is not a harmless no-op. A custom property accepts almost
+              any token sequence, so the declaration was VALID with a garbage
+              value, and being set on the img it shadowed the good :root
+              defaults in design-tokens.css. header.css then resolved
+              height: var(--logo-height-mobile) to that garbage, which is
+              invalid at computed-value time, so height fell back to its
+              initial value auto and the logo drew at its intrinsic size.
+
+              It only bit once a logo was uploaded: with the setting empty the
+              section takes the text-wordmark branch below, which is why every
+              fixture in Phases 4-9 rendered correctly.
+            endcomment
+            assign logo_style = '--logo-height-desktop: ' | append: logo_h_desktop | append: 'px; --logo-height-mobile: ' | append: logo_h_mobile | append: 'px;'
+          -%}
+          {{
+            settings.logo
+            | image_url: width: 600
+            | image_tag:
+              class: 'header__logo',
+              alt: logo_alt,
+              widths: '120, 180, 240, 360, 480, 600',
+              sizes: '(min-width: 1024px) 240px, 160px',
+              preload: true,
+              style: logo_style
+          }}
+        </a>
+      {%- else -%}
+        {%- comment -%}
+          No logo uploaded. The bundled wordmark stands in, so the header reads
+          as the brand rather than as plain text; uploading one in Theme settings
+          > Brand takes the branch above. The style attribute is built the same
+          way and for the same reason documented there.
+        {%- endcomment -%}
+        {%- liquid
+          assign logo_h_desktop = section.settings.logo_height_desktop
+          assign logo_h_mobile = section.settings.logo_height_mobile
+          assign logo_style = '--logo-height-desktop: ' | append: logo_h_desktop | append: 'px; --logo-height-mobile: ' | append: logo_h_mobile | append: 'px;'
+        -%}
+        <a
+          class="header__logo-link"
+          href="{{ routes.root_url }}"
+          {% if template.name == 'index' %}aria-current="page"{% endif %}
+        >
+          <img
+            class="header__logo"
+            src="{{ 'logo.png' | asset_url }}"
+            width="500"
+            height="500"
+            sizes="(min-width: 1024px) 240px, 160px"
+            style="{{ logo_style }}"
+            alt="{{ shop.name | escape }}"
+          >
+        </a>
+      {%- endif -%}
+    </div>
+
+    {%- comment -%} Centre: primary navigation, desktop only {%- endcomment -%}
+    <nav class="header__nav" aria-label="{{ 'header.primary_nav' | t }}">
+      <ul class="header__nav-list" role="list">
+        {%- if has_menu -%}
+          {%- for link in linklists[menu].links -%}
+            <li class="header__nav-item">
+              <a
+                class="header__nav-link{% if link.active %} is-active{% endif %}"
+                href="{{ link.url }}"
+                {% if link.active %}aria-current="page"{% endif %}
+              >{{ link.title }}</a>
+            </li>
+          {%- endfor -%}
+        {%- else -%}
+          {%- for title in fb_titles -%}
+            <li class="header__nav-item">
+              <a class="header__nav-link" href="{{ fb_urls[forloop.index0] }}">{{ title }}</a>
+            </li>
+          {%- endfor -%}
+        {%- endif -%}
+      </ul>
+    </nav>
+
+    {%- comment -%} Right: utility navigation {%- endcomment -%}
+    <div class="header__cluster header__cluster--end">
+      {%- if section.settings.show_search -%}
+        <a class="header__control" href="{{ routes.search_url }}" data-search-trigger>
+          {% render 'icon-search' %}
+          <span class="visually-hidden">{{ 'header.search' | t }}</span>
+        </a>
+      {%- endif -%}
+
+      {%- comment -%}
+        PHASE 15 REPLACED THIS CONTROL AND NOTHING ELSE IN THIS FILE.
+
+        It was an <a href="{{ routes.account_url }}"> carrying the Phase 3
+        account icon and a label that switched between Account and Log in. It
+        worked, and Shopify still redirects that URL. It is gone anyway,
+        because the platform moved underneath it.
+
+        WHY A SHOPIFY-OWNED ELEMENT IS HERE AT ALL.
+        Legacy customer accounts were deprecated on 2026-02-26 and the account
+        experience now lives on Shopify's own host, off this origin. A link
+        could only ever navigate away from the store; <shopify-account> opens
+        the account sheet in place. On a store still using legacy accounts
+        Shopify documents the component as degrading to exactly what this used
+        to be — a link straight to the sign-in page — so the replacement loses
+        nothing on either system.
+
+        ONE ENTRY POINT, NOT TWO.
+        The old link is not kept beside this. Two account controls on one
+        header would behave differently from each other — one opening a sheet,
+        one navigating off-site — and there is no width in the 375px end
+        cluster for a second control anyway.
+
+        WHAT THIS THEME DOES NOT CONTROL.
+        Shopify owns this element and says it may change it independently of
+        the theme. Only three things are contractual: the published
+        --shopify-account-* custom properties, ::part(signed-out-avatar), and
+        the signed-out-avatar slot. assets/header.css uses the first and this
+        uses the third; nothing here reaches inside it with a descendant
+        selector, because that would break the first time Shopify ships a
+        change.
+
+        THE SLOT KEEPS THE BRAND'S OWN ICON.
+        Without it the header would show Shopify's default avatar in place of
+        the account mark Phase 3 drew to the Phase 2 icon contract. The slot is
+        the documented way to supply your own, so the icon survives the change.
+
+        THE HIDDEN LABEL IS DELIBERATE BELT AND BRACES.
+        Dawn ships this component with no label at all, which implies Shopify
+        names the control itself. "Implies" is not good enough for a Level A
+        requirement that cannot be tested from here, so a visually-hidden name
+        goes in the slot. If Shopify sets its own aria-label that label wins
+        and this is ignored; if it does not, the control is still named. The
+        two outcomes are "correct" and "correct" — whereas omitting it has an
+        outcome that is an unnamed control (SC 4.1.2).
+      {%- endcomment -%}
+      {%- if shop.customer_accounts_enabled and section.settings.show_account -%}
+        <shopify-account
+          class="header__control header__account"
+          menu="{{ settings.customer_account_menu | default: 'customer-account-main-menu' }}"
+        >
+          <span class="header__account-avatar" slot="signed-out-avatar">
+            {% render 'icon-account' %}
+            <span class="visually-hidden">{{ 'header.account' | t }}</span>
+          </span>
+        </shopify-account>
+      {%- endif -%}
+
+      {%- comment -%}
+        PHASE 8 TOUCHED THIS ELEMENT AND NOTHING ELSE IN THIS FILE.
+
+        It is still the same link to the cart page it was in Phase 4, and with
+        scripting off that is exactly what it does. assets/cart.js cancels the
+        navigation and opens the drawer instead — and leaves a modified click
+        alone, so cmd-click still opens the cart page in a new tab.
+
+        Its contents moved into a snippet because the Section Rendering API
+        needs a second copy of this markup to swap in after a cart change, and
+        two hand-maintained copies drift. The count is still cart.item_count
+        and is still absent when the cart is empty (NAV-09: the prototype's
+        badge was the literal character 0).
+      {%- endcomment -%}
+      {%- comment -%}
+        aria-controls names the drawer, so it is only truthful while a drawer
+        exists. With the cart set to "Cart page" the layout renders no drawer
+        and this stays what it already is without scripting: a link to the cart.
+      {%- endcomment -%}
+      {%- comment -%}
+        PHASE 16: aria-controls carries a SECOND condition now. The drawer is
+        absent for two reasons and this only knew about one — layout/theme.liquid
+        skips it when the merchant picks the cart page, and ALSO on the cart
+        template itself, because there the page is the cart. Without the second
+        arm this control pointed aria-controls at an element id that does not
+        exist on /cart.
+
+        The reasoning lives out here rather than among the attributes. A
+        comment tag with whitespace control, placed INSIDE an element tag, eats
+        the space before it: the first attempt at this fix shipped
+        data-cart-bubble and aria-controls fused into one attribute, which
+        removed the hook the entire cart script binds to. Phase 13 recorded the
+        neighbouring hazard, that comment prose containing tag syntax closes the
+        tag that encloses it.
+      {%- endcomment -%}
+      {%- if section.settings.show_cart -%}
+        <a
+          class="header__control header__cart"
+          href="{{ routes.cart_url }}"
+          data-cart-bubble
+          {% if settings.cart_type != 'page' and template.name != 'cart' %}aria-controls="CartDrawer"{% endif %}
+        >
+          {% render 'cart-icon-bubble' %}
+        </a>
+      {%- endif -%}
+    </div>
+  </div>
+
+  {%- comment -%}
+    Phase 13. The search panel.
+
+    The trigger above is still a plain link to routes.search_url and is left
+    byte-identical on purpose: with no script it navigates to a complete search
+    page, and a <button> with no script would be a control that does nothing.
+    assets/header.js intercepts the click and opens this instead, so the panel
+    is an enhancement over a working link rather than a replacement for one.
+
+    An overlay panel rather than an expanding field, and that is arithmetic. At
+    375px the header row has 327px of content box; the start cluster takes 44,
+    the end cluster 148 and the two grid gaps 32, leaving the branding track
+    103px. A usable field needs about 180. Taking it means the logo goes or the
+    bar reflows — which is redesigning the header, not preserving it. A layer
+    adds nothing to that row.
+
+    aria-haspopup and aria-expanded are NOT printed here. They would be a claim
+    about behaviour that only exists once the script runs; header.js applies
+    them at upgrade.
+  {%- endcomment -%}
+  <div class="header__search" id="HeaderSearch" data-search-panel hidden>
+    <form
+      class="header__search-form"
+      action="{{ routes.search_url }}"
+      method="get"
+      role="search"
+    >
+      <label class="visually-hidden" for="HeaderSearchInput">
+        {{ 'header.search_label' | t }}
+      </label>
+      <input
+        class="header__search-input"
+        id="HeaderSearchInput"
+        type="search"
+        name="q"
+        placeholder="{{ 'header.search_placeholder' | t }}"
+        data-search-input
+      >
+      {%- comment -%}
+        type=product, matching what templates/search.json configures, so the
+        header and the results page agree on what is being searched.
+      {%- endcomment -%}
+      <input type="hidden" name="type" value="product">
+      <button type="submit" class="button button--primary header__search-submit">
+        {{ 'header.search' | t }}
+      </button>
+      <button type="button" class="header__control" data-search-close>
+        {% render 'icon-close' %}
+        <span class="visually-hidden">{{ 'header.search_close' | t }}</span>
+      </button>
+    </form>
+  </div>
+
+  {%- comment -%} Mobile menu panel {%- endcomment -%}
+  <div class="header__panel" id="MobileMenu" data-menu-panel hidden>
+    <div class="header__panel-header">
+      <span class="header__panel-title">{{ 'header.menu' | t }}</span>
+      <button type="button" class="header__control" data-menu-close>
+        {% render 'icon-close' %}
+        <span class="visually-hidden">{{ 'header.close' | t }}</span>
+      </button>
+    </div>
+
+    <nav class="header__panel-nav" aria-label="{{ 'header.mobile_nav' | t }}">
+      <ul class="header__panel-list" role="list">
+        {%- if has_menu -%}
+          {%- for link in linklists[menu].links -%}
+            <li>
+              <a
+                class="header__panel-link{% if link.active %} is-active{% endif %}"
+                href="{{ link.url }}"
+                {% if link.active %}aria-current="page"{% endif %}
+              >{{ link.title }}</a>
+            </li>
+          {%- endfor -%}
+        {%- else -%}
+          {%- for title in fb_titles -%}
+            <li>
+              <a class="header__panel-link" href="{{ fb_urls[forloop.index0] }}">{{ title }}</a>
+            </li>
+          {%- endfor -%}
+        {%- endif -%}
+      </ul>
+    </nav>
+
+    {%- comment -%}
+      The no_menu notice now shows only in the Theme Editor. On the storefront
+      the fallback nav above stands in, so telling a shopper the merchant has
+      not picked a menu would be addressing the wrong person; in the editor the
+      merchant IS the reader, and the cue to build a real menu still matters.
+    {%- endcomment -%}
+    {%- if has_menu == false and request.design_mode -%}
+      <p class="header__panel-empty">
+        {{ 'header.no_menu' | t }}
+      </p>
+    {%- endif -%}
+  </div>
+
+  <div class="header__overlay" data-menu-overlay hidden></div>
+</header>
+
+{% schema %}
+{
+  "name": "Header",
+  "tag": "div",
+  "class": "header-section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Branding"
+    },
+    {
+      "type": "paragraph",
+      "content": "The logo is uploaded once in Theme settings > Brand, so the header and the footer always show the same mark. Its size on each is set here."
+    },
+    {
+      "type": "range",
+      "id": "logo_height_desktop",
+      "label": "Logo height, desktop",
+      "min": 40,
+      "max": 120,
+      "step": 2,
+      "unit": "px",
+      "default": 78
+    },
+    {
+      "type": "range",
+      "id": "logo_height_mobile",
+      "label": "Logo height, mobile",
+      "min": 32,
+      "max": 80,
+      "step": 2,
+      "unit": "px",
+      "default": 56
+    },
+    {
+      "type": "header",
+      "content": "Navigation"
+    },
+    {
+      "type": "link_list",
+      "id": "menu",
+      "label": "Menu",
+      "default": "main-menu",
+      "info": "Destinations are set on the menu in Navigation, not in the theme."
+    },
+    {
+      "type": "header",
+      "content": "Utility"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_search",
+      "label": "Show search",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_account",
+      "label": "Show account",
+      "default": true,
+      "info": "Only appears when customer accounts are enabled for the store, under Settings > Customer accounts. The account pages themselves are hosted by Shopify and are styled in the checkout and accounts editor, not in this theme."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_cart",
+      "label": "Show cart",
+      "default": true,
+      "info": "Leave this on unless you have another route to the cart. With it off the header has no cart control at all, and a customer who has added something can only reach the cart by typing the address."
+    },
+    {
+      "type": "header",
+      "content": "Behaviour"
+    },
+    {
+      "type": "checkbox",
+      "id": "sticky",
+      "label": "Stick to the top on scroll",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "overlay_first_section",
+      "label": "Overlay the first section on the home page",
+      "default": true,
+      "info": "Matches the approved design, where the header sits over the hero. A dark scrim is always applied behind the header when this is on: without it three of the five links measured 2.4-2.9:1 against the sky, below the 4.5:1 minimum."
+    }
+  ],
+  "enabled_on": {
+    "groups": [
+      "header"
+    ]
+  }
+}
+{% endschema %}

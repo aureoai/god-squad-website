@@ -1,0 +1,662 @@
+<!doctype html>
+<html lang="en" class="no-js"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>God Squad — Phase 8 harness</title>
+<link rel="stylesheet" href="assets/design-tokens.css">
+<link rel="stylesheet" href="assets/base.css">
+<link rel="stylesheet" href="assets/header.css">
+<link rel="stylesheet" href="assets/component-container.css">
+<link rel="stylesheet" href="assets/component-button.css">
+<link rel="stylesheet" href="assets/component-pagination.css">
+<link rel="stylesheet" href="assets/component-quantity.css">
+<link rel="stylesheet" href="assets/component-cart-line.css">
+<script>document.documentElement.classList.replace('no-js','js');</script>
+<script>window.Shopify = window.Shopify || {routes: {root: '/'}};</script>
+<script src="assets/header.js" defer></script>
+<script src="assets/cart.js" defer></script>
+</head><body class="template-product">
+<a class="skip-link" href="#MainContent">Skip to content</a>
+<div id="shopify-section-header" class="shopify-section"><header
+  class="header surface-dark"
+  data-header
+  
+><div class="header__inner container"><div class="header__cluster header__cluster--start">
+      <button
+        type="button"
+        class="header__control header__menu-toggle"
+        aria-expanded="false"
+        aria-controls="MobileMenu"
+        data-menu-toggle
+      >
+        <svg class="icon icon--menu " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3.75 6.5h16.5"/><path d="M3.75 12h16.5"/><path d="M3.75 17.5h16.5"/></svg>
+
+        <span class="visually-hidden">Menu</span>
+      </button>
+    </div><div class="header__branding"><a
+          class="header__logo-link"
+          href="/"
+          
+        ><img class="header__logo" src="img/logo.png" srcset="img/logo.png 120w, img/logo.png 180w, img/logo.png 240w, img/logo.png 360w, img/logo.png 480w, img/logo.png 600w" sizes="(min-width: 1024px) 240px, 160px" width="500" height="500" style="--logo-height-desktop: 78px; --logo-height-mobile: 56px;" alt="God Squad">
+        </a></div><nav class="header__nav" aria-label="Primary">
+      <ul class="header__nav-list" role="list"><li class="header__nav-item">
+              <a
+                class="header__nav-link"
+                href="/"
+                
+              >Home</a>
+            </li><li class="header__nav-item">
+              <a
+                class="header__nav-link"
+                href="/collections/all"
+                
+              >Shop</a>
+            </li><li class="header__nav-item">
+              <a
+                class="header__nav-link"
+                href="/#story"
+                
+              >Our Story</a>
+            </li><li class="header__nav-item">
+              <a
+                class="header__nav-link"
+                href="/#verse"
+                
+              >Verse</a>
+            </li></ul>
+    </nav><div class="header__cluster header__cluster--end"><a class="header__control" href="/search" data-search-trigger>
+          <svg class="icon icon--search " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="6.25"/><path d="M15.6 15.6 20.5 20.5"/></svg>
+
+          <span class="visually-hidden">Search</span>
+        </a><shopify-account
+          class="header__control header__account"
+          menu="customer-account-main-menu"
+        >
+          <span class="header__account-avatar" slot="signed-out-avatar">
+            <svg class="icon icon--account " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="8.25" r="3.75"/><path d="M4.75 19.75a7.25 7.25 0 0 1 14.5 0"/></svg>
+
+            <span class="visually-hidden">Account</span>
+          </span>
+        </shopify-account><a
+          class="header__control header__cart"
+          href="/cart"
+          data-cart-bubble
+          aria-controls="CartDrawer"
+        >
+          <svg class="icon icon--cart " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.5 7.75h13l-1.1 11.3a1.4 1.4 0 0 1-1.4 1.2H8a1.4 1.4 0 0 1-1.4-1.2Z"/><path d="M9 10V6.9a3 3 0 0 1 6 0V10"/></svg>
+
+<span class="visually-hidden">Cart</span>
+        </a></div>
+  </div><div class="header__search" id="HeaderSearch" data-search-panel hidden>
+    <form
+      class="header__search-form"
+      action="/search"
+      method="get"
+      role="search"
+    >
+      <label class="visually-hidden" for="HeaderSearchInput">
+        Search the store
+      </label>
+      <input
+        class="header__search-input"
+        id="HeaderSearchInput"
+        type="search"
+        name="q"
+        placeholder="Search the store…"
+        data-search-input
+      ><input type="hidden" name="type" value="product">
+      <button type="submit" class="button button--primary header__search-submit">
+        Search
+      </button>
+      <button type="button" class="header__control" data-search-close>
+        <svg class="icon icon--close " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.4 6.4 17.6 17.6"/><path d="M17.6 6.4 6.4 17.6"/></svg>
+
+        <span class="visually-hidden">Close search</span>
+      </button>
+    </form>
+  </div><div class="header__panel" id="MobileMenu" data-menu-panel hidden>
+    <div class="header__panel-header">
+      <span class="header__panel-title">Menu</span>
+      <button type="button" class="header__control" data-menu-close>
+        <svg class="icon icon--close " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.4 6.4 17.6 17.6"/><path d="M17.6 6.4 6.4 17.6"/></svg>
+
+        <span class="visually-hidden">Close menu</span>
+      </button>
+    </div>
+
+    <nav class="header__panel-nav" aria-label="Main">
+      <ul class="header__panel-list" role="list"><li>
+              <a
+                class="header__panel-link"
+                href="/"
+                
+              >Home</a>
+            </li><li>
+              <a
+                class="header__panel-link"
+                href="/collections/all"
+                
+              >Shop</a>
+            </li><li>
+              <a
+                class="header__panel-link"
+                href="/#story"
+                
+              >Our Story</a>
+            </li><li>
+              <a
+                class="header__panel-link"
+                href="/#verse"
+                
+              >Verse</a>
+            </li></ul>
+    </nav></div>
+
+  <div class="header__overlay" data-menu-overlay hidden></div>
+</header>
+
+
+</div>
+<main id="MainContent" tabindex="-1">
+<div id="shopify-section-main" class="shopify-section"><link rel="stylesheet" href="assets/section-main-product.css">
+<script src="assets/product.js" defer="defer"></script>
+
+<div
+  class="main-product surface-light main-product--media-stacked main-product--sticky-info"
+  data-main-product
+  data-section-id="main"
+  data-url="/products/signature-tee"
+  data-string-unavailable="Unavailable"
+  
+>
+  <div class="main-product__inner container">
+    <div class="main-product__media">
+      <div
+    class="product-gallery product-gallery--stacked"
+    data-product-gallery
+    data-gallery-layout="stacked"
+  >
+    <div class="product-gallery__viewport" data-gallery-viewport><div
+          class="product-gallery__slide"
+          id="main-media-101"
+          data-media-id="101"
+          data-media-type="image"
+        >
+          <div class="product-gallery__frame"><img class="product-gallery__image" src="img/tee.webp" srcset="img/tee.webp 360w, img/tee.webp 480w, img/tee.webp 640w, img/tee.webp 800w, img/tee.webp 960w, img/tee.webp 1200w, img/tee.webp 1400w, img/tee.webp 1600w, img/tee.webp 1800w" sizes="(min-width: 1440px) 840px, (min-width: 1106px) calc((100vw - 128px) * 0.64), (min-width: 1024px) calc(100vw - 480px), (min-width: 768px) calc(100vw - 64px), calc(100vw - 48px)" width="900" height="900" loading="eager" decoding="async" alt="Signature Oversized Tee, front"></div>
+        </div><div
+          class="product-gallery__slide is-active"
+          id="main-media-102"
+          data-media-id="102"
+          data-media-type="image"
+        >
+          <div class="product-gallery__frame"><img class="product-gallery__image" src="img/hoodie.webp" srcset="img/hoodie.webp 360w, img/hoodie.webp 480w, img/hoodie.webp 640w, img/hoodie.webp 800w, img/hoodie.webp 960w, img/hoodie.webp 1200w, img/hoodie.webp 1400w, img/hoodie.webp 1600w, img/hoodie.webp 1800w" sizes="(min-width: 1440px) 840px, (min-width: 1106px) calc((100vw - 128px) * 0.64), (min-width: 1024px) calc(100vw - 480px), (min-width: 768px) calc(100vw - 64px), calc(100vw - 48px)" width="900" height="900" loading="eager" fetchpriority="high" decoding="async" alt="Signature Oversized Tee, back"></div>
+        </div><div
+          class="product-gallery__slide"
+          id="main-media-103"
+          data-media-id="103"
+          data-media-type="image"
+        >
+          <div class="product-gallery__frame"><img class="product-gallery__image" src="img/cap.webp" srcset="img/cap.webp 360w, img/cap.webp 480w, img/cap.webp 640w, img/cap.webp 800w, img/cap.webp 960w, img/cap.webp 1200w, img/cap.webp 1400w, img/cap.webp 1600w, img/cap.webp 1800w" sizes="(min-width: 1440px) 840px, (min-width: 1106px) calc((100vw - 128px) * 0.64), (min-width: 1024px) calc(100vw - 480px), (min-width: 768px) calc(100vw - 64px), calc(100vw - 48px)" width="900" height="900" loading="lazy" decoding="async" alt="Signature Oversized Tee, detail"></div>
+        </div><div
+          class="product-gallery__slide"
+          id="main-media-104"
+          data-media-id="104"
+          data-media-type="image"
+        >
+          <div class="product-gallery__frame"><img class="product-gallery__image" src="img/story.webp" srcset="img/story.webp 360w, img/story.webp 480w, img/story.webp 640w, img/story.webp 800w, img/story.webp 960w, img/story.webp 1200w, img/story.webp 1400w, img/story.webp 1600w, img/story.webp 1800w" sizes="(min-width: 1440px) 840px, (min-width: 1106px) calc((100vw - 128px) * 0.64), (min-width: 1024px) calc(100vw - 480px), (min-width: 768px) calc(100vw - 64px), calc(100vw - 48px)" width="535" height="348" loading="lazy" decoding="async" alt="Signature Oversized Tee, worn"></div>
+        </div></div><nav class="product-gallery__rail" aria-label="Product media" data-gallery-rail>
+        <ul class="product-gallery__thumbs" role="list"><li class="product-gallery__thumb-item">
+              <a
+                class="product-gallery__thumb"
+                href="#main-media-101"
+                data-gallery-thumb
+                data-media-id="101"
+                
+              ><img class="product-gallery__thumb-image" src="img/tee.webp" srcset="img/tee.webp 80w, img/tee.webp 120w, img/tee.webp 160w, img/tee.webp 240w" sizes="80px" width="900" height="900" loading="lazy" decoding="async" alt=""><span class="visually-hidden">Go to media 1 of 4</span>
+              </a>
+            </li><li class="product-gallery__thumb-item">
+              <a
+                class="product-gallery__thumb is-active"
+                href="#main-media-102"
+                data-gallery-thumb
+                data-media-id="102"
+                aria-current="true"
+              ><img class="product-gallery__thumb-image" src="img/hoodie.webp" srcset="img/hoodie.webp 80w, img/hoodie.webp 120w, img/hoodie.webp 160w, img/hoodie.webp 240w" sizes="80px" width="900" height="900" loading="lazy" decoding="async" alt=""><span class="visually-hidden">Go to media 2 of 4</span>
+              </a>
+            </li><li class="product-gallery__thumb-item">
+              <a
+                class="product-gallery__thumb"
+                href="#main-media-103"
+                data-gallery-thumb
+                data-media-id="103"
+                
+              ><img class="product-gallery__thumb-image" src="img/cap.webp" srcset="img/cap.webp 80w, img/cap.webp 120w, img/cap.webp 160w, img/cap.webp 240w" sizes="80px" width="900" height="900" loading="lazy" decoding="async" alt=""><span class="visually-hidden">Go to media 3 of 4</span>
+              </a>
+            </li><li class="product-gallery__thumb-item">
+              <a
+                class="product-gallery__thumb"
+                href="#main-media-104"
+                data-gallery-thumb
+                data-media-id="104"
+                
+              ><img class="product-gallery__thumb-image" src="img/story.webp" srcset="img/story.webp 80w, img/story.webp 120w, img/story.webp 160w, img/story.webp 240w" sizes="80px" width="535" height="348" loading="lazy" decoding="async" alt=""><span class="visually-hidden">Go to media 4 of 4</span>
+              </a>
+            </li></ul>
+      </nav></div>
+    </div><div
+      class="main-product__info"
+    ><p class="main-product__vendor">God Squad</p><p
+        class="main-product__low-stock"
+        data-low-stock
+        hidden
+      >Low stock</p><h1 class="main-product__title">Signature Oversized Tee</h1><p class="main-product__price price" data-price>
+        <span class="visually-hidden" data-price-label-sale hidden>Sale price</span>
+        <span class="price__current" data-price-current>&#8369;1,290.00</span>
+        <span class="price__compare-wrap" data-price-compare-wrap hidden>
+          <span class="visually-hidden">Regular price</span>
+          <s class="price__compare" data-price-compare>&#8369;0.00</s>
+        </span></p><form method="post" action="/cart/add" accept-charset="UTF-8" enctype="multipart/form-data" id="ProductForm-main" class="shopify-product-form main-product__form" data-product-form="true"><input type="hidden" name="form_type" value="product"><input type="hidden" name="utf8" value="✓"><input
+          type="hidden"
+          name="id"
+          value="9102"
+          data-variant-input
+          
+        >
+
+        <div class="variant-picker" data-variant-picker><fieldset
+        class="variant-picker__option"
+        data-option-position="1"
+      >
+        <legend class="variant-picker__legend">
+          <span class="variant-picker__legend-name">Size</span><span class="variant-picker__legend-value" data-option-value-for="1">S</span>
+        </legend>
+
+        <div class="variant-picker__values"><input
+              class="variant-picker__input visually-hidden"
+              type="radio"
+              id="main-option-1-1"
+              name="main-option-1"
+              value="XS"
+              data-option-position="1"
+              
+              
+            >
+            <label
+              class="variant-picker__value"
+              for="main-option-1-1"
+            ><span class="variant-picker__value-text">XS</span></label><input
+              class="variant-picker__input visually-hidden"
+              type="radio"
+              id="main-option-1-2"
+              name="main-option-1"
+              value="S"
+              data-option-position="1"
+              checked
+              
+            >
+            <label
+              class="variant-picker__value"
+              for="main-option-1-2"
+            ><span class="variant-picker__value-text">S</span></label><input
+              class="variant-picker__input visually-hidden"
+              type="radio"
+              id="main-option-1-3"
+              name="main-option-1"
+              value="M"
+              data-option-position="1"
+              
+              
+            >
+            <label
+              class="variant-picker__value"
+              for="main-option-1-3"
+            ><span class="variant-picker__value-text">M</span></label><input
+              class="variant-picker__input visually-hidden"
+              type="radio"
+              id="main-option-1-4"
+              name="main-option-1"
+              value="L"
+              data-option-position="1"
+              
+              data-unavailable="true"
+            >
+            <label
+              class="variant-picker__value variant-picker__value--unavailable"
+              for="main-option-1-4"
+            ><span class="variant-picker__value-text">L</span> <span class="visually-hidden" data-unavailable-note>Unavailable</span></label><input
+              class="variant-picker__input visually-hidden"
+              type="radio"
+              id="main-option-1-5"
+              name="main-option-1"
+              value="XL"
+              data-option-position="1"
+              
+              
+            >
+            <label
+              class="variant-picker__value"
+              for="main-option-1-5"
+            ><span class="variant-picker__value-text">XL</span></label></div>
+      </fieldset></div><div class="main-product__quantity">
+            <p class="main-product__quantity-label" id="QuantityLabel-main">
+              Quantity
+            </p>
+            <div
+  class="quantity"
+  data-quantity
+  
+>
+  <button
+    type="button"
+    class="quantity__button"
+    data-quantity-step="-1"
+    aria-disabled="true"
+  >
+    <svg class="icon icon--minus " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4.75 12h14.5"/></svg>
+
+    <span class="visually-hidden">Decrease quantity for Signature Oversized Tee</span>
+  </button>
+
+  <label class="visually-hidden" for="Quantity-main">Quantity for Signature Oversized Tee</label>
+  <input
+    class="quantity__input"
+    id="Quantity-main"
+    type="number"
+    name="quantity"
+    value="1"
+    min="1"
+    step="1"
+    
+    inputmode="numeric"
+    autocomplete="off"
+    
+    
+    data-quantity-input
+  >
+
+  <button
+    type="button"
+    class="quantity__button"
+    data-quantity-step="1"
+    
+  >
+    <svg class="icon icon--plus " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 4.75v14.5"/><path d="M4.75 12h14.5"/></svg>
+
+    <span class="visually-hidden">Increase quantity for Signature Oversized Tee</span>
+  </button>
+</div>
+
+          </div><div class="main-product__actions"><button
+            type="submit"
+            name="add"
+            class="button button--primary button--full main-product__submit"
+            data-add-to-cart
+            data-label-idle="Add to bag"
+            data-label-busy="Adding…"
+            data-label-sold-out="Sold out"data-label-unavailable="Unavailable"
+            
+          >
+            <span data-add-to-cart-label>Add to bag</span>
+          </button><div data-shopify="payment-button" class="shopify-payment-button" data-harness-stub="payment-button"><button type="button" class="shopify-payment-button__button">Buy it now</button></div></div><div
+          class="main-product__error"
+          data-product-error
+          role="alert"
+          hidden
+        ></div><div
+          class="main-product__success"
+          data-product-success
+          role="status"
+          hidden
+        >
+          <span data-product-success-text></span><a class="main-product__success-link button button--secondary" href="/cart">
+            View cart
+          </a>
+        </div></form><dl class="main-product__meta"><div class="main-product__meta-row">
+              <dt>Type</dt>
+              <dd>T-shirt</dd>
+            </div><div
+              class="main-product__meta-row"
+              data-variant-sku-row
+              
+            >
+              <dt>SKU</dt>
+              <dd data-variant-sku>GS-TEE-S</dd>
+            </div></dl></div><div class="main-product__story"><details class="main-product__details" open>
+            <summary class="main-product__details-summary">
+              <span>Description</span>
+              <svg class="icon icon--chevron " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9.5 5.5 16 12l-6.5 6.5"/></svg>
+
+            </summary>
+            <div class="main-product__description rte"><p>Heavyweight cotton, cut boxy and built to last. Printed in small runs.</p><p>Every piece is produced in limited quantity so the people wearing it are not wearing what everyone else is wearing.</p><p>Fit is oversized. Take your usual size for the intended drape, or one down for a regular fit.</p><ul><li>Ribbed collar</li><li>Double-stitched hems</li><li>Machine wash cold</li></ul></div>
+          </details></div>
+  </div><script type="application/json" data-variant-data>
+    [{
+          "id": 9101,
+          "available": true,
+          "options": ["XS"],
+          "price": "&#8369;1,290.00",
+          "compare_at_price": null,
+          "media_id": 101,
+          "sku": "","low_stock": false,
+          "quantity_rule": null
+        },{
+          "id": 9102,
+          "available": true,
+          "options": ["S"],
+          "price": "&#8369;1,290.00",
+          "compare_at_price": null,
+          "media_id": 102,
+          "sku": "GS-TEE-S","low_stock": false,
+          "quantity_rule": null
+        },{
+          "id": 9103,
+          "available": true,
+          "options": ["M"],
+          "price": "&#8369;1,290.00",
+          "compare_at_price": null,
+          "media_id": null,
+          "sku": "","low_stock": false,
+          "quantity_rule": null
+        },{
+          "id": 9104,
+          "available": false,
+          "options": ["L"],
+          "price": "&#8369;1,290.00",
+          "compare_at_price": null,
+          "media_id": null,
+          "sku": "","low_stock": false,
+          "quantity_rule": null
+        },{
+          "id": 9105,
+          "available": true,
+          "options": ["XL"],
+          "price": "&#8369;1,290.00",
+          "compare_at_price": null,
+          "media_id": null,
+          "sku": "","low_stock": false,
+          "quantity_rule": null
+        }]
+  </script><script type="application/ld+json">
+    {
+  "@context": "http://schema.org/",
+  "@type": "ProductGroup",
+  "@id": "/products/signature-tee",
+  "name": "Signature Oversized Tee",
+  "url": "/products/signature-tee",
+  "description": "Heavyweight cotton, cut boxy and built to last. Printed in small runs.Every piece is produced in limited quantity so the people wearing it are not wearing what everyone else is wearing.Fit is oversized. Take your usual size for the intended drape, or one down for a regular fit.Ribbed collarDouble-stitched hemsMachine wash cold",
+  "image": [
+    "img/tee.webp",
+    "img/hoodie.webp",
+    "img/cap.webp",
+    "img/story.webp"
+  ],
+  "brand": {
+    "@type": "Brand",
+    "name": "God Squad"
+  },
+  "offers": [
+    {
+      "@type": "Offer",
+      "@id": "/products/signature-tee?variant=9101",
+      "availability": "http://schema.org/InStock",
+      "price": "1290.00",
+      "priceCurrency": "PHP",
+      "url": "/products/signature-tee?variant=9101"
+    },
+    {
+      "@type": "Offer",
+      "@id": "/products/signature-tee?variant=9102",
+      "availability": "http://schema.org/InStock",
+      "price": "1290.00",
+      "priceCurrency": "PHP",
+      "url": "/products/signature-tee?variant=9102"
+    },
+    {
+      "@type": "Offer",
+      "@id": "/products/signature-tee?variant=9103",
+      "availability": "http://schema.org/InStock",
+      "price": "1290.00",
+      "priceCurrency": "PHP",
+      "url": "/products/signature-tee?variant=9103"
+    },
+    {
+      "@type": "Offer",
+      "@id": "/products/signature-tee?variant=9104",
+      "availability": "http://schema.org/OutOfStock",
+      "price": "1290.00",
+      "priceCurrency": "PHP",
+      "url": "/products/signature-tee?variant=9104"
+    },
+    {
+      "@type": "Offer",
+      "@id": "/products/signature-tee?variant=9105",
+      "availability": "http://schema.org/InStock",
+      "price": "1290.00",
+      "priceCurrency": "PHP",
+      "url": "/products/signature-tee?variant=9105"
+    }
+  ]
+}
+  </script>
+</div>
+
+
+</div>
+</main>
+<div id="shopify-section-cart-drawer" class="shopify-section"><link rel="stylesheet" href="assets/section-cart-drawer.css">
+
+<div
+  class="cart-drawer surface-dark"
+  id="CartDrawer"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="CartDrawerTitle"
+  data-cart-drawer
+  data-auto-open="true"
+  hidden
+><div class="cart-drawer__overlay" data-cart-overlay aria-hidden="true"></div>
+
+  <div class="cart-drawer__panel">
+    <div class="cart-drawer__header"><h2 class="cart-drawer__title" id="CartDrawerTitle" tabindex="-1">
+        Your cart
+      </h2>
+      <button type="button" class="cart-drawer__close" data-cart-close>
+        <svg class="icon icon--close " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.4 6.4 17.6 17.6"/><path d="M17.6 6.4 6.4 17.6"/></svg>
+
+        <span class="visually-hidden">Close cart</span>
+      </button>
+    </div><div class="visually-hidden" role="status" aria-live="polite" data-cart-drawer-status></div><p class="cart-drawer__error" data-cart-error role="alert" hidden></p>
+
+    <div class="cart-drawer__inner" data-cart-drawer-inner><div class="cart-empty">
+  <p class="cart-empty__title">Your cart is empty.</p>
+  <p class="cart-empty__body">Find something that speaks to your purpose.</p>
+  <a class="button button--accent" href="/">
+    Shop the collection
+    <svg class="icon icon--arrow " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 12h15.5"/><path d="M13.5 6 19.5 12l-6 6"/></svg>
+
+  </a>
+</div>
+</div>
+  </div>
+</div>
+
+
+</div>
+<div id="CartStatus" class="visually-hidden" role="status" aria-live="polite" data-cart-no-inert></div>
+<div hidden data-cart-no-inert data-cart-strings
+  data-added="Added to your cart."
+  data-updated="Cart updated."
+  data-removed="Removed from your cart."
+  data-note-saved="Order note saved."
+  data-quantity-announce="Quantity: [count]"
+  data-error-generic="Unable to update your cart. Please try again."
+  data-error-network="We could not reach the store. Check your connection and try again."></div>
+<div id="shopify-section-brand-values" class="shopify-section"><link rel="stylesheet" href="assets/section-brand-values.css">
+
+<div class="brand-values surface-dark brand-values--cols-4 brand-values--dividers">
+  <div class="brand-values__inner container"><ul class="brand-values__list" role="list"><li
+          class="brand-values__item"
+          
+        ><div class="brand-values__body">
+              <svg class="icon icon--crown brand-values__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3.75 17.75V7.25l4.5 4.25L12 5.5l3.75 6 4.5-4.25v10.5Z"/><path d="M3.75 14.5h16.5"/></svg>
+<span class="brand-values__title">Faith Driven</span><span class="brand-values__sub">More Than Clothing</span></div></li><li
+          class="brand-values__item"
+          
+        ><div class="brand-values__body">
+              <svg class="icon icon--community brand-values__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="8.25" r="2.9"/><path d="M6.9 19.25a5.1 5.1 0 0 1 10.2 0"/><circle cx="5.3" cy="10.4" r="2.15"/><path d="M2 18.5a3.75 3.75 0 0 1 2.95-3.66"/><circle cx="18.7" cy="10.4" r="2.15"/><path d="M22 18.5a3.75 3.75 0 0 0-2.95-3.66"/></svg>
+<span class="brand-values__title">Community</span><span class="brand-values__sub">People With Purpose</span></div></li><li
+          class="brand-values__item"
+          
+        ><div class="brand-values__body">
+              <svg class="icon icon--globe brand-values__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 3v18"/><path d="M3 12h18"/><path d="M4.2 7.5h15.6"/><path d="M4.2 16.5h15.6"/><path d="M12 3a5 9 0 0 1 0 18"/><path d="M12 3a5 9 0 0 0 0 18"/></svg>
+<span class="brand-values__title">Worldwide</span><span class="brand-values__sub">Shipping Available</span></div></li><li
+          class="brand-values__item"
+          
+        ><div class="brand-values__body">
+              <svg class="icon icon--diamond brand-values__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.75 3.75h10.5L21 9.5 12 20.5 3 9.5Z"/><path d="M3 9.5h18"/><path d="m6.75 3.75 2.75 5.75L12 20.5"/><path d="m17.25 3.75-2.75 5.75L12 20.5"/></svg>
+<span class="brand-values__title">Premium Quality</span><span class="brand-values__sub">Crafted To Inspire</span></div></li></ul></div>
+</div>
+</div>
+<div id="shopify-section-footer" class="shopify-section"><link rel="stylesheet" href="assets/section-footer.css"><footer class="footer surface-dark" role="contentinfo">
+  <div class="footer__inner container"><div class="footer__brand"><a class="footer__logo-link" href="/"><img class="footer__logo" src="img/logo.png" srcset="img/logo.png 112w, img/logo.png 168w, img/logo.png 224w, img/logo.png 336w" sizes="112px" width="500" height="500" loading="lazy" alt=""><span class="visually-hidden">God Squad</span>
+      </a><div class="footer__lockup-text"><p class="footer__tagline">Different People.<br />
+Same Purpose.</p></div><nav class="footer__social" aria-label="Social"><ul class="footer__social-list" role="list"><li>
+                  <a class="footer__link footer__social-link" href="https://example.com/instagram">
+                    <svg class="icon icon--instagram " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3.5" y="3.5" width="17" height="17" rx="4.75"/><circle cx="12" cy="12" r="3.9"/><path d="M16.95 7.05h.01"/></svg>
+
+                    <span class="visually-hidden">Instagram</span>
+                  </a>
+                </li><li>
+                  <a class="footer__link footer__social-link" href="https://example.com/facebook">
+                    <svg class="icon icon--facebook " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M17.5 3.25h-2.75a4.75 4.75 0 0 0-4.75 4.75v2.75H7.25v4h2.75v6.5h4v-6.5h2.75l.75-4h-3.5V8a.75.75 0 0 1 .75-.75h2.75Z"/></svg>
+
+                    <span class="visually-hidden">Facebook</span>
+                  </a>
+                </li><li>
+                  <a class="footer__link footer__social-link" href="https://example.com/tiktok">
+                    <svg class="icon icon--tiktok " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9.5 11.75a4.25 4.25 0 1 0 4.25 4.25V3.75a5.25 5.25 0 0 0 5.25 5.25"/></svg>
+
+                    <span class="visually-hidden">TikTok</span>
+                  </a>
+                </li><li>
+                  <a class="footer__link footer__social-link" href="https://example.com/youtube">
+                    <svg class="icon icon--youtube " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2.9 16.85a23.6 23.6 0 0 1 0-9.7 2.1 2.1 0 0 1 1.47-1.47 48.5 48.5 0 0 1 15.26 0 2.1 2.1 0 0 1 1.47 1.47 23.6 23.6 0 0 1 0 9.7 2.1 2.1 0 0 1-1.47 1.47 48.5 48.5 0 0 1-15.26 0 2.1 2.1 0 0 1-1.47-1.47Z"/><path d="m10 14.9 4.7-2.9-4.7-2.9Z"/></svg>
+
+                    <span class="visually-hidden">YouTube</span>
+                  </a>
+                </li></ul>
+          </nav><p class="footer__strapline">A Brighter Tomorrow</p></div><div class="footer__utility"><nav class="footer__policies" aria-label="Policies">
+            <ul class="footer__policy-list" role="list"><li>
+                    <a class="footer__link" href="/policies/refund-policy">Refund policy</a>
+                  </li><li>
+                    <a class="footer__link" href="/policies/privacy-policy">Privacy policy</a>
+                  </li></ul>
+          </nav></div><div class="footer__bottom">
+      <p class="footer__copyright">
+        © 2026 God Squad
+      </p>
+    </div></div>
+</footer>
+
+
+</div>
+</body></html>

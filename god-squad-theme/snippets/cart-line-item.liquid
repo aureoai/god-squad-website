@@ -1,0 +1,220 @@
+{%- comment -%}
+  GOD SQUAD — Cart line
+  Phase 8. One line of the cart, used by the drawer and by the cart page.
+
+  Accepts:
+  - item     {Object}  required. A Shopify line_item.
+  - index    {Number}  required. forloop.index — the line's 1-based position.
+  - form_id  {String}  optional. The id of the cart form, for inputs that are
+                       not descendants of it.
+  - scope    {String}  optional. Namespaces every id this line emits. Two
+                       surfaces can render the same cart line, and an id built
+                       from the line key alone collides across them — which
+                       silently re-points one copy's <label for> at the other
+                       copy's input.
+  - compact  {Boolean} optional, default false. The drawer size.
+  - eager    {Boolean} optional, default false. Load this thumbnail eagerly.
+                       True only for the first line of the cart PAGE, where it
+                       is the largest above-the-fold element.
+
+  Usage:
+  {% for item in cart.items %}
+    {% render 'cart-line-item', item: item, index: forloop.index %}
+  {% endfor %}
+
+  THE LINE WORKS WITH JAVASCRIPT OFF.
+  The quantity field is name="updates[]" — Shopify's own documented cart form
+  field — and removal is item.url_to_remove, Shopify's own documented removal
+  link. Submitting the surrounding form updates the cart; following the link
+  removes the line. The Ajax layer intercepts both and does the same thing
+  without a reload. Nothing in this file is script-only.
+
+  updates[] IS POSITIONAL.
+  The array index maps to the cart line number, so exactly one input is
+  emitted per line, in cart.items order, with no gaps. A quantity field wrapped
+  in a condition that can be false would shift every later line's quantity onto
+  the wrong product. That is why the input is never conditional here.
+
+  FIELD NAMES THAT LOOK RIGHT AND ARE NOT.
+  line_item.product_title and line_item.variant_title do not exist in Liquid —
+  they exist only in the Ajax Cart API's JSON, which is a different API and the
+  usual source of this mistake. The name comes from item.product.title and the
+  variant line from item.options_with_values, guarded by
+  has_only_default_variant so a product with no options does not print a
+  spurious "Title: Default Title" row.
+
+  item.key, NOT item.id.
+  In a cart context item.id is the variant id, and two lines can share one —
+  the same variant with different properties, or split by an automatic
+  discount. The key identifies the line. It is also not stable across cart
+  mutations, so the script re-reads it from freshly rendered markup rather than
+  caching it.
+{%- endcomment -%}
+
+{%- liquid
+  assign line_classes = 'cart-line'
+  if compact
+    assign line_classes = line_classes | append: ' cart-line--compact'
+  endif
+
+  assign id_scope = scope | default: 'Cart'
+  assign qty_id = id_scope | append: '-Quantity-' | append: item.key | append: '-' | append: index
+
+  comment
+    The thumbnail's slot, which the component fixes: 76px in the drawer, 96px
+    on the cart page below --bp-md and 120px from it up. A flat declaration
+    under-declared the widest of the three.
+  endcomment
+  assign media_sizes = '(min-width: 768px) 120px, 96px'
+  if compact
+    assign media_sizes = '76px'
+  endif
+
+  assign media_loading = 'lazy'
+  if eager
+    assign media_loading = 'eager'
+  endif
+  assign has_discount = false
+  if item.original_line_price > item.final_line_price
+    assign has_discount = true
+  endif
+-%}
+
+<li class="{{ line_classes }}" data-cart-line data-line-key="{{ item.key | escape }}" data-line-index="{{ index }}">
+  <div class="cart-line__media">
+    {%- if item.image != blank -%}
+      {%- comment -%}
+        The image is inside the product link with the title, so it carries no
+        alt of its own — repeating the product name would make the link
+        announce it twice. This is the same rule the Phase 6 product card uses.
+      {%- endcomment -%}
+      <a class="cart-line__media-link" href="{{ item.url }}" tabindex="-1" aria-hidden="true">
+        {{
+          item.image
+          | image_url: width: 300
+          | image_tag:
+            class: 'cart-line__image',
+            widths: '76, 96, 120, 152, 192, 240, 300',
+            sizes: media_sizes,
+            loading: media_loading,
+            decoding: 'async',
+            alt: ''
+        }}
+      </a>
+    {%- else -%}
+      <span class="cart-line__image cart-line__image--empty" aria-hidden="true"></span>
+    {%- endif -%}
+  </div>
+
+  <div class="cart-line__detail">
+    <a class="cart-line__title" href="{{ item.url }}">{{ item.product.title }}</a>
+
+    {%- unless item.product.has_only_default_variant -%}
+      <p class="cart-line__variant">
+        {%- for option in item.options_with_values -%}
+          <span class="cart-line__variant-part">
+            <span class="visually-hidden">{{ option.name }}: </span>{{ option.value }}
+          </span>
+          {%- unless forloop.last %}<span aria-hidden="true"> / </span>{% endunless -%}
+        {%- endfor -%}
+      </p>
+    {%- endunless -%}
+
+    {%- comment -%}
+      Line properties a merchant or app has attached. Shopify's convention is
+      that a property whose name begins with an underscore is private, so it is
+      not shown, and an empty value means nothing was chosen.
+
+      PHASE 17: BOTH HALVES ARE ESCAPED, AND THAT IS NOT OPTIONAL.
+      Shopify Liquid does not escape output. A line item property is supplied by
+      whoever posted to /cart/add.js, which makes both its name and its value
+      untrusted input rendered into markup. Without the filter, a property value
+      of "</p><img src=x onerror=...>" closed this paragraph and produced a live
+      element with an event handler — verified by rendering it.
+
+      The theme already escapes search.terms for exactly this reason
+      (sections/main-search.liquid); this was the inconsistency, not the policy.
+    {%- endcomment -%}
+    {%- if item.properties != blank -%}
+      {%- for property in item.properties -%}
+        {%- assign first_char = property.first | slice: 0 -%}
+        {%- if property.last != blank and first_char != '_' -%}
+          <p class="cart-line__property">{{ property.first | escape }}: {{ property.last | escape }}</p>
+        {%- endif -%}
+      {%- endfor -%}
+    {%- endif -%}
+
+    {%- comment -%}
+      Discounts Shopify has applied to this line. Rendered from the platform's
+      own allocations; the theme creates no discount logic of its own.
+    {%- endcomment -%}
+    {%- if item.line_level_discount_allocations.size > 0 -%}
+      <ul class="cart-line__discounts" role="list">
+        {%- for allocation in item.line_level_discount_allocations -%}
+          <li class="cart-line__discount">
+            {{ allocation.discount_application.title }}
+            (&minus;{{ allocation.amount | money }})
+          </li>
+        {%- endfor -%}
+      </ul>
+    {%- endif -%}
+
+    {%- comment -%}
+      Shopify sets error_message on a line it could not honour — most often a
+      quantity that exceeded stock between adding and checking out. It is the
+      platform's own text, not a string this theme writes.
+    {%- endcomment -%}
+    {%- if item.error_message != blank -%}
+      <p class="cart-line__error" role="alert">{{ item.error_message }}</p>
+    {%- endif -%}
+
+    <div class="cart-line__controls">
+      {% render 'quantity-selector',
+        id: qty_id,
+        name: 'updates[]',
+        value: item.quantity,
+        min: 1,
+        describe: item.product.title,
+        form: form_id,
+        line_key: item.key,
+        compact: compact
+      %}
+
+      {%- comment -%}
+        The floor is one, not zero. Stepping a quantity down to nothing would
+        make the minus button destructive at its last press — the brief's rule
+        is "do not allow quantity below 1" — so the minus disables at one and
+        removal is the explicit control beside it.
+      {%- endcomment -%}
+
+      {%- comment -%}
+        Removal. A text control rather than a glyph: Phase 2 §18.1 closes the
+        icon set to decorative additions and contains no trash mark, and in a
+        420px drawer a word is less ambiguous than a bin at 44px. The
+        destination is Shopify's own item.url_to_remove, so it works with no
+        script; the cart script cancels the navigation and does the same thing
+        through the Ajax API.
+      {%- endcomment -%}
+      <a
+        class="cart-line__remove"
+        href="{{ item.url_to_remove }}"
+        data-cart-remove
+        data-line-key="{{ item.key | escape }}"
+      >
+        <span aria-hidden="true">{{ 'cart.remove' | t }}</span>
+        <span class="visually-hidden">{{ 'cart.remove_title' | t: title: item.product.title }}</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="cart-line__price">
+    {%- if has_discount -%}
+      <span class="visually-hidden">{{ 'products.price.sale_price' | t }}</span>
+      <span class="cart-line__price-final">{{ item.final_line_price | money }}</span>
+      <span class="visually-hidden">{{ 'products.price.regular_price' | t }}</span>
+      <s class="cart-line__price-original">{{ item.original_line_price | money }}</s>
+    {%- else -%}
+      <span class="cart-line__price-final">{{ item.final_line_price | money }}</span>
+    {%- endif -%}
+  </div>
+</li>

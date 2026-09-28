@@ -1,0 +1,193 @@
+{%- comment -%}
+  GOD SQUAD — grid-sizes
+  Phase 12. The product grid's `sizes` attribute, derived once.
+
+  Accepts:
+  - cols_d   {Number} required. The desktop column CEILING (Phase 6: the grid is
+                      auto-fill with a floor, so this is the most it will paint).
+  - cols_t   {Number} required. The tablet ceiling.
+  - cols_m   {Number} required. The mobile ceiling.
+  - chrome_d {Number} optional, default 96. Horizontal chrome at the desktop
+                      tier — gutters plus anything the section puts beside the
+                      grid. featured-collection's copy-column preset passes 128.
+
+  Usage:
+  {%- capture card_sizes -%}
+    {% render 'grid-sizes', cols_d: cols_d, cols_t: cols_t, cols_m: cols_m %}
+  {%- endcapture -%}
+
+  WHY THIS IS A SNIPPET AND NOT THREE COPIES.
+
+  It was three copies — featured-collection, main-collection and main-search each
+  carried the same ninety lines. Phase 10 found that the desktop clause fired
+  below its own breakpoint, booked it as a blocker, and fixed it in
+  main-collection. The other two copies kept the bug for two phases, because the
+  fix was applied to an instance rather than to the rule. Phase 10's own document
+  recorded the duplication as debt; this discharges it.
+
+  TWO CORRECTNESS RULES THIS ENCODES, BOTH LEARNED THE HARD WAY.
+
+  1. A clause may not claim a width before the layout that produces it applies.
+     The desktop threshold is derived from column arithmetic alone, so at three
+     columns it computes 976 — but the desktop column count does not take effect
+     until --bp-lg 1024. Left unfloored, the clause declared 280px for a slot
+     painting 452px between 976 and 1023.
+
+  2. A clause may not divide by more columns than actually fit. At the container
+     cap the row stops growing, so the track is a fixed pixel value — but the
+     grid is auto-fill with a 272px floor, so it paints only as many columns as
+     that floor allows. With the shipped maximum of 4 columns and the container
+     narrowed to its 1200px minimum, dividing by the REQUESTED 4 declares 253px
+     for a track that actually paints 346px: a 27% under-declaration, which makes
+     the browser fetch a candidate it then has to upscale.
+
+  Both errors run in the same direction — under-declaring — which is the
+  direction that costs image quality.
+{%- endcomment -%}
+
+{%- liquid
+  assign gap = 32
+  comment
+    Below --bp-md the grid tightens its column gap to --space-4 16px
+    (component-product-card.css) and relaxes its track floor to 8rem. A narrower
+    gap makes the cards WIDER, so the mobile clauses have to be computed against
+    16 or they under-declare the slot.
+  endcomment
+  assign gap_m = 16
+  assign col_min = 272
+  assign col_min_m = 128
+
+  assign chrome_m = 48
+  assign chrome_t = 64
+  assign chrome_d = chrome_d | default: 96
+
+  assign container = settings.container_width | default: 1440
+
+  comment
+    Desktop.
+  endcomment
+  assign need_d = cols_d | times: col_min
+  assign need_d = cols_d | minus: 1 | times: gap | plus: need_d
+  assign threshold_d = need_d | plus: chrome_d
+  comment
+    Rule 1: never claim a width before its layout applies.
+  endcomment
+  if threshold_d < 1024
+    assign threshold_d = 1024
+  endif
+
+  assign cols_d_low = cols_d | minus: 1
+  if cols_d_low < 1
+    assign cols_d_low = 1
+  endif
+
+  comment ---------------------------------------------------- tablet
+    Does cols_t fit at 768, the tier's own minimum? If not, the tier never
+    reaches it, because the next tier starts at 1024.
+  endcomment
+  assign need_t = cols_t | times: col_min
+  assign need_t = cols_t | minus: 1 | times: gap | plus: need_t
+  assign row_t_min = 768 | minus: chrome_t
+  assign cols_t_used = cols_t
+  if need_t > row_t_min
+    assign cols_t_used = cols_t | minus: 1
+  endif
+  if cols_t_used < 1
+    assign cols_t_used = 1
+  endif
+
+  comment
+    Mobile: the floor is 8rem/128px below 768 and the gap is 16px.
+  endcomment
+  assign need_m = cols_m | times: col_min_m
+  assign need_m = cols_m | minus: 1 | times: gap_m | plus: need_m
+  assign threshold_m = need_m | plus: chrome_m
+  assign cols_m_low = cols_m | minus: 1
+  if cols_m_low < 1
+    assign cols_m_low = 1
+  endif
+
+  assign gaps_d = cols_d | minus: 1 | times: gap
+  assign gaps_d_low = cols_d_low | minus: 1 | times: gap
+  assign gaps_t = cols_t_used | minus: 1 | times: gap
+  assign gaps_m = cols_m | minus: 1 | times: gap_m
+  assign gaps_m_low = cols_m_low | minus: 1 | times: gap_m
+
+  comment ------------------------------------------- the capped row
+    Above the container cap the row stops growing, so the first clause is a
+    fixed pixel value rather than a vw expression.
+
+    Rule 2: divide by what FITS, not by what was asked for. One more column fits
+    for every (col_min + gap) of room, once the first column's own width is
+    accounted for — so the capacity test adds one gap to the row before dividing.
+  endcomment
+  assign capped_row = container | minus: chrome_d
+  assign col_slot = col_min | plus: gap
+  assign fits_d = capped_row | plus: gap | divided_by: col_slot
+  if fits_d < 1
+    assign fits_d = 1
+  endif
+  assign cols_capped = cols_d
+  if fits_d < cols_d
+    assign cols_capped = fits_d
+  endif
+  assign gaps_capped = cols_capped | minus: 1 | times: gap
+
+  comment
+    Integer division truncates, so the cap would be declared one pixel under the
+    rendered track; one pixel changes no candidate, but under-declaring is the
+    direction that costs quality, so it rounds up.
+  endcomment
+  assign capped_track = capped_row | minus: gaps_capped | divided_by: cols_capped | plus: 1
+-%}
+{%- liquid
+  echo '(min-width: '
+  echo container
+  echo 'px) '
+  echo capped_track
+  echo 'px'
+
+  echo ', (min-width: '
+  echo threshold_d
+  echo 'px) calc((100vw - '
+  echo chrome_d
+  echo 'px - '
+  echo gaps_d
+  echo 'px) / '
+  echo cols_d
+  echo ')'
+
+  echo ', (min-width: 1024px) calc((100vw - '
+  echo chrome_d
+  echo 'px - '
+  echo gaps_d_low
+  echo 'px) / '
+  echo cols_d_low
+  echo ')'
+
+  echo ', (min-width: 768px) calc((100vw - '
+  echo chrome_t
+  echo 'px - '
+  echo gaps_t
+  echo 'px) / '
+  echo cols_t_used
+  echo ')'
+
+  echo ', (min-width: '
+  echo threshold_m
+  echo 'px) calc((100vw - '
+  echo chrome_m
+  echo 'px - '
+  echo gaps_m
+  echo 'px) / '
+  echo cols_m
+  echo ')'
+
+  echo ', calc((100vw - '
+  echo chrome_m
+  echo 'px - '
+  echo gaps_m_low
+  echo 'px) / '
+  echo cols_m_low
+  echo ')'
+-%}

@@ -1,0 +1,70 @@
+{
+  "name": "Footer group",
+  "type": "footer",
+  "sections": {
+    "footer": {
+      "type": "footer",
+      "block_order": [],
+      "settings": {
+        "tagline": "Different People.\nSame Purpose.",
+        "strapline": "A Brighter Tomorrow",
+        "show_logo": true,
+        "show_policies": true,
+        "show_social": true,
+        "surface": "dark"
+      }
+    },
+    "brand-values": {
+      "type": "brand-values",
+      "blocks": {
+        "faith": {
+          "type": "value",
+          "settings": {
+            "icon": "crown",
+            "title": "Faith Driven",
+            "sub": "More Than Clothing"
+          }
+        },
+        "community": {
+          "type": "value",
+          "settings": {
+            "icon": "community",
+            "title": "Community",
+            "sub": "People With Purpose"
+          }
+        },
+        "quality": {
+          "type": "value",
+          "settings": {
+            "icon": "diamond",
+            "title": "Premium Quality",
+            "sub": "Crafted To Inspire"
+          }
+        },
+        "worldwide": {
+          "type": "value",
+          "settings": {
+            "icon": "globe",
+            "title": "Worldwide",
+            "sub": "Shipping Available"
+          }
+        }
+      },
+      "block_order": [
+        "faith",
+        "community",
+        "worldwide",
+        "quality"
+      ],
+      "settings": {
+        "columns_desktop": 4,
+        "show_dividers": true,
+        "surface": "dark"
+      }
+    }
+  },
+  "order": [
+    "brand-values",
+    "footer"
+  ]
+}

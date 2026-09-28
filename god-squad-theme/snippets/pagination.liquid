@@ -1,0 +1,131 @@
+{%- comment -%}
+  GOD SQUAD — Pagination
+  Phase 18. One paginator, rendered by every surface that pages.
+
+  Accepts:
+  - paginate {Object} required. The paginate object from inside a
+                      {% paginate %} block.
+  - label    {String} optional. The nav's accessible name. Defaults to the
+                      generic one; a surface with a more specific answer — the
+                      search page — passes its own.
+
+  Usage:
+  {% paginate collection.products by n %}
+    ...
+    {% render 'pagination', paginate: paginate %}
+  {% endpaginate %}
+
+  WHY THIS EXISTS: IT WAS BUILT TWICE.
+
+  main-collection and main-search each had their own paginator, under their own
+  class names, in their own stylesheet — and the two had already drifted apart
+  in ways a customer could see. Collection used caption type; search used
+  uppercase label type at a heavier weight and wider tracking. Collection marked
+  the current page with weight and a rule; search marked it with gold. Two
+  paginations, one shop.
+
+  section-main-collection.css said in writing what to do about it: "It stays in
+  this stylesheet only while this is its single consumer. The moment a second
+  surface renders it, the block moves to assets/component-pagination.css." The
+  second surface existed; the move had not happened.
+
+  WHICH ONE SURVIVED, AND WHY IT IS A MERGE RATHER THAN A RENAME.
+
+  The two were not the same component with different names. Each was better in
+  a different place, and a straight rename would have thrown one of them away:
+
+  - The TYPE is collection's. Caption rather than tracked uppercase label: a
+    row of page numbers is metadata, not a set of labels, and 0.22em tracking
+    on a single digit reads as a gap rather than as letterspacing.
+
+  - The CURRENT-PAGE MARKER is collection's. Weight plus a rule beneath, never
+    gold on its own. Search coloured the current page with the accent, which
+    makes the state colour-dependent (SC 1.4.1) even with the border present.
+
+  - The ACCESSIBILITY is search's, in all three places it differs. The gap's
+    aria-hidden goes on the <li>, not on the span inside it — hiding only the
+    span leaves a list item with no accessible content, which is announced as
+    a blank entry and inflates the list count. The current page carries a full
+    "Page 4" hidden label with the digit beside it marked decorative, so it is
+    not read twice. And links are named with aria-label, which is safe on an
+    anchor because an anchor has a role that supports naming, while the current
+    page — a bare span — uses hidden text, because aria-label on a role-less
+    element is not reliably exposed.
+
+  Phase 16's accessibility audit had already found collection's empty list item
+  independently. Consolidating fixes it rather than carrying it to a second
+  surface.
+
+  TYPE COERCION: Liquid's == does not coerce.
+  paginate.current_page is a number and part.title is a string, so they never
+  compare equal without help. Both sides are appended to an empty string before
+  comparison, which also makes the gap part — whose title is an ellipsis — fall
+  through to the third branch rather than matching by accident.
+{%- endcomment -%}
+
+{%- liquid
+  comment
+    The fallback is resolved in two steps, not with `default`. A filter chain
+    applies left to right, so `label | default: 'key' | t` runs the t filter
+    over whatever came out of default — including a label the CALLER already
+    translated, which comes back as "Translation missing: Search results pages".
+    Only the fallback key may be passed to t.
+  endcomment
+  assign nav_label = label
+  if nav_label == blank
+    assign nav_label = 'general.pagination.label' | t
+  endif
+
+  assign current_title = paginate.current_page | append: ''
+-%}
+
+<nav class="pagination" aria-label="{{ nav_label }}">
+  <ul class="pagination__list" role="list">
+    {%- if paginate.previous.is_link -%}
+      <li class="pagination__item">
+        <a class="pagination__link" href="{{ paginate.previous.url }}" rel="prev">
+          {{- 'general.pagination.previous' | t -}}
+        </a>
+      </li>
+    {%- endif -%}
+
+    {%- for part in paginate.parts -%}
+      {%- assign part_title = part.title | append: '' -%}
+      {%- if part.is_link -%}
+        <li class="pagination__item">
+          <a
+            class="pagination__link"
+            href="{{ part.url }}"
+            aria-label="{{ 'general.pagination.page_number' | t: number: part.title }}"
+          >{{ part.title }}</a>
+        </li>
+      {%- elsif part_title == current_title -%}
+        <li class="pagination__item">
+          <span class="pagination__link pagination__link--current" aria-current="page">
+            <span class="visually-hidden">
+              {{- 'general.pagination.page_number' | t: number: part.title -}}
+            </span>
+            <span aria-hidden="true">{{ part.title }}</span>
+          </span>
+        </li>
+      {%- else -%}
+        {%- comment -%}
+          aria-hidden on the LIST ITEM, not on the span inside it. See the
+          header note: hiding only the span leaves an item with no accessible
+          content and the list announces a blank entry.
+        {%- endcomment -%}
+        <li class="pagination__item" aria-hidden="true">
+          <span class="pagination__gap">{{ part.title }}</span>
+        </li>
+      {%- endif -%}
+    {%- endfor -%}
+
+    {%- if paginate.next.is_link -%}
+      <li class="pagination__item">
+        <a class="pagination__link" href="{{ paginate.next.url }}" rel="next">
+          {{- 'general.pagination.next' | t -}}
+        </a>
+      </li>
+    {%- endif -%}
+  </ul>
+</nav>

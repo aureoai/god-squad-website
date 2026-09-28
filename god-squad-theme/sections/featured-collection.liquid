@@ -1,0 +1,666 @@
+{%- comment -%}
+  GOD SQUAD — Featured collection
+  Phase 6. One section, used for every collection row on the home page.
+
+  The Phase 6 brief offered a second file, sections/best-sellers.liquid. It is
+  not here on purpose: Best Sellers and New Drop differ only in which
+  collection is selected and what the copy says, and duplicating the Liquid
+  would mean fixing every future bug twice. The section ships two presets
+  instead — "New Drop" and "Best Sellers" — so both are one click away in the
+  Theme Editor with the right defaults already set.
+
+  Sources of truth:
+  - PHASE-2-DESIGN-SYSTEM.md sections 9.3 (grid), 13 (card), 27 (commerce),
+    29.3 (this section's worked schema).
+  - PHASE-1-WEBSITE-AUDIT.md for the eleven issues assigned to this phase.
+  - PHASE-5-HERO.md section 16 for what this section inherited.
+
+  SHOPIFY IS THE SOURCE OF TRUTH. There is no product data in this file, no
+  price string, no ranking logic and no assumption that any collection exists.
+  "Best Sellers" names a collection the merchant chooses; this section never
+  decides what sells.
+
+  ZERO JavaScript.
+{%- endcomment -%}
+
+{%- liquid
+  assign collection = section.settings.collection
+  assign heading = section.settings.heading | strip
+  assign eyebrow = section.settings.eyebrow | strip
+  assign description = section.settings.description | strip
+
+  assign cols_d = section.settings.columns_desktop
+  assign cols_t = section.settings.columns_tablet
+  assign cols_m = section.settings.columns_mobile
+
+  assign surface_class = 'surface-light'
+  if section.settings.surface == 'dark'
+    assign surface_class = 'surface-dark'
+  endif
+
+  assign has_products = false
+  if collection != blank and collection.products.size > 0
+    assign has_products = true
+  endif
+
+  comment
+    View all. The destination is the selected collection's own URL. A url
+    setting cannot default to a dynamic value, so the override is offered and
+    falls back rather than the other way round. No collection URL is ever
+    built by hand — Phase 1 NAV-03 recorded six href="#" anchors and this
+    phase does not add a seventh.
+  endcomment
+  assign view_all_url = section.settings.view_all_url
+  if view_all_url == blank and collection != blank
+    assign view_all_url = collection.url
+  endif
+  assign view_all_label = section.settings.view_all_label | strip
+  assign show_view_all = false
+  if section.settings.show_view_all and view_all_url != blank and view_all_label != blank
+    assign show_view_all = true
+  endif
+
+  comment
+    The sizes attribute.
+
+    The section knows the grid, so the section computes this; the card takes it
+    as a parameter rather than guessing. Two things make it more than a
+    division.
+
+    First, the grid's column count is a CEILING. .product-grid floors every
+    track at --product-col-min 272px, so where a viewport cannot carry the
+    requested count the grid drops a column and the survivors stretch. Dividing
+    by the requested count would then declare a slot narrower than the tile
+    actually painted, and the browser would fetch a candidate it has to upscale.
+    Measured before this was fixed: at 1024 the New Drop grid painted two 292px
+    tracks against a declared 196px.
+
+    Between a tier's minimum width and the width at which the requested count
+    first fits, the rendered count is exactly one lower. That threshold is
+    computable here, so each tier emits two clauses: the requested count from
+    the threshold up, and one fewer below it. Both are exact at every width in
+    their range, so nothing is over-declared either.
+
+    Second, the copy-column layout puts the grid in the 2.4 track of
+    --split-30-70, which is 72.7% of the row once the 32px split gap is taken
+    off. Gutters come from the Phase 2 ladder: 24, 32 and 48 per side.
+  endcomment
+
+  assign gap = 32
+  comment
+    The column gap is not the same at every tier. Below --bp-md the grid
+    tightens to --space-4 16px, because a 32px gap between two 147px cards sat
+    inside a 24px gutter and read as two bands rather than one row. A narrower
+    gap makes the cards WIDER, so the mobile clauses of the sizes attribute
+    have to be computed against it or they under-declare the slot.
+  endcomment
+  assign gap_m = 16
+  assign col_min = 272
+
+  comment
+    Per-tier row width available to the grid, expressed as the fixed pixels to
+    subtract from the viewport. Desktop also loses the copy rail.
+  endcomment
+  assign chrome_m = 48
+  assign chrome_t = 64
+  assign chrome_d = 96
+  if section.settings.layout == 'with-copy-column'
+    assign chrome_d = 128
+  endif
+
+  comment
+    The viewport at which cols_d first fits. Needed row is
+    cols_d * 272 + (cols_d - 1) * 32; for the copy-column layout the grid is
+    only 72.7% of the row, so the viewport has to be correspondingly wider.
+    1000 / 727 is used rather than a float because Liquid's divided_by on two
+    integers truncates, and truncating downward here would put the threshold
+    below the width that actually fits.
+  endcomment
+  assign need_d = cols_d | times: col_min
+  assign need_d = cols_d | minus: 1 | times: gap | plus: need_d
+  if section.settings.layout == 'with-copy-column'
+    assign need_d = need_d | times: 1000 | divided_by: 727 | plus: 1
+  endif
+  assign threshold_d = need_d | plus: chrome_d
+
+  comment
+    Floored at the tier boundary. The desktop column count only takes effect at
+    --bp-lg 1024, but the threshold is derived from the column arithmetic alone,
+    so the full-bleed layout at three columns computes 976. Left there, the
+    clause would match from 976 up while the grid between 976 and 1023 is still
+    painting the TABLET count — declaring a slot narrower than the one that
+    paints. A sizes clause must never claim a width before the layout that
+    produces it applies.
+
+    This section is not consolidated into snippets/grid-sizes.liquid because its
+    copy-column layout scales the needed row by 1000/727 above: its derivation
+    is genuinely different, not duplicated.
+  endcomment
+  if threshold_d < 1024
+    assign threshold_d = 1024
+  endif
+
+  comment
+    Below the threshold the grid paints one column fewer, floored at one.
+  endcomment
+  assign cols_d_low = cols_d | minus: 1
+  if cols_d_low < 1
+    assign cols_d_low = 1
+  endif
+  assign cols_t_low = cols_t | minus: 1
+  if cols_t_low < 1
+    assign cols_t_low = 1
+  endif
+
+  comment
+    Tablet: does cols_t fit at 768, the tier's own minimum? If not, the tier
+    never reaches it, because the next tier starts at 1024.
+  endcomment
+  assign need_t = cols_t | times: col_min
+  assign need_t = cols_t | minus: 1 | times: gap | plus: need_t
+  assign row_t_min = 768 | minus: chrome_t
+  assign cols_t_used = cols_t
+  if need_t > row_t_min
+    assign cols_t_used = cols_t_low
+  endif
+
+  comment
+    Mobile: the floor is 8rem/128px below 768 and the gap is 16px, so the step
+    is 144.
+  endcomment
+  assign need_m = cols_m | times: 128
+  assign need_m = cols_m | minus: 1 | times: gap_m | plus: need_m
+  assign threshold_m = need_m | plus: chrome_m
+  assign cols_m_low = cols_m | minus: 1
+  if cols_m_low < 1
+    assign cols_m_low = 1
+  endif
+
+  assign gaps_d = cols_d | minus: 1 | times: gap
+  assign gaps_d_low = cols_d_low | minus: 1 | times: gap
+  assign gaps_t = cols_t_used | minus: 1 | times: gap
+  assign gaps_m = cols_m | minus: 1 | times: gap_m
+  assign gaps_m_low = cols_m_low | minus: 1 | times: gap_m
+  assign container = settings.container_width | default: 1440
+
+  comment
+    Above the container cap the row stops growing, so the first clause is a
+    fixed pixel value rather than a vw expression.
+  endcomment
+  assign capped_row = container | minus: chrome_d
+  if section.settings.layout == 'with-copy-column'
+    assign capped_row = capped_row | times: 727 | divided_by: 1000
+  endif
+  comment
+    Integer division truncates, so the cap would be declared one pixel under
+    the rendered track — measured 296 against 297 at 1440. One pixel changes
+    no candidate, but under-declaring is the direction that costs quality.
+  endcomment
+  comment
+    Divide by what FITS, not by what was asked for. The grid is auto-fill with a
+    272px floor, so at the container cap it paints only as many columns as that
+    floor allows: with four columns and the container at its 1200px minimum,
+    dividing by the requested four declares 253px for a track that actually
+    paints 346px — a 27% under-declaration, which makes the browser fetch a
+    candidate it then has to upscale.
+  endcomment
+  assign col_slot = col_min | plus: gap
+  assign fits_d = capped_row | plus: gap | divided_by: col_slot
+  if fits_d < 1
+    assign fits_d = 1
+  endif
+  assign cols_capped = cols_d
+  if fits_d < cols_d
+    assign cols_capped = fits_d
+  endif
+  assign gaps_capped = cols_capped | minus: 1 | times: gap
+  assign capped_track = capped_row | minus: gaps_capped | divided_by: cols_capped | plus: 1
+
+  capture sizes_attr
+    echo '(min-width: '
+    echo container
+    echo 'px) '
+    echo capped_track
+    echo 'px'
+
+    echo ', (min-width: '
+    echo threshold_d
+    echo 'px) calc(('
+    if section.settings.layout == 'with-copy-column'
+      echo '(100vw - '
+      echo chrome_d
+      echo 'px) * 0.727 - '
+    else
+      echo '100vw - '
+      echo chrome_d
+      echo 'px - '
+    endif
+    echo gaps_d
+    echo 'px) / '
+    echo cols_d
+    echo ')'
+
+    echo ', (min-width: 1024px) calc(('
+    if section.settings.layout == 'with-copy-column'
+      echo '(100vw - '
+      echo chrome_d
+      echo 'px) * 0.727 - '
+    else
+      echo '100vw - '
+      echo chrome_d
+      echo 'px - '
+    endif
+    echo gaps_d_low
+    echo 'px) / '
+    echo cols_d_low
+    echo ')'
+
+    echo ', (min-width: 768px) calc((100vw - '
+    echo chrome_t
+    echo 'px - '
+    echo gaps_t
+    echo 'px) / '
+    echo cols_t_used
+    echo ')'
+
+    echo ', (min-width: '
+    echo threshold_m
+    echo 'px) calc((100vw - '
+    echo chrome_m
+    echo 'px - '
+    echo gaps_m
+    echo 'px) / '
+    echo cols_m
+    echo ')'
+
+    echo ', calc((100vw - '
+    echo chrome_m
+    echo 'px - '
+    echo gaps_m_low
+    echo 'px) / '
+    echo cols_m_low
+    echo ')'
+  endcapture
+
+  comment
+    The card titles sit one level below this section's heading — but the
+    heading is a free-text setting a merchant can clear, and when it is blank
+    no h2 renders. Hard-coding level 3 would then jump from the hero's h1
+    straight to h3, which is the outline defect Phase 1 HTML-03 assigns to this
+    phase. The level follows the heading instead.
+  endcomment
+  assign card_heading_level = 3
+  if heading == blank
+    assign card_heading_level = 2
+  endif
+
+  assign classes = 'featured-collection '
+  assign classes = classes | append: surface_class
+  assign classes = classes | append: ' featured-collection--' | append: section.settings.layout
+  assign classes = classes | append: ' featured-collection--pt-' | append: section.settings.spacing_top
+  assign classes = classes | append: ' featured-collection--pb-' | append: section.settings.spacing_bottom
+-%}
+
+{%- comment -%}
+  Nothing is rendered on the live storefront until there are products to show.
+  The test is has_products, not "is a collection chosen": a merchant can point
+  the section at a collection and later empty or unpublish it, and the result
+  would otherwise be a full-height band of copy and a View all button over
+  nothing — the very thing a heading floating above an empty band describes.
+
+  In the Theme Editor the section always renders, with a note saying which of
+  the two is missing, so the merchant can see and configure it.
+{%- endcomment -%}
+{%- if has_products == false and request.design_mode == false -%}
+  {%- comment -%}
+    Not configured yet: render nothing, and request nothing. The stylesheets
+    are emitted inside this branch rather than at the top of the file so an
+    unconfigured section costs no requests either.
+  {%- endcomment -%}
+{%- else -%}
+
+{{ 'component-product-card.css' | asset_url | stylesheet_tag }}
+{{ 'section-featured-collection.css' | asset_url | stylesheet_tag }}
+
+{%- comment -%}
+  The column counts are merchant settings, so they arrive as scoped custom
+  properties rather than as inline style on the grid: an inline declaration
+  would outrank every media query and pin the mobile count to all three tiers.
+  The section id scopes them, which is what lets two instances of this section
+  on one page carry different counts.
+{%- endcomment -%}
+{% style %}
+  #shopify-section-{{ section.id }} .product-grid { --product-cols: {{ cols_m }}; }
+  @media (min-width: 768px) {
+    #shopify-section-{{ section.id }} .product-grid { --product-cols: {{ cols_t }}; }
+  }
+  @media (min-width: 1024px) {
+    #shopify-section-{{ section.id }} .product-grid { --product-cols: {{ cols_d }}; }
+  }
+{% endstyle %}
+
+<div
+  class="{{ classes }}"
+  {% if section.settings.anchor_id != blank %}id="{{ section.settings.anchor_id | handle }}"{% endif %}
+>
+  <div class="featured-collection__inner container">
+    <div class="featured-collection__copy">
+      {%- if eyebrow != blank -%}
+        <p class="featured-collection__eyebrow">{{ eyebrow }}</p>
+      {%- endif -%}
+
+      {%- if heading != blank -%}
+        {%- comment -%}
+          An h2, never an h1. Phase 5 established the home page's single h1 in
+          the hero and Phase 1 HTML-03 recorded the outline as the defect this
+          fixes.
+        {%- endcomment -%}
+        <h2 class="featured-collection__heading">{{ heading }}</h2>
+      {%- endif -%}
+
+      {%- if description != blank -%}
+        <p class="featured-collection__description">{{ description }}</p>
+      {%- endif -%}
+
+      {%- if show_view_all -%}
+        <a class="featured-collection__cta button button--primary" href="{{ view_all_url }}">
+          {{ view_all_label }}
+          {% render 'icon-arrow' %}
+        </a>
+      {%- endif -%}
+    </div>
+
+    <div class="featured-collection__products">
+      {%- if has_products -%}
+        <ul class="product-grid" role="list">
+          {%- for product in collection.products limit: section.settings.products_to_show -%}
+            <li class="product-grid__item">
+              {% render 'product-card',
+                product: product,
+                heading_level: card_heading_level,
+                sizes: sizes_attr,
+                show_price: section.settings.show_price,
+                show_compare_at: section.settings.show_compare_at_price,
+                show_swatches: section.settings.show_swatches
+              %}
+            </li>
+          {%- endfor -%}
+        </ul>
+      {%- elsif request.design_mode -%}
+        <p class="featured-collection__notice">
+          {%- if collection == blank -%}
+            {{ 'sections.featured_collection.no_collection' | t }}
+          {%- else -%}
+            {{ 'sections.featured_collection.empty_collection' | t }}
+          {%- endif -%}
+        </p>
+      {%- endif -%}
+    </div>
+  </div>
+
+</div>
+
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Collection row",
+  "tag": "section",
+  "class": "featured-collection-section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Collection"
+    },
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Collection",
+      "info": "Products, prices, images and availability all come from this collection. Nothing is set in the theme. Until a collection is chosen the section does not render on the live store."
+    },
+    {
+      "type": "range",
+      "id": "products_to_show",
+      "label": "Products to show",
+      "min": 2,
+      "max": 12,
+      "step": 1,
+      "default": 3,
+      "info": "A count that divides evenly into the column count fills its rows. Three products in a two-column grid leaves one on a row of its own."
+    },
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "New Drop /"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "The Faithful",
+      "info": "Renders as a level-2 heading. The page's only level-1 heading belongs to the hero."
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Description",
+      "default": "Premium Essentials for a Higher Purpose."
+    },
+    {
+      "type": "header",
+      "content": "View all"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_view_all",
+      "label": "Show the view all button",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "view_all_label",
+      "label": "Button label",
+      "default": "View All Products"
+    },
+    {
+      "type": "url",
+      "id": "view_all_url",
+      "label": "Button link",
+      "info": "Leave empty and the button points at the collection chosen above. Set it only to send people somewhere else."
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "surface",
+      "label": "Colour scheme",
+      "info": "The theme switches text, border, accent and focus colours to suit the band. Muted gold is a dark-surface accent; on cream a darker gold is substituted automatically.",
+      "options": [
+        {
+          "value": "light",
+          "label": "Cream"
+        },
+        {
+          "value": "dark",
+          "label": "Ink"
+        }
+      ],
+      "default": "light"
+    },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Layout",
+      "info": "The copy column takes about a third of the row, so the grid beside it carries fewer products per row: a three-column grid reaches three columns at 1440px wide with the copy beside it, and at 1024px with the copy above it.",
+      "options": [
+        {
+          "value": "with-copy-column",
+          "label": "Copy beside the products"
+        },
+        {
+          "value": "full-width",
+          "label": "Copy above the products"
+        }
+      ],
+      "default": "with-copy-column"
+    },
+    {
+      "type": "header",
+      "content": "Grid"
+    },
+    {
+      "type": "paragraph",
+      "content": "These are maximums. A tile never drops below a readable width, so if a viewport cannot carry the count you choose, the grid drops a column rather than squeezing one."
+    },
+    {
+      "type": "range",
+      "id": "columns_desktop",
+      "label": "Columns, desktop",
+      "min": 2,
+      "max": 4,
+      "step": 1,
+      "default": 3
+    },
+    {
+      "type": "range",
+      "id": "columns_tablet",
+      "label": "Columns, tablet",
+      "min": 1,
+      "max": 3,
+      "step": 1,
+      "default": 2
+    },
+    {
+      "type": "range",
+      "id": "columns_mobile",
+      "label": "Columns, mobile",
+      "min": 1,
+      "max": 3,
+      "step": 1,
+      "default": 2
+    },
+    {
+      "type": "header",
+      "content": "Product card"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_price",
+      "label": "Show price",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_compare_at_price",
+      "label": "Show the original price when a product is reduced",
+      "default": true,
+      "info": "Shown beside the current price, struck through and muted. There is no sale badge: the two prices are the signal."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_swatches",
+      "label": "Show colourway swatches",
+      "default": true,
+      "info": "Only appears where a product has more than one colour and swatches are configured on that option in Shopify admin. Colours are never guessed from a product's images."
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "select",
+      "id": "spacing_top",
+      "label": "Space above",
+      "options": [
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "tight",
+          "label": "Tight"
+        },
+        {
+          "value": "standard",
+          "label": "Standard"
+        }
+      ],
+      "default": "standard"
+    },
+    {
+      "type": "select",
+      "id": "spacing_bottom",
+      "label": "Space below",
+      "options": [
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "tight",
+          "label": "Tight"
+        },
+        {
+          "value": "standard",
+          "label": "Standard"
+        }
+      ],
+      "default": "standard"
+    },
+    {
+      "type": "header",
+      "content": "Advanced"
+    },
+    {
+      "type": "text",
+      "id": "anchor_id",
+      "label": "Anchor",
+      "info": "Optional. Lets a menu item or a button link to this section, for example shop."
+    }
+  ],
+  "presets": [
+    {
+      "name": "New Drop",
+      "settings": {
+        "eyebrow": "New Drop /",
+        "heading": "The Faithful",
+        "description": "Premium Essentials for a Higher Purpose.",
+        "view_all_label": "View All Products",
+        "surface": "light",
+        "layout": "with-copy-column",
+        "products_to_show": 3,
+        "columns_desktop": 3,
+        "columns_tablet": 2,
+        "columns_mobile": 2,
+        "spacing_top": "standard",
+        "spacing_bottom": "standard",
+        "anchor_id": "shop"
+      }
+    },
+    {
+      "name": "Best Sellers",
+      "settings": {
+        "eyebrow": "Best Sellers /",
+        "heading": "The Pieces That Define The Movement",
+        "description": "Chosen by the community.",
+        "view_all_label": "Shop All Best Sellers",
+        "surface": "dark",
+        "layout": "full-width",
+        "products_to_show": 4,
+        "columns_desktop": 4,
+        "columns_tablet": 2,
+        "columns_mobile": 2,
+        "spacing_top": "standard",
+        "spacing_bottom": "standard"
+      }
+    }
+  ]
+}
+{% endschema %}

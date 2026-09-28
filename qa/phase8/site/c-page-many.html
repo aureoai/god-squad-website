@@ -1,0 +1,498 @@
+<!doctype html>
+<html lang="en" class="no-js"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>God Squad — Phase 8 harness</title>
+<link rel="stylesheet" href="assets/design-tokens.css">
+<link rel="stylesheet" href="assets/base.css">
+<link rel="stylesheet" href="assets/header.css">
+<link rel="stylesheet" href="assets/component-container.css">
+<link rel="stylesheet" href="assets/component-button.css">
+<link rel="stylesheet" href="assets/component-pagination.css">
+<link rel="stylesheet" href="assets/component-quantity.css">
+<link rel="stylesheet" href="assets/component-cart-line.css">
+<script>document.documentElement.classList.replace('no-js','js');</script>
+<script>window.Shopify = window.Shopify || {routes: {root: '/'}};</script>
+<script src="assets/header.js" defer></script>
+<script src="assets/cart.js" defer></script>
+</head><body class="template-cart">
+<a class="skip-link" href="#MainContent">Skip to content</a>
+<div id="shopify-section-header" class="shopify-section"><header
+  class="header surface-dark"
+  data-header
+  
+><div class="header__inner container"><div class="header__cluster header__cluster--start">
+      <button
+        type="button"
+        class="header__control header__menu-toggle"
+        aria-expanded="false"
+        aria-controls="MobileMenu"
+        data-menu-toggle
+      >
+        <svg class="icon icon--menu " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3.75 6.5h16.5"/><path d="M3.75 12h16.5"/><path d="M3.75 17.5h16.5"/></svg>
+
+        <span class="visually-hidden">Menu</span>
+      </button>
+    </div><div class="header__branding"><a
+          class="header__logo-link"
+          href="/"
+          
+        ><img class="header__logo" src="img/logo.png" srcset="img/logo.png 120w, img/logo.png 180w, img/logo.png 240w, img/logo.png 360w, img/logo.png 480w, img/logo.png 600w" sizes="(min-width: 1024px) 240px, 160px" width="500" height="500" style="--logo-height-desktop: 78px; --logo-height-mobile: 56px;" alt="God Squad">
+        </a></div><nav class="header__nav" aria-label="Primary">
+      <ul class="header__nav-list" role="list"><li class="header__nav-item">
+              <a
+                class="header__nav-link"
+                href="/"
+                
+              >Home</a>
+            </li><li class="header__nav-item">
+              <a
+                class="header__nav-link"
+                href="/collections/all"
+                
+              >Shop</a>
+            </li><li class="header__nav-item">
+              <a
+                class="header__nav-link"
+                href="/#story"
+                
+              >Our Story</a>
+            </li><li class="header__nav-item">
+              <a
+                class="header__nav-link"
+                href="/#verse"
+                
+              >Verse</a>
+            </li></ul>
+    </nav><div class="header__cluster header__cluster--end"><a class="header__control" href="/search" data-search-trigger>
+          <svg class="icon icon--search " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="6.25"/><path d="M15.6 15.6 20.5 20.5"/></svg>
+
+          <span class="visually-hidden">Search</span>
+        </a><shopify-account
+          class="header__control header__account"
+          menu="customer-account-main-menu"
+        >
+          <span class="header__account-avatar" slot="signed-out-avatar">
+            <svg class="icon icon--account " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="8.25" r="3.75"/><path d="M4.75 19.75a7.25 7.25 0 0 1 14.5 0"/></svg>
+
+            <span class="visually-hidden">Account</span>
+          </span>
+        </shopify-account><a
+          class="header__control header__cart"
+          href="/cart"
+          data-cart-bubble
+          
+        >
+          <svg class="icon icon--cart " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.5 7.75h13l-1.1 11.3a1.4 1.4 0 0 1-1.4 1.2H8a1.4 1.4 0 0 1-1.4-1.2Z"/><path d="M9 10V6.9a3 3 0 0 1 6 0V10"/></svg>
+
+<span class="visually-hidden">Cart</span><span class="header__cart-count" data-cart-count aria-hidden="true">5</span>
+  <span class="visually-hidden" data-cart-count-text>5 items</span>
+        </a></div>
+  </div><div class="header__search" id="HeaderSearch" data-search-panel hidden>
+    <form
+      class="header__search-form"
+      action="/search"
+      method="get"
+      role="search"
+    >
+      <label class="visually-hidden" for="HeaderSearchInput">
+        Search the store
+      </label>
+      <input
+        class="header__search-input"
+        id="HeaderSearchInput"
+        type="search"
+        name="q"
+        placeholder="Search the store…"
+        data-search-input
+      ><input type="hidden" name="type" value="product">
+      <button type="submit" class="button button--primary header__search-submit">
+        Search
+      </button>
+      <button type="button" class="header__control" data-search-close>
+        <svg class="icon icon--close " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.4 6.4 17.6 17.6"/><path d="M17.6 6.4 6.4 17.6"/></svg>
+
+        <span class="visually-hidden">Close search</span>
+      </button>
+    </form>
+  </div><div class="header__panel" id="MobileMenu" data-menu-panel hidden>
+    <div class="header__panel-header">
+      <span class="header__panel-title">Menu</span>
+      <button type="button" class="header__control" data-menu-close>
+        <svg class="icon icon--close " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.4 6.4 17.6 17.6"/><path d="M17.6 6.4 6.4 17.6"/></svg>
+
+        <span class="visually-hidden">Close menu</span>
+      </button>
+    </div>
+
+    <nav class="header__panel-nav" aria-label="Main">
+      <ul class="header__panel-list" role="list"><li>
+              <a
+                class="header__panel-link"
+                href="/"
+                
+              >Home</a>
+            </li><li>
+              <a
+                class="header__panel-link"
+                href="/collections/all"
+                
+              >Shop</a>
+            </li><li>
+              <a
+                class="header__panel-link"
+                href="/#story"
+                
+              >Our Story</a>
+            </li><li>
+              <a
+                class="header__panel-link"
+                href="/#verse"
+                
+              >Verse</a>
+            </li></ul>
+    </nav></div>
+
+  <div class="header__overlay" data-menu-overlay hidden></div>
+</header>
+
+
+</div>
+<main id="MainContent" tabindex="-1">
+<div id="shopify-section-main" class="shopify-section"><link rel="stylesheet" href="assets/section-main-cart.css">
+
+<div
+  class="main-cart surface-dark"
+  data-cart-page
+  data-cart-page-section="main"
+  
+>
+  <div class="main-cart__inner container">
+    <h1 class="main-cart__title" tabindex="-1" id="CartPageTitle">Your cart</h1><p class="main-cart__error" data-cart-error role="alert" hidden></p>
+
+    <div data-cart-page-inner><form
+          action="/cart"
+          method="post"
+          id="CartPageForm"
+          class="main-cart__form"
+          data-cart-form
+        >
+          <ul class="main-cart__lines" role="list"><li class="cart-line" data-cart-line data-line-key="k1:aaa" data-line-index="1">
+  <div class="cart-line__media"><a class="cart-line__media-link" href="/products/signature-tee?variant=9102" tabindex="-1" aria-hidden="true">
+        <img class="cart-line__image" src="img/tee.webp" srcset="img/tee.webp 76w, img/tee.webp 96w, img/tee.webp 120w, img/tee.webp 152w, img/tee.webp 192w, img/tee.webp 240w, img/tee.webp 300w" sizes="(min-width: 768px) 120px, 96px" width="900" height="900" loading="eager" decoding="async" alt="">
+      </a></div>
+
+  <div class="cart-line__detail">
+    <a class="cart-line__title" href="/products/signature-tee?variant=9102">Signature Oversized Tee</a><p class="cart-line__variant"><span class="cart-line__variant-part">
+            <span class="visually-hidden">Size: </span>S
+          </span></p><div class="cart-line__controls">
+      <div
+  class="quantity"
+  data-quantity
+  data-line-key="k1:aaa"
+>
+  <button
+    type="button"
+    class="quantity__button"
+    data-quantity-step="-1"
+    aria-disabled="true"
+  >
+    <svg class="icon icon--minus " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4.75 12h14.5"/></svg>
+
+    <span class="visually-hidden">Decrease quantity for Signature Oversized Tee</span>
+  </button>
+
+  <label class="visually-hidden" for="CartPage-Quantity-k1:aaa-1">Quantity for Signature Oversized Tee</label>
+  <input
+    class="quantity__input"
+    id="CartPage-Quantity-k1:aaa-1"
+    type="number"
+    name="updates[]"
+    value="1"
+    min="1"
+    step="1"
+    
+    inputmode="numeric"
+    autocomplete="off"
+    form="CartPageForm"
+    
+    data-quantity-input
+  >
+
+  <button
+    type="button"
+    class="quantity__button"
+    data-quantity-step="1"
+    
+  >
+    <svg class="icon icon--plus " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 4.75v14.5"/><path d="M4.75 12h14.5"/></svg>
+
+    <span class="visually-hidden">Increase quantity for Signature Oversized Tee</span>
+  </button>
+</div>
+<a
+        class="cart-line__remove"
+        href="/cart/change?id=k1:aaa&quantity=0"
+        data-cart-remove
+        data-line-key="k1:aaa"
+      >
+        <span aria-hidden="true">Remove</span>
+        <span class="visually-hidden">Remove Signature Oversized Tee from your cart</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="cart-line__price"><span class="cart-line__price-final">&#8369;1,290.00</span></div>
+</li>
+<li class="cart-line" data-cart-line data-line-key="k2:bbb" data-line-index="2">
+  <div class="cart-line__media"><a class="cart-line__media-link" href="/products/signature-tee?variant=9103" tabindex="-1" aria-hidden="true">
+        <img class="cart-line__image" src="img/tee.webp" srcset="img/tee.webp 76w, img/tee.webp 96w, img/tee.webp 120w, img/tee.webp 152w, img/tee.webp 192w, img/tee.webp 240w, img/tee.webp 300w" sizes="(min-width: 768px) 120px, 96px" width="900" height="900" loading="lazy" decoding="async" alt="">
+      </a></div>
+
+  <div class="cart-line__detail">
+    <a class="cart-line__title" href="/products/signature-tee?variant=9103">Signature Oversized Tee</a><p class="cart-line__variant"><span class="cart-line__variant-part">
+            <span class="visually-hidden">Size: </span>M
+          </span></p><div class="cart-line__controls">
+      <div
+  class="quantity"
+  data-quantity
+  data-line-key="k2:bbb"
+>
+  <button
+    type="button"
+    class="quantity__button"
+    data-quantity-step="-1"
+    
+  >
+    <svg class="icon icon--minus " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4.75 12h14.5"/></svg>
+
+    <span class="visually-hidden">Decrease quantity for Signature Oversized Tee</span>
+  </button>
+
+  <label class="visually-hidden" for="CartPage-Quantity-k2:bbb-2">Quantity for Signature Oversized Tee</label>
+  <input
+    class="quantity__input"
+    id="CartPage-Quantity-k2:bbb-2"
+    type="number"
+    name="updates[]"
+    value="2"
+    min="1"
+    step="1"
+    
+    inputmode="numeric"
+    autocomplete="off"
+    form="CartPageForm"
+    
+    data-quantity-input
+  >
+
+  <button
+    type="button"
+    class="quantity__button"
+    data-quantity-step="1"
+    
+  >
+    <svg class="icon icon--plus " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 4.75v14.5"/><path d="M4.75 12h14.5"/></svg>
+
+    <span class="visually-hidden">Increase quantity for Signature Oversized Tee</span>
+  </button>
+</div>
+<a
+        class="cart-line__remove"
+        href="/cart/change?id=k2:bbb&quantity=0"
+        data-cart-remove
+        data-line-key="k2:bbb"
+      >
+        <span aria-hidden="true">Remove</span>
+        <span class="visually-hidden">Remove Signature Oversized Tee from your cart</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="cart-line__price"><span class="cart-line__price-final">&#8369;2,580.00</span></div>
+</li>
+<li class="cart-line" data-cart-line data-line-key="k3:ccc" data-line-index="3">
+  <div class="cart-line__media"><a class="cart-line__media-link" href="/products/heavyweight-hoodie?variant=9201" tabindex="-1" aria-hidden="true">
+        <img class="cart-line__image" src="img/hoodie.webp" srcset="img/hoodie.webp 76w, img/hoodie.webp 96w, img/hoodie.webp 120w, img/hoodie.webp 152w, img/hoodie.webp 192w, img/hoodie.webp 240w, img/hoodie.webp 300w" sizes="(min-width: 768px) 120px, 96px" width="900" height="900" loading="lazy" decoding="async" alt="">
+      </a></div>
+
+  <div class="cart-line__detail">
+    <a class="cart-line__title" href="/products/heavyweight-hoodie?variant=9201">Heavyweight Hoodie</a><p class="cart-line__variant"><span class="cart-line__variant-part">
+            <span class="visually-hidden">Colour: </span>Ink
+          </span><span aria-hidden="true"> / </span><span class="cart-line__variant-part">
+            <span class="visually-hidden">Size: </span>S
+          </span></p><ul class="cart-line__discounts" role="list"><li class="cart-line__discount">
+            Launch 10%
+            (&minus;&#8369;249.00)
+          </li></ul><div class="cart-line__controls">
+      <div
+  class="quantity"
+  data-quantity
+  data-line-key="k3:ccc"
+>
+  <button
+    type="button"
+    class="quantity__button"
+    data-quantity-step="-1"
+    aria-disabled="true"
+  >
+    <svg class="icon icon--minus " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4.75 12h14.5"/></svg>
+
+    <span class="visually-hidden">Decrease quantity for Heavyweight Hoodie</span>
+  </button>
+
+  <label class="visually-hidden" for="CartPage-Quantity-k3:ccc-3">Quantity for Heavyweight Hoodie</label>
+  <input
+    class="quantity__input"
+    id="CartPage-Quantity-k3:ccc-3"
+    type="number"
+    name="updates[]"
+    value="1"
+    min="1"
+    step="1"
+    
+    inputmode="numeric"
+    autocomplete="off"
+    form="CartPageForm"
+    
+    data-quantity-input
+  >
+
+  <button
+    type="button"
+    class="quantity__button"
+    data-quantity-step="1"
+    
+  >
+    <svg class="icon icon--plus " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 4.75v14.5"/><path d="M4.75 12h14.5"/></svg>
+
+    <span class="visually-hidden">Increase quantity for Heavyweight Hoodie</span>
+  </button>
+</div>
+<a
+        class="cart-line__remove"
+        href="/cart/change?id=k3:ccc&quantity=0"
+        data-cart-remove
+        data-line-key="k3:ccc"
+      >
+        <span aria-hidden="true">Remove</span>
+        <span class="visually-hidden">Remove Heavyweight Hoodie from your cart</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="cart-line__price"><span class="visually-hidden">Sale price</span>
+      <span class="cart-line__price-final">&#8369;2,241.00</span>
+      <span class="visually-hidden">Regular price</span>
+      <s class="cart-line__price-original">&#8369;2,490.00</s></div>
+</li>
+<li class="cart-line" data-cart-line data-line-key="k4:ddd" data-line-index="4">
+  <div class="cart-line__media"><a class="cart-line__media-link" href="/products/utility-cap?variant=9001" tabindex="-1" aria-hidden="true">
+        <img class="cart-line__image" src="img/cap.webp" srcset="img/cap.webp 76w, img/cap.webp 96w, img/cap.webp 120w, img/cap.webp 152w, img/cap.webp 192w, img/cap.webp 240w, img/cap.webp 300w" sizes="(min-width: 768px) 120px, 96px" width="900" height="900" loading="lazy" decoding="async" alt="">
+      </a></div>
+
+  <div class="cart-line__detail">
+    <a class="cart-line__title" href="/products/utility-cap?variant=9001">Utility Cap</a><p class="cart-line__error" role="alert">All 3 Utility Cap are in your cart.</p><div class="cart-line__controls">
+      <div
+  class="quantity"
+  data-quantity
+  data-line-key="k4:ddd"
+>
+  <button
+    type="button"
+    class="quantity__button"
+    data-quantity-step="-1"
+    aria-disabled="true"
+  >
+    <svg class="icon icon--minus " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4.75 12h14.5"/></svg>
+
+    <span class="visually-hidden">Decrease quantity for Utility Cap</span>
+  </button>
+
+  <label class="visually-hidden" for="CartPage-Quantity-k4:ddd-4">Quantity for Utility Cap</label>
+  <input
+    class="quantity__input"
+    id="CartPage-Quantity-k4:ddd-4"
+    type="number"
+    name="updates[]"
+    value="1"
+    min="1"
+    step="1"
+    
+    inputmode="numeric"
+    autocomplete="off"
+    form="CartPageForm"
+    
+    data-quantity-input
+  >
+
+  <button
+    type="button"
+    class="quantity__button"
+    data-quantity-step="1"
+    
+  >
+    <svg class="icon icon--plus " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 4.75v14.5"/><path d="M4.75 12h14.5"/></svg>
+
+    <span class="visually-hidden">Increase quantity for Utility Cap</span>
+  </button>
+</div>
+<a
+        class="cart-line__remove"
+        href="/cart/change?id=k4:ddd&quantity=0"
+        data-cart-remove
+        data-line-key="k4:ddd"
+      >
+        <span aria-hidden="true">Remove</span>
+        <span class="visually-hidden">Remove Utility Cap from your cart</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="cart-line__price"><span class="cart-line__price-final">&#8369;890.00</span></div>
+</li>
+</ul>
+
+          <div class="main-cart__summary"><dl class="cart-totals">
+  <div class="cart-totals__row">
+    <dt>Subtotal</dt>
+    <dd>&#8369;7,001.00</dd>
+  </div><div class="cart-totals__row cart-totals__row--discount">
+      <dt>Welcome</dt>
+      <dd>&minus;&#8369;50.00</dd>
+    </div><div class="cart-totals__row cart-totals__row--final">
+    <dt>Estimated total</dt>
+    <dd data-cart-total>&#8369;6,951.00</dd>
+  </div>
+</dl>
+
+<p class="cart-totals__note">Taxes and shipping are calculated at checkout.</p>
+<button type="submit" name="update" class="button button--secondary main-cart__update">
+              Update cart
+            </button>
+
+            <button type="submit" name="checkout" class="button button--primary button--full">
+              Checkout
+            </button><div class="main-cart__accelerated">
+                <div data-harness-stub="additional-checkout">Shop Pay</div>
+              </div><a class="main-cart__continue" href="/">
+              Continue shopping
+            </a>
+          </div>
+        </form></div>
+  </div>
+</div>
+
+
+</div>
+</main>
+
+<div id="CartStatus" class="visually-hidden" role="status" aria-live="polite" data-cart-no-inert></div>
+<div hidden data-cart-no-inert data-cart-strings
+  data-added="Added to your cart."
+  data-updated="Cart updated."
+  data-removed="Removed from your cart."
+  data-note-saved="Order note saved."
+  data-quantity-announce="Quantity: [count]"
+  data-error-generic="Unable to update your cart. Please try again."
+  data-error-network="We could not reach the store. Check your connection and try again."></div>
+</body></html>

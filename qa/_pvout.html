@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>DONE</title></head><body style="margin:0">
+<pre id="o" style="display:none">&lt;&lt;&lt;{"page":"search.html","errors":[],"findings":[{"sev":"SUSPECT","kind":"form-no-action","detail":"header__search-form"},{"sev":"SUSPECT","kind":"form-no-action","detail":"main-search__form"}]}&gt;&gt;&gt;</pre>
+<script>
+var PAGE = 'search.html', FILES = ["404.html", "cart-drawer.html", "cart-empty.html", "cart-note.html", "cart.html", "collection-empty.html", "collection-filters.html", "collection.html", "index.html", "page.html", "product-details.html", "product-long.html", "product-one-image.html", "product-soldout.html", "product-variants.html", "product.html", "search-none.html", "search.html"], out = {page: PAGE, errors: [], findings: []};
+function add(sev, kind, detail) { out.findings.push({sev: sev, kind: kind, detail: detail}); }
+
+var f = document.createElement('iframe');
+f.style.cssText = 'border:0;width:1280px;height:900px';
+document.body.appendChild(f);
+
+/* Attach before navigation so early throws are caught. */
+f.src = PAGE;
+try {
+  var w0 = f.contentWindow;
+  w0.addEventListener('error', function (e) {
+    out.errors.push('error: ' + (e.message || e.type) + ' @ ' + (e.filename || '?') + ':' + (e.lineno || 0));
+  }, true);
+  w0.addEventListener('unhandledrejection', function (e) {
+    out.errors.push('unhandledrejection: ' + (e.reason && e.reason.message || e.reason));
+  });
+} catch (e) {}
+
+f.onload = function () {
+  var d = f.contentDocument, w = f.contentWindow;
+
+  try {
+    var oe = w.console.error, ow = w.console.warn;
+    w.console.error = function () { out.errors.push('console.error: ' + [].join.call(arguments, ' ')); oe.apply(w.console, arguments); };
+    w.console.warn = function () { out.errors.push('console.warn: ' + [].join.call(arguments, ' ')); ow.apply(w.console, arguments); };
+  } catch (e) {}
+
+  setTimeout(function () {
+    /* ---------------------------------------------- assets that failed */
+    try {
+      w.performance.getEntriesByType('resource').forEach(function (r) {
+        if (r.transferSize === 0 && r.decodedBodySize === 0 && r.duration === 0) {
+          add('BROKEN', 'resource-failed', r.name.split('/').slice(-1)[0]);
+        }
+      });
+    } catch (e) {}
+
+    Array.prototype.forEach.call(d.querySelectorAll('img'), function (i) {
+      var src = i.getAttribute('src') || '(no src)';
+      if (!i.getAttribute('src')) { add('SUSPECT', 'img-no-src', i.className || i.tagName); return; }
+      if (i.complete && i.naturalWidth === 0) add('BROKEN', 'img-broken', src);
+      if (!i.hasAttribute('alt')) add('SUSPECT', 'img-no-alt', src);
+    });
+
+    /* ---------------------------------------------- unrendered Liquid */
+    var html = d.documentElement.innerHTML;
+    var liq = html.match(/\{\{[^}]{0,60}\}\}|\{%[^%]{0,60}%\}/g);
+    if (liq) {
+      var uniq = {};
+      liq.forEach(function (x) { uniq[x] = 1; });
+      Object.keys(uniq).slice(0, 6).forEach(function (x) {
+        add('WRONG', 'liquid-not-rendered', x.replace(/\s+/g, ' ').slice(0, 60));
+      });
+    }
+
+    /* ---------------------------------------------- junk in visible text */
+    var body = d.body.innerText || '';
+    ['undefined', 'NaN', 'null', '[object Object]', 'translation missing'].forEach(function (bad) {
+      var re = new RegExp(bad.replace(/[.[\]]/g, '\\$&'), 'i');
+      if (re.test(body)) {
+        var m = body.match(new RegExp('.{0,30}' + bad.replace(/[.[\]]/g, '\\$&') + '.{0,30}', 'i'));
+        add('WRONG', 'junk-in-text', (m ? m[0] : bad).replace(/\s+/g, ' '));
+      }
+    });
+
+    /* ---------------------------------------------- duplicate ids */
+    var seen = {}, dupes = {};
+    Array.prototype.forEach.call(d.querySelectorAll('[id]'), function (el) {
+      var id = el.id;
+      if (!id) return;
+      if (seen[id]) dupes[id] = 1; else seen[id] = 1;
+    });
+    Object.keys(dupes).slice(0, 8).forEach(function (id) { add('WRONG', 'duplicate-id', id); });
+
+    /* ---------------------------------------------- links */
+    Array.prototype.forEach.call(d.querySelectorAll('a'), function (a) {
+      var h = a.getAttribute('href');
+      if (h === null) { add('SUSPECT', 'anchor-no-href', (a.textContent || '').trim().slice(0, 24)); return; }
+      if (h === '' ) { add('SUSPECT', 'anchor-empty-href', (a.textContent || '').trim().slice(0, 24)); return; }
+      if (h.charAt(0) === '#' || /^(https?:|mailto:|tel:|data:)/.test(h)) return;
+      var file = h.split('?')[0].split('#')[0];
+      if (!file) return;
+      if (FILES.indexOf(file) === -1 && file.indexOf('assets/') !== 0 && file.indexOf('img/') !== 0) {
+        add('BROKEN', 'link-target-missing', h + '  (' + (a.textContent || '').trim().slice(0, 20) + ')');
+      }
+    });
+
+    /* ---------------------------------------------- document basics */
+    if (!d.querySelector('h1')) add('SUSPECT', 'no-h1', '');
+    var t = (d.title || '').trim();
+    if (!t) add('SUSPECT', 'no-title', '');
+    else if (/harness|WAIT|untitled/i.test(t)) add('WRONG', 'placeholder-title', t);
+
+    if (d.documentElement.scrollWidth > d.documentElement.clientWidth + 1) {
+      add('BROKEN', 'horizontal-overflow',
+          d.documentElement.scrollWidth + ' > ' + d.documentElement.clientWidth);
+    }
+
+    /* ---------------------------------------------- forms that go nowhere */
+    Array.prototype.forEach.call(d.querySelectorAll('form'), function (fm) {
+      var a = fm.getAttribute('action');
+      if (a === '#' || a === '' || a === null) {
+        add('SUSPECT', 'form-no-action', (fm.className || 'form').toString().split(' ')[0]);
+      }
+    });
+
+    document.title = 'DONE';
+    document.getElementById('o').textContent = '<<<' + JSON.stringify(out) + '>>>';
+  }, 2200);
+};
+</script><iframe src="search.html" style="border: 0px; width: 1280px; height: 900px;"></iframe>
+</body></html>

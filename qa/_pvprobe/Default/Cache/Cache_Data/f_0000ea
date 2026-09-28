@@ -1,0 +1,533 @@
+/* ============================================================================
+   GOD SQUAD — component-facets.css
+   Phase 13. Shopify's native filtering, in one element.
+
+   THE SAME MARKUP IS TWO LAYOUTS.
+
+   snippets/facets.liquid emits the filter controls exactly once. Above --bp-md
+   they are a horizontal row of dropdowns; below it, once script has upgraded
+   them, the same element is a drawer. Nothing is duplicated, so there is one
+   checked state and nothing to keep in step.
+
+   THE DRAWER IS OPT-IN, NOT THE BASE STATE.
+
+   position:fixed is applied only under .facets--drawer, a class assets/facets.js
+   adds. That ordering is load-bearing: with no script the panel has to be IN
+   FLOW and visible, because the button that would open a drawer is the thing
+   script was going to reveal. A fixed panel with no opener is a filter UI a
+   customer cannot reach.
+
+   So the base state — a stack of collapsed groups above the grid — is the
+   no-script state, and it is already a usable mobile filter UI.
+   ========================================================================== */
+
+.facets {
+  margin-block-end: var(--space-5);
+}
+
+/* The drawer's own title row. Below --bp-md it is the drawer header; above it
+   there is no layer, so it is not needed. */
+.facets__bar {
+  display: none;
+}
+
+.facets__groups {
+  display: grid;
+  gap: var(--space-2);
+}
+
+/* -------------------------------------------------------------- one group */
+
+.facets__group {
+  border-block-end: var(--border-width) solid var(--color-border-current-subtle);
+}
+
+/* The whole disclosure is <details>/<summary>. No ARIA, no script: the same
+   reasoning sections/main-product.liquid records for its description. */
+.facets__summary {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  /* --target-min tall. A filter group heading is a primary control on this
+     surface, and Phase 9 set the floor. */
+  min-height: var(--target-min);
+  padding-block: var(--space-3);
+  cursor: pointer;
+  color: inherit;
+  font-family: var(--font-body);
+  font-size: var(--type-label-size);
+  font-weight: var(--type-label-weight);
+  letter-spacing: var(--type-label-ls);
+  text-transform: uppercase;
+  list-style: none;
+}
+
+/* Safari still paints its own disclosure triangle without this. */
+.facets__summary::-webkit-details-marker {
+  display: none;
+}
+
+.facets__summary-label {
+  flex: 1 1 auto;
+}
+
+/* The applied count, so a collapsed group still says it is doing something. */
+.facets__summary-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.5rem;
+  height: 1.5rem;
+  padding-inline: var(--space-2);
+  border-radius: var(--radius-sm);
+  background-color: var(--accent-current);
+  color: var(--color-bg-primary);
+  font-size: var(--type-caption-size);
+}
+
+.surface-light .facets__summary-count {
+  color: var(--color-bg-secondary);
+}
+
+/* Phase 18. The base rotation was missing, so this pointed RIGHT closed and
+   LEFT open — a 180° flip with nothing to flip from. icon-chevron.svg is drawn
+   pointing right (see the snippet), so a disclosure has to turn it down before
+   the open state means anything.
+
+   PHASE-2-DESIGN-SYSTEM.md §18 line 1489 permits exactly one transform, "the
+   chevron rotating 180° when its disclosure opens", and line 2917 describes one
+   mark "rotated in CSS for all four directions" — the 180° was implemented, the
+   direction it rotates FROM was not. 90deg to -90deg is still 180°, and it is
+   what sections/main-product.liquid's disclosure already does, so all three
+   disclosures now agree: down at rest, up when open.
+
+   Size is deliberately left alone. Line 1428 assigns the chevron "--icon-sm
+   16px inline; --icon-md in controls", so 16px in a compact filter row and 24px
+   on the product accordion are both the specified value, not drift. */
+.facets__summary .icon {
+  flex: 0 0 auto;
+  width: var(--icon-sm);
+  height: var(--icon-sm);
+  transform: rotate(90deg);
+  transition: transform var(--transition-fast);
+}
+
+.facets__group[open] .facets__summary .icon {
+  transform: rotate(-90deg);
+}
+
+/* ------------------------------------------------------------- the values */
+
+.facets__values {
+  padding-block-end: var(--space-4);
+}
+
+.facets__list {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.facets__value {
+  position: relative;
+}
+
+/* The checkbox carries the theme's shared .visually-hidden utility rather than
+   re-declaring the same six properties here — the pattern
+   snippets/product-variant-picker.liquid established for its radios. It stays
+   in the document and focusable; the ring is drawn on the label it controls,
+   and the label is the 44px target. */
+
+.facets__label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  /* 44px, not the 24px AA floor: a filter value is a primary control on this
+     surface and there is no larger equivalent beside it. */
+  min-height: var(--target-min);
+  padding-inline: var(--space-2);
+  cursor: pointer;
+  color: var(--color-text-current-muted);
+  font-family: var(--font-body);
+  font-size: var(--type-body-sm-size);
+  line-height: var(--type-body-sm-lh);
+}
+
+/* The box is drawn, not native, so its border can use the interactive token
+   that measures 3:1 — Phase 2 §12.2. Native checkbox accent colours cannot be
+   measured against the surface they land on. */
+.facets__label::before {
+  content: '';
+  flex: 0 0 auto;
+  width: 1rem;
+  height: 1rem;
+  border: var(--border-width) solid var(--color-border-current-interactive);
+  border-radius: var(--radius-sm);
+  background-color: transparent;
+}
+
+.facets__checkbox:checked + .facets__label {
+  color: inherit;
+}
+
+.facets__checkbox:checked + .facets__label::before {
+  border-color: var(--accent-current);
+  background-color: var(--accent-current);
+}
+
+.facets__checkbox:focus-visible + .facets__label {
+  outline: var(--focus-width) solid var(--focus-ring);
+  outline-offset: var(--focus-offset);
+}
+
+.facets__label-text {
+  flex: 1 1 auto;
+}
+
+/* Shopify's own count. Muted, because it is a hint rather than a value. */
+.facets__count {
+  flex: 0 0 auto;
+  color: var(--color-text-current-muted);
+  font-size: var(--type-caption-size);
+  font-variant-numeric: tabular-nums;
+}
+
+/* A swatch is decorative — the colour's NAME is beside it, so the mark is never
+   the only carrier (SC 1.4.1). The border keeps a cream swatch visible on a
+   cream surface. */
+.facets__swatch {
+  flex: 0 0 auto;
+  width: var(--swatch-size);
+  height: var(--swatch-size);
+  border: var(--border-width) solid var(--color-border-current);
+  border-radius: 50%;
+  background-color: var(--facet-swatch, transparent);
+}
+
+/* --------------------------------------------------------------- price */
+
+.facets__price {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+  padding-inline: var(--space-2);
+}
+
+.facets__price-field label {
+  display: block;
+  margin-block-end: var(--space-2);
+  color: var(--color-text-current-muted);
+  font-family: var(--font-body);
+  font-size: var(--type-caption-size);
+  text-transform: uppercase;
+  letter-spacing: var(--type-caption-ls);
+}
+
+.facets__price-input {
+  width: 100%;
+  min-height: var(--control-height);
+  padding-inline: var(--space-3);
+  border: var(--border-width) solid var(--color-border-current-interactive);
+  border-radius: var(--radius-sm);
+  background-color: transparent;
+  color: inherit;
+  font-family: var(--font-body);
+  /* 16px: below it iOS zooms the viewport on focus. */
+  font-size: var(--type-body-size);
+}
+
+/* --------------------------------------------------------------- footer
+   Apply and Clear all. Only a drawer needs them: above --bp-md the toolbar's
+   own submit does the applying and the chips do the clearing. */
+
+.facets__footer {
+  display: none;
+  gap: var(--space-3);
+  padding-block-start: var(--space-4);
+}
+
+.facets__clear,
+.facets-active__clear {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target-min);
+  color: var(--color-text-current-muted);
+  font-family: var(--font-body);
+  font-size: var(--type-body-sm-size);
+  text-decoration: underline;
+  text-underline-offset: 0.25em;
+}
+
+/* ------------------------------------------------------- applied filters
+   Chips are links carrying Shopify's own url_to_remove. Small and quiet: the
+   brief asks for them to be easy to remove and NOT visually dominant, so they
+   are outlined rather than filled and sit at the caption size. */
+
+.facets-active {
+  margin-block-end: var(--space-5);
+}
+
+.facets-active__list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.facets-active__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  /* 24px is the SC 2.5.8 floor. A chip is a secondary control and its removal
+     is also reachable from the group it came from, which is the equivalent
+     control that exception allows. */
+  min-height: var(--target-min-aa);
+  padding: var(--space-1) var(--space-3);
+  border: var(--border-width) solid var(--color-border-current);
+  border-radius: var(--radius-sm);
+  color: inherit;
+  font-family: var(--font-body);
+  font-size: var(--type-caption-size);
+  letter-spacing: var(--type-caption-ls);
+  text-transform: uppercase;
+  text-decoration: none;
+}
+
+.facets-active__group {
+  color: var(--color-text-current-muted);
+}
+
+/* --icon-sm is the smallest the scale defines. A chip's close mark is the one
+   place that wants smaller still, so it is scaled from the token rather than
+   given a magic number of its own. */
+.facets-active__chip .icon {
+  width: calc(var(--icon-sm) * 0.75);
+  height: calc(var(--icon-sm) * 0.75);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .facets-active__chip:hover {
+    border-color: var(--accent-current);
+  }
+}
+
+/* ============================================================== the drawer
+   Below --bp-md, and ONLY once assets/facets.js has added .facets--drawer.
+   ========================================================================== */
+
+@media (max-width: 767px) {
+  .facets--drawer {
+    position: fixed;
+    inset-block: 0;
+    inset-inline-end: 0;
+    z-index: var(--z-drawer);
+    display: flex;
+    flex-direction: column;
+    width: var(--drawer-width);
+    max-width: 100%;
+    margin-block-end: 0;
+    padding: var(--space-5);
+    background-color: var(--color-bg-primary);
+    box-shadow: var(--shadow-on-dark);
+    transform: translateX(100%);
+    transition: transform var(--transition-medium);
+    visibility: hidden;
+  }
+
+  .facets--drawer.is-open {
+    transform: translateX(0);
+    visibility: visible;
+  }
+
+  /* Phase 18. The exit slide was never seen: `visibility` is not a transitioned
+     property here, so removing .is-open flipped it to hidden in the same frame
+     the transform started and the panel vanished instead of sliding out.
+     PHASE-2 §21 line 1725 assigns "menu panel / drawer entry AND exit" the
+     medium duration, so the exit is specified, not decoration.
+
+     assets/facets.js adds this class on close and removes it on transitionend,
+     with a timeout fallback — the same shape assets/cart.js uses for the cart
+     drawer, which is the one other drawer in the theme and already animates its
+     exit correctly. Doing it in JS rather than with a `visibility 0s linear
+     250ms` delay keeps the two drawers on one pattern. */
+  .facets--drawer.is-closing {
+    visibility: visible;
+  }
+
+  .facets--drawer .facets__bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding-block-end: var(--space-4);
+    border-block-end: var(--border-width) solid var(--color-border-current);
+  }
+
+  /* The groups scroll, the header and footer do not — so Apply is always
+     reachable however many filters a merchant has configured. */
+  .facets--drawer .facets__groups {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-block: var(--space-4);
+  }
+
+  .facets--drawer .facets__footer {
+    display: grid;
+    gap: var(--space-3);
+    justify-items: center;
+  }
+
+  /* The phone's home indicator sits under the footer, and Apply is in it. */
+  @supports (padding: max(0px)) {
+    .facets--drawer {
+      padding-block-end: max(var(--space-5), env(safe-area-inset-bottom));
+    }
+  }
+}
+
+/* Phase 18: --font-body, not --font-display. design-tokens.css:170 states the
+   rule — "Playfair for H1-H2, Jost for H3-H4 (interface headings)" — and
+   PHASE-2 §6.1 assigns the h3/h4 rows the body family at weight 600. It also
+   made the weight honest: the display font is registered as playfair_display_n9
+   with no font_modify, so --weight-semibold against a 900-only family resolved
+   to 900. Jost 600 IS registered (layout/theme.liquid), so 600 now means 600. */
+.facets__bar-title {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--type-h4-size);
+  font-weight: var(--weight-semibold);
+}
+
+.facets__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--target-min);
+  min-height: var(--target-min);
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+/* ------------------------------------------------- the horizontal bar
+   --bp-md and up. A row of dropdowns above the toolbar. An open group overlays
+   the grid rather than reflowing it, which is what keeps the bar's cost a
+   one-time 72px rather than a jump every time a customer opens a group. */
+
+@media (min-width: 768px) {
+  .facets__groups {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-5);
+    align-items: center;
+  }
+
+  .facets__group {
+    position: relative;
+    border-block-end: 0;
+  }
+
+  .facets__values {
+    position: absolute;
+    inset-block-start: 100%;
+    inset-inline-start: 0;
+    z-index: var(--z-raised);
+    min-width: 14rem;
+    padding: var(--space-4);
+    border: var(--border-width) solid var(--color-border-current);
+    background-color: var(--color-bg-primary);
+    box-shadow: var(--shadow-elevated);
+  }
+
+  .surface-light .facets__values {
+    background-color: var(--color-bg-secondary);
+  }
+
+  .facets__price {
+    min-width: 18rem;
+  }
+}
+
+/* ============================================================== page state
+   The lock is a class on <html>, matching the header's menu panel and NOT
+   assets/cart.js's inline fixed-position lock. Two class-based owners compose:
+   each adds and removes its own class, and overflow:hidden is still in force
+   while either is present. Two inline-style owners would fight over one
+   recorded scroll position.
+   ========================================================================== */
+
+.facets-open body {
+  overflow: hidden;
+}
+
+/* [hidden] loses to the .button class at equal specificity — the same defect
+   Phase 11 found on the header panel — so the trigger needs this to stay
+   hidden until assets/facets.js reveals it. */
+.main-collection__filter-toggle[hidden] {
+  display: none;
+}
+
+/* ORDER IS LOAD-BEARING HERE, AND IT WAS WRONG.
+
+   The base rule must come FIRST and the media query second. A media query adds
+   no specificity, so when the unconditional `display: inline-flex` sat AFTER
+   the `@media (min-width: 768px) { display: none }` block, both selectors were
+   (0,1,0) and the later one won at every width. The retirement rule had never
+   once applied.
+
+   That is not cosmetic. This rule is the no-script half of the Phase 16 P0 fix:
+   with scripting off, facets.js never runs, never sets the hidden attribute,
+   and this media query is the only thing standing between a desktop keyboard
+   user and a focusable Filter button that opens nothing — SC 2.1.2, the exact
+   trap Phase 16 closed for the scripted case. Phase 18's audit reported the
+   dead rule as a LOW cosmetic finding; it is the accessibility guard.
+
+   Caught by running the suite under Chrome after Edge's --dump-dom broke: the
+   trigger measured display:flex at 1280 where 1440 and 768 both hid it.
+
+   display:none rather than visibility or opacity, because it must also leave
+   the tab order — a focusable control that opens nothing is worse than one that
+   is merely invisible. header.css retires the mobile menu button the same way. */
+.main-collection__filter-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* Retired above --bp-md, where there is no drawer for it to open. */
+@media (min-width: 768px) {
+  .main-collection__filter-toggle {
+    display: none;
+  }
+}
+
+.main-collection__filter-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  border-radius: var(--radius-sm);
+  background-color: var(--accent-current);
+  color: var(--color-bg-primary);
+  font-size: var(--type-caption-size);
+}
+
+/* The editor-only note, when a merchant has switched filters on but has not
+   created any in the admin app yet. */
+.main-collection__notice {
+  margin: 0 0 var(--space-5);
+  padding: var(--space-3) var(--space-4);
+  border-inline-start: var(--border-width-strong) solid var(--accent-current);
+  color: var(--color-text-current-muted);
+  font-family: var(--font-body);
+  font-size: var(--type-body-sm-size);
+  line-height: var(--type-body-sm-lh);
+}

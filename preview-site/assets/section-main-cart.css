@@ -1,0 +1,180 @@
+/* ============================================================================
+   GOD SQUAD — Cart page
+   Phase 8. The lean page the no-JavaScript add-to-cart path lands on, and the
+   destination of the drawer's View cart link.
+
+   It shares the cart line component with the drawer and adds nothing of its
+   own beyond a page frame, because a fuller cart design belongs to whichever
+   later phase owns it — and anything invented here would have to be undone.
+   ========================================================================== */
+
+.main-cart {
+  width: 100%;
+  padding-block: var(--section-pad-block);
+  /* svh, not vh. On a phone the retracting toolbar makes vh jump, so a vh
+     minimum can leave the page taller than the screen for no reason. This is
+     the same reasoning Phase 5 applied to the hero. */
+  min-height: 60svh;
+}
+
+.main-cart__title {
+  margin: 0 0 var(--space-7);
+  font-family: var(--font-display);
+  font-size: var(--type-display-m-size);
+  font-weight: var(--weight-black);
+  line-height: var(--type-display-m-lh);
+  letter-spacing: var(--type-display-m-ls);
+  text-transform: uppercase;
+}
+
+.main-cart__title:focus {
+  outline: none;
+}
+
+.main-cart__title:focus-visible {
+  outline: var(--focus-width) solid var(--focus-ring);
+  outline-offset: var(--focus-offset);
+}
+
+.main-cart__lines {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-block-end: var(--border-width) solid var(--color-border-current);
+}
+
+/* ---------------------------------------------------------------- summary
+   The totals, the tax note and the empty state are in component-cart-line.css,
+   shared with the drawer. Only the page's own chrome is here. */
+
+.main-cart__error {
+  margin-block-end: var(--space-6);
+}
+
+.main-cart__summary {
+  margin-block-start: var(--space-7);
+  margin-inline-start: auto;
+  /* The totals sit at the trailing edge on a wide screen and run full width on
+     a phone, which is the one place this page departs from the symmetrical
+     grid — a totals block centred under a list of prices reads as a separate
+     thing rather than as their sum. */
+  max-width: 28rem;
+}
+
+.main-cart__update {
+  margin-block-end: var(--space-3);
+  width: 100%;
+}
+
+/* Hidden once the cart script is running, because there it does nothing:
+   quantity changes are applied as they are made and this page re-renders
+   itself, so the control is a tab stop that leads to a no-op.
+
+   This rule used to live in section-cart-drawer.css beside the drawer's
+   identical one. That file is loaded by sections/cart-drawer.liquid, and the
+   layout does not render the drawer on the cart template — so on the only page
+   that has a .main-cart__update, the rule hiding it was never loaded. It is
+   here now, in the stylesheet this page actually links.
+
+   The class is `cart-js`, which assets/cart.js sets on itself — NOT the
+   layout's `js` class, which an inline script sets whether or not the cart
+   script ever arrives. Keying on `js` would hide the only control that can
+   apply a quantity change in precisely the case where nothing else can. */
+.cart-js .main-cart__update {
+  display: none;
+}
+
+.main-cart__accelerated {
+  margin-block-start: var(--space-4);
+}
+
+/* --------------------------------------------------------- continue shopping
+   The route back to shopping, which this page had none of. Quiet, under the
+   two buttons, for the reason the drawer's copy records: it is the way out of
+   a decision and must not compete with Checkout. */
+
+.main-cart__continue {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--target-min);
+  margin-block-start: var(--space-3);
+  color: var(--color-text-current-muted);
+  font-family: var(--font-body);
+  font-size: var(--type-body-sm-size);
+  letter-spacing: var(--type-label-ls);
+  text-transform: uppercase;
+  text-align: center;
+  transition: color var(--transition-fast);
+}
+
+/* Pointer-scoped in Phase 18 (PHASE-2 22.1 rule 5). */
+@media (hover: hover) and (pointer: fine) {
+  .main-cart__continue:hover {
+    color: inherit;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .main-cart__continue {
+    transition: none;
+  }
+}
+
+/* ------------------------------------------------------------- two columns
+   Below --bp-lg the page is one column: the lines, then the totals under them,
+   which is the only honest order on a phone.
+
+   From --bp-lg it becomes the editorial two-column cart. This is not
+   decoration. At the 1440 container the single column ran the cart lines to
+   1344px, so a 120px thumbnail sat beside a product title with roughly 1000px
+   of empty rule between it and its own price — the eye has to travel the whole
+   width to pair a name with a number. The second column both shortens that
+   journey and puts the subtotal where it can stay in view.
+
+   24rem, not a share of the row: the summary holds a fixed set of short lines
+   and a button, and giving it a fraction would stretch the same content wider
+   on a wider screen for no reason. */
+
+@media (min-width: 1024px) {
+  .main-cart__form {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 24rem;
+    gap: var(--space-8);
+    align-items: start;
+  }
+
+  .main-cart__lines {
+    /* The rule under the last line closed the single column. In two columns
+       the summary is beside the list, not under it, so the line has nothing
+       left to separate. */
+    border-block-end: none;
+  }
+
+  .main-cart__summary {
+    /* Both of these are the single-column layout's: a cap that pulled the
+       block to the trailing edge of a full-width row. The grid track is the
+       width now. */
+    max-width: none;
+    margin-block-start: 0;
+    margin-inline-start: 0;
+    position: sticky;
+    /* Clear of the sticky header, the same offset the product page's buying
+       column uses. */
+    top: var(--header-offset-desktop);
+    /* If the summary is ever taller than the screen — a long order note, a
+       stack of discounts — sticking it would hide its own bottom, Checkout
+       included. Its own scroll keeps every control reachable, and the
+       scroll-padding keeps a focused control clear of the bottom edge
+       (WCAG 2.2 SC 2.4.11). */
+    max-height: calc(100dvh - var(--header-offset-desktop) - var(--space-6));
+    overflow-y: auto;
+    scroll-padding-block: var(--space-6);
+  }
+}
+
+/* ------------------------------------------------------------------ empty */
+
+.main-cart__inner .cart-empty {
+  padding-block: var(--space-8);
+}

@@ -1,0 +1,261 @@
+/* ============================================================================
+   GOD SQUAD — section-verse-feature.css
+
+   BAND 1 of the Verse feature: the Today's Verse strip.
+
+   Consumes tokens only; defines none outside its own --vf-* scope, the way
+   section-our-story.css does.
+
+   THE BREAKPOINT IS 1280, NOT 1024. Three panels in one row means the
+   photograph gets roughly a third of the viewport while two text panels take
+   the rest. The verse panel has to hold "2 CORINTHIANS 5:7" — thirteen
+   characters of Playfair at up to 40px — without breaking mid-reference, and
+   the message panel a paragraph plus a link. At 1024 the two text columns come
+   out under 400px each and both wrap badly. It composes at --bp-xl.
+
+   Breakpoints are written as literal pixels because a media query cannot read
+   a custom property. The values match --bp-md 768 and --bp-xl 1280 in
+   design-tokens.css; changing one means changing both.
+   ========================================================================== */
+
+.verse-feature {
+  --vf-space-top: var(--section-pad-block);
+  --vf-space-bottom: 0px;
+  /* The panels' own inner padding. Generous, because each panel is a complete
+     composition rather than a column of a grid. */
+  --vf-panel-pad: var(--space-6);
+
+  padding-block-start: var(--vf-space-top);
+  padding-block-end: var(--vf-space-bottom);
+  /* No background-color or color here. The surface class on this element sets
+     both directly (design-tokens.css:485-507); restating them is how a band
+     drifts out of its surface context. */
+}
+
+.verse-feature--pt-standard { --vf-space-top: var(--section-pad-block); }
+.verse-feature--pt-tight    { --vf-space-top: var(--section-pad-block-tight); }
+.verse-feature--pt-none     { --vf-space-top: 0px; }
+.verse-feature--pb-standard { --vf-space-bottom: var(--section-pad-block); }
+.verse-feature--pb-tight    { --vf-space-bottom: var(--section-pad-block-tight); }
+.verse-feature--pb-none     { --vf-space-bottom: 0px; }
+
+/* ----------------------------------------------------------------- the row */
+
+/* Full bleed, no container: the mockup runs the three panels edge to edge, and
+   the photograph is a bleed element. The panels carry their own inset instead,
+   which is why --vf-panel-pad exists. */
+.verse-feature__row {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 1280px) {
+  /* Three equal-ish tracks with the photograph widest. minmax(0, …) on every
+     track, not 1fr alone: a grid item's default min-width is auto, so a long
+     unbroken reference would push its own track wider than its share and the
+     row would overflow the viewport rather than wrap. */
+  .verse-feature--has-media.verse-feature--has-message .verse-feature__row {
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1.1fr) minmax(0, 0.95fr);
+  }
+  .verse-feature--has-media:not(.verse-feature--has-message) .verse-feature__row,
+  .verse-feature--has-message:not(.verse-feature--has-media) .verse-feature__row {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+}
+
+/* --------------------------------------------------------------- the panels */
+
+.verse-feature__panel {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: var(--vf-panel-pad) var(--gutter);
+}
+
+.verse-feature__panel--verse {
+  align-items: center;
+  text-align: center;
+}
+
+.verse-feature__panel--message {
+  align-items: flex-start;
+  text-align: start;
+  /* .surface-dark on this element supplies the ink ground and the cream text,
+     and re-declares every context variable at this scope. Phase 2 operating
+     rule 3: an inverse block is a nested surface class, never an override of
+     individual colour properties. Nothing to set here. */
+}
+
+/* ---------------------------------------------------------------- the type */
+
+.verse-feature__eyebrow {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--type-eyebrow-size);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--type-eyebrow-ls);
+  text-transform: uppercase;
+  color: var(--color-text-current-muted);
+}
+
+/* The reference sets at --weight-regular, not --weight-black. Every other
+   display heading in the theme is black because it is a statement; this one is
+   a citation, and the approved design sets it as a light serif in caps. Black
+   at 40px in caps would out-shout the quote underneath, which is the line that
+   matters. */
+.verse-feature__reference {
+  margin: var(--space-4) 0 0;
+  font-family: var(--font-display);
+  font-size: var(--type-h2-size);
+  font-weight: var(--weight-regular);
+  line-height: var(--type-h2-lh);
+  text-transform: uppercase;
+  /* A citation must not break mid-reference: "2 CORINTHIANS" on one line and
+     "5:7" on the next reads as two separate things. */
+  text-wrap: balance;
+}
+
+/* The rule under the reference. Same construction as .our-story__caption::after
+   (section-our-story.css:248-255), including its margin-top — dropping that is
+   what makes a copied rule sit flush against the text above it. */
+.verse-feature__reference::after {
+  content: '';
+  display: block;
+  width: var(--space-7);
+  height: var(--border-width);
+  margin-top: var(--space-4);
+  margin-inline: auto;
+  background-color: var(--color-border-current-interactive);
+}
+
+.verse-feature__quote {
+  /* A blockquote carries a user-agent margin and inline padding. Both go: the
+     panel owns the spacing. */
+  margin: var(--space-5) 0 0;
+  padding: 0;
+}
+
+.verse-feature__quote p {
+  margin: 0;
+  font-family: var(--font-display);
+  /* The italic cut is registered in layout/theme.liquid via font_modify. Without
+     it the browser synthesises italic by shearing the upright, which on a
+     high-contrast serif smears the thick/thin relationship — most visibly at
+     this size. */
+  font-style: italic;
+  font-size: var(--type-h3-size);
+  font-weight: var(--weight-regular);
+  line-height: var(--type-h3-lh);
+  text-wrap: balance;
+}
+
+.verse-feature__caption {
+  margin: var(--space-6) 0 0;
+  font-family: var(--font-body);
+  font-size: var(--type-caption-size);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--type-caption-ls);
+  text-transform: uppercase;
+  color: var(--color-text-current-muted);
+}
+
+.verse-feature__message {
+  margin-block-start: var(--space-4);
+  font-family: var(--font-body);
+  font-size: var(--type-body-size);
+  line-height: var(--type-body-lh);
+  max-width: 34ch;
+}
+
+.verse-feature__message > :first-child { margin-block-start: 0; }
+.verse-feature__message > :last-child  { margin-block-end: 0; }
+
+/* ----------------------------------------------------------------- the link */
+
+/* A link, not a button: it navigates. The rule above it is the design's, and it
+   is a separate element from the message so it holds its position when the
+   message is empty. */
+.verse-feature__link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  /* The affordance is the underline, which is required at rest for a link
+     standing in a run of text (Phase 2 section 11.3, SC 1.4.1). */
+  min-height: var(--target-min);
+  margin-block-start: var(--space-6);
+  padding-block-start: var(--space-5);
+  border-block-start: var(--border-width) solid var(--color-border-current);
+  font-family: var(--font-body);
+  font-size: var(--type-label-size);
+  font-weight: var(--type-label-weight);
+  letter-spacing: var(--type-label-ls);
+  text-transform: uppercase;
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: var(--link-underline-offset);
+  text-decoration-thickness: var(--link-underline-thickness);
+  transition: color var(--transition-fast);
+}
+
+/* The border above is a full-width rule in the design, so the link's own box
+   must span the panel rather than shrink to its text. */
+.verse-feature__link {
+  align-self: stretch;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .verse-feature__link:hover {
+    color: var(--accent-current);
+  }
+}
+
+.verse-feature__link .icon {
+  flex: none;
+  inline-size: var(--icon-sm);
+  block-size: var(--icon-sm);
+}
+
+/* ---------------------------------------------------------------- the photo */
+
+.verse-feature__media {
+  position: relative;
+  overflow: hidden;
+  /* An explicit ratio so the row does not jump as the image decodes, and so the
+     photograph has a shape before one is uploaded. */
+  aspect-ratio: 4 / 3;
+  background-color: var(--color-surface-tile);
+}
+
+@media (min-width: 768px) {
+  .verse-feature__media { aspect-ratio: 16 / 9; }
+}
+
+@media (min-width: 1280px) {
+  /* In the row the photograph fills its track's height rather than dictating
+     it, so the three panels share one baseline. */
+  .verse-feature__media { aspect-ratio: auto; }
+}
+
+.verse-feature__image {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+
+/* ------------------------------------------------------- the editor notice */
+
+/* Theme Editor only — the Liquid wraps it in request.design_mode, so it never
+   reaches a shopper. Same treatment as .our-story__notice. */
+.verse-feature__notice {
+  margin: var(--space-5) var(--gutter) 0;
+  padding: var(--space-4);
+  border: var(--border-width) dashed var(--color-border-current-interactive);
+  font-family: var(--font-body);
+  font-size: var(--type-body-sm-size);
+  line-height: var(--type-body-sm-lh);
+  color: var(--color-text-current-muted);
+}
+
+.verse-feature__notice p { margin: 0 0 var(--space-2); }
+.verse-feature__notice p:last-child { margin-block-end: 0; }

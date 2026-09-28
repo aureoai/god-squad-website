@@ -1,0 +1,25 @@
+{%- comment -%}
+  Renders the Instagram mark used in the footer's social row.
+
+  Drawn to the Phase 2 contract - 24x24 canvas, stroke 1.5, currentColor, round
+  caps and joins - so the mark follows --accent-current, a hover and either
+  surface. The prototype's raster PNGs could not: colour is baked into their
+  pixels (Phase 1 classifies both as "replace with SVG snippet").
+
+  NOT THE OFFICIAL BRAND ASSET. PHASE-3-ASSET-SYSTEM.md records that platform
+  marks should come from each platform's own brand kit as SVG and be used
+  unmodified. This is a stroke-weight approximation drawn to match the rest of
+  the icon set, which is what the approved footer design shows. Swap it for the
+  official asset before launch if the brand guidelines are to be followed to the
+  letter.
+
+  Accepts:
+  - class: {String} optional extra class names
+
+  Usage:
+  {% render 'icon-instagram' %}
+
+  Decorative: the link that wraps it carries the accessible name, so the mark is
+  aria-hidden.
+{%- endcomment -%}
+<svg class="icon icon--instagram {{ class }}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3.5" y="3.5" width="17" height="17" rx="4.75"/><circle cx="12" cy="12" r="3.9"/><path d="M16.95 7.05h.01"/></svg>

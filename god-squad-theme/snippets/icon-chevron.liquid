@@ -1,0 +1,27 @@
+{%- comment -%}
+  Renders the chevron icon.
+
+  Source: phase-3-assets/icons/icon-chevron.svg, drawn in Phase 3 — 24x24
+  canvas, stroke 1.5, currentColor, round caps and joins. Drawn pointing right;
+  it is rotated rather than redrawn, which is why only one chevron exists in
+  the set.
+
+  Round, not square. Phase 2 §18.3 rule 2 specifies square caps and mitred
+  joins; every glyph Phase 3 drew and Phases 4-7 shipped uses round ones, so
+  matching the set is what keeps the icons looking like one drawing. The
+  deviation belongs to the set, not to this file, and is recorded in
+  PHASE-8-PRODUCT-SHOPPING-UX.md rather than half-corrected here.
+
+  Accepts:
+  - class: {String} optional extra class names. The rotation is owned by the
+    control the chevron sits in — sections/main-product.liquid's disclosure
+    rotates it from .main-product__details-summary — rather than by a modifier
+    class here, so there is one rule per consumer and no unused class.
+
+  Usage:
+  {% render 'icon-chevron' %}
+
+  Decorative: the control it sits in carries the accessible name and, for a
+  disclosure, the open state.
+{%- endcomment -%}
+<svg class="icon icon--chevron {{ class }}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9.5 5.5 16 12l-6.5 6.5"/></svg>

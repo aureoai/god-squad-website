@@ -1,0 +1,224 @@
+[
+  {
+    "name": "theme_info",
+    "theme_name": "God Squad",
+    "theme_version": "0.5.0",
+    "theme_author": "God Squad",
+    "theme_documentation_url": "https:\/\/help.shopify.com\/manual\/online-store\/themes",
+    "theme_support_url": "https:\/\/help.shopify.com\/manual\/online-store\/themes"
+  },
+  {
+    "name": "Colours",
+    "settings": [
+      {
+        "type": "paragraph",
+        "content": "The brand palette is chosen as a whole rather than as three separate colours. Each scheme ships its dark-surface gold and its light-surface partner together and carries measured contrast for every pairing in the system, so no combination here can fall below WCAG AA."
+      },
+      {
+        "type": "select",
+        "id": "color_scheme",
+        "label": "Brand palette",
+        "options": [
+          {
+            "value": "godsquad",
+            "label": "God Squad (approved palette)"
+          }
+        ],
+        "default": "godsquad",
+        "info": "The whole palette, chosen as one. Each section then picks which side of it to sit on with its own \"Colour scheme\" setting. Measured: cream on near black 17.04:1, near black on cream 17.04:1, muted gold on near black 11.01:1, and the light-surface gold #82672B on cream 4.66:1. Muted gold is 1.55:1 on cream and is therefore a dark-surface accent only, which the theme enforces for you."
+      }
+    ]
+  },
+  {
+    "name": "Typography",
+    "settings": [
+      {
+        "type": "paragraph",
+        "content": "Playfair Display for display, Jost for interface and body. Those are the two families the theme renders — the design also names a script face for a single accent, but nothing in the theme uses it and no third font is loaded, so changing these two changes everything."
+      },
+      {
+        "type": "font_picker",
+        "id": "type_display_font",
+        "label": "Display font",
+        "default": "playfair_display_n9"
+      },
+      {
+        "type": "font_picker",
+        "id": "type_body_font",
+        "label": "Body and interface font",
+        "default": "jost_n4"
+      }
+    ]
+  },
+  {
+    "name": "Layout",
+    "settings": [
+      {
+        "type": "range",
+        "id": "container_width",
+        "label": "Content width",
+        "min": 1200,
+        "max": 1800,
+        "step": 20,
+        "unit": "px",
+        "default": 1440,
+        "info": "Sections run full bleed; this constrains their content."
+      },
+      {
+        "type": "select",
+        "id": "radius_sm",
+        "label": "Corner radius",
+        "options": [
+          {
+            "value": "0",
+            "label": "Square"
+          },
+          {
+            "value": "2",
+            "label": "Slight (default)"
+          },
+          {
+            "value": "4",
+            "label": "Rounded"
+          }
+        ],
+        "default": "2",
+        "info": "Kept small deliberately. The brand reads editorial rather than app-like."
+      }
+    ]
+  },
+  {
+    "name": "Products",
+    "settings": [
+      {
+        "type": "paragraph",
+        "content": "One image shape for the whole catalogue. It is set here rather than on each section because a ratio that differs between two rows of the same shop is a bug, not a choice: mixed shapes break the grid rhythm and force product photographs to be letterboxed onto the tile ground."
+      },
+      {
+        "type": "select",
+        "id": "product_image_ratio",
+        "label": "Product image shape",
+        "options": [
+          {
+            "value": "square",
+            "label": "Square (1:1)"
+          },
+          {
+            "value": "portrait",
+            "label": "Portrait (4:5)"
+          }
+        ],
+        "default": "square"
+      },
+      {
+        "type": "checkbox",
+        "id": "card_hover_secondary_image",
+        "label": "Show a second photo on hover",
+        "default": false,
+        "info": "On a mouse, hovering a product card fades to the next photo. Nothing changes on a phone or tablet, and a product with only one photo is unaffected. Off by default because the approved card hover is the image lift and the title underline."
+      }
+    ]
+  },
+  {
+    "name": "Brand",
+    "settings": [
+      {
+        "type": "paragraph",
+        "content": "The wordmark, used by the header and — when you switch it on there — the footer. It is uploaded once, here, so the two can never drift apart."
+      },
+      {
+        "type": "image_picker",
+        "id": "logo",
+        "label": "Logo",
+        "info": "A transparent PNG or, better, an SVG. The wordmark supplied with the theme carries heavy transparent padding and renders at roughly half its intended size — upload a vector master to fix it."
+      },
+      {
+        "type": "image_picker",
+        "id": "favicon",
+        "label": "Favicon",
+        "info": "None is supplied, so browsers currently show their default mark. Upload a square image — a vector logo gives the cleanest result at small sizes."
+      },
+      {
+        "type": "image_picker",
+        "id": "share_image",
+        "label": "Social sharing image",
+        "info": "Shown when someone shares a link to this store on Facebook, Viber, X or Instagram. Product and collection pages use their own image; this covers everything else. Around 1200 x 630 works best — a logo on its own tends to be cropped badly. Leave it empty and the logo is used instead."
+      }
+    ]
+  },
+  {
+    "name": "Cart",
+    "settings": [
+      {
+        "type": "paragraph",
+        "content": "How the cart opens. The slide-out drawer keeps the customer on the page they were browsing; the cart page is a full page of its own."
+      },
+      {
+        "type": "select",
+        "id": "cart_type",
+        "label": "Cart style",
+        "options": [
+          {
+            "value": "drawer",
+            "label": "Slide-out drawer"
+          },
+          {
+            "value": "page",
+            "label": "Cart page"
+          }
+        ],
+        "default": "drawer",
+        "info": "With the cart page selected the drawer is not rendered at all, and the header cart control becomes an ordinary link to /cart."
+      }
+    ]
+  },
+  {
+    "name": "Customer accounts",
+    "settings": [
+      {
+        "type": "paragraph",
+        "content": "Customer accounts are turned on in Shopify admin under Settings > Customer accounts, not here. When they are on, the header shows the account control and Shopify hosts the account pages on its own domain. Their colours and type come from the checkout and accounts editor, because the theme cannot reach a page it does not serve."
+      },
+      {
+        "type": "link_list",
+        "id": "customer_account_menu",
+        "label": "Account menu",
+        "default": "customer-account-main-menu",
+        "info": "The links inside the account sheet. Create the menu in Navigation, then choose it here. Leaving this empty does not fall back to a default set of links — the sheet simply has none."
+      }
+    ]
+  },
+  {
+    "name": "Social",
+    "settings": [
+      {
+        "type": "paragraph",
+        "content": "Paste the full address of each profile. A row with no address is not rendered, so the footer never shows a link that goes nowhere."
+      },
+      {
+        "type": "url",
+        "id": "social_facebook_url",
+        "label": "Facebook",
+        "info": "No address has been supplied for the brand yet."
+      },
+      {
+        "type": "url",
+        "id": "social_instagram_url",
+        "label": "Instagram",
+        "info": "No address has been supplied for the brand yet."
+      },
+      {
+        "type": "url",
+        "id": "social_tiktok_url",
+        "label": "TikTok",
+        "info": "No address has been supplied for the brand yet."
+      },
+      {
+        "type": "url",
+        "id": "social_youtube_url",
+        "label": "YouTube",
+        "info": "No address has been supplied for the brand yet."
+      }
+    ]
+  }
+]

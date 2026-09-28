@@ -1,0 +1,13 @@
+{
+  "sections": {
+    "main": {
+      "type": "main-cart",
+      "settings": {
+        "empty_link_label": "Shop the collection"
+      }
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

@@ -1,0 +1,413 @@
+/* ============================================================================
+   GOD SQUAD — Product card
+   Phase 6. Every value is a token. No raw hex, no magic numbers, no
+   !important, and no JavaScript dependency of any kind.
+
+   Structure, in Phase 2 section 13.2's closed order:
+     media -> title -> price -> swatches, with one optional action slot.
+   A fourth unconditional part would have to survive being multiplied across a
+   whole catalogue, and nothing earns that.
+
+   The card container has no background, no border, no shadow and no lift, at
+   any state (Phase 2 section 22.4). The only thing that moves is the
+   photograph, by 3%, inside a fixed box.
+   ========================================================================== */
+
+/* ------------------------------------------------------------------- grid
+   One mechanism for every product grid in the theme.
+
+   --product-cols is the merchant's column count for the current tier; the
+   section sets it per breakpoint. It is a CEILING, not a command. The track
+   floor keeps a tile from ever dropping below --product-col-min 272px, which
+   is the width Phase 2 section 9.3 derived to retire RESP-08: the prototype
+   squeezed three columns into ~230px between 901 and 1100, where the eyebrow,
+   the product names and the CTA all wrapped.
+
+   Reading the expression: auto-fill asks how many tracks of at least
+   max(floor, ideal) fit. When the viewport can carry the requested count at
+   272px or wider, "ideal" is the larger value and the count comes out exactly
+   as asked. When it cannot, the floor wins and the grid drops a column
+   instead of squeezing one. There is no breakpoint gap for a layout to fail
+   in, and no setting a merchant can choose that produces a broken grid. */
+
+.product-grid {
+  --product-cols: 2;
+  --product-track-ideal: calc(
+    (100% - (var(--product-cols) - 1) * var(--product-grid-gap)) / var(--product-cols)
+  );
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(max(var(--product-track-floor, var(--product-col-min)), var(--product-track-ideal)), 1fr)
+  );
+  gap: var(--product-grid-gap);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Below the tablet tier, two things change and only there.
+
+   The COLUMN gap tightens to --space-4 16px. Measured at 375, a 32px gap sat
+   between two 147px cards inside a 24px gutter — the space between the cards
+   was wider than the space around the row, which reads as two bands rather
+   than one, and it cost each card 8px it could not spare. The row gap stays at
+   32px: vertical space is not the scarce dimension on a phone. Phase 2 §27.6
+   rule 4 records 24px as the intended grid gap and the token's 32px as a
+   comment needing correction; this is the mobile half of that.
+
+   The floor is relaxed too. Phase 2 section 13.9 permits two columns on a
+   phone; the 272px catalogue floor would force one, because a 375px viewport
+   has only 327px of content box.
+
+   8rem (128px) is measured, not chosen. Two columns need 2F + 32px of gap to
+   fit the grid's width, so the floor alone decides where the grid drops to one
+   column. With the body reset in place (the first measurement of this was
+   taken before it, and was 16px out at every width):
+
+     layout  grid   columns at 8rem   columns at 8.5rem
+       320    272         1                 1
+       336    288         2                 1
+       352    304         2                 2
+       375    327         2                 2
+       430    382         2                 2
+       768    704    the 272px catalogue floor takes over again
+
+   Both values behave identically from 352 up, because there the merchant's
+   ceiling of two columns is the binding constraint and the tracks come out the
+   same width either way. They differ only between 336 and 351, and 8rem is
+   chosen so that a merchant who asks for two columns on mobile gets two on the
+   narrowest phones as well. The narrowest resulting track is 128px, which was
+   rendered and read before it was adopted: the tracked-caps title still wraps
+   inside its two-line clamp and the price and swatch row still read.
+
+   320px still gets one column, which is correct: two 128px tracks plus the gap
+   do not fit 272px of grid.
+
+   A merchant who chooses one column on mobile still gets one. The ceiling
+   governs; the floor only stops the ceiling asking for something the viewport
+   cannot carry. */
+@media (max-width: 767px) {
+  .product-grid {
+    --product-grid-gap: var(--space-4);
+    row-gap: var(--space-6);
+    --product-track-floor: 8rem;
+  }
+}
+
+/* ------------------------------------------------------------------- card */
+
+.product-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  /* Phase 2 section 22.4: no background, no border, no shadow, no lift. */
+  background: none;
+  border: 0;
+}
+
+/* One anchor per card, wrapping the media and the title. Phase 2 section 11.5
+   asks for the focus ring around the whole card rather than around the
+   anchor's box, so the card draws it on :focus-within and the anchor
+   suppresses its own. This is the one place a component may touch outline:
+   it removes one ring and immediately draws an equivalent one. */
+.product-card__link {
+  display: block;
+  width: 100%;
+  color: inherit;
+  text-decoration: none;
+}
+
+.product-card__link:focus-visible {
+  outline: none;
+}
+
+.product-card:has(.product-card__link:focus-visible) {
+  outline: var(--focus-width) solid var(--focus-ring);
+  outline-offset: var(--focus-offset);
+}
+
+/* Fallback for engines without :has(). The two rules are mutually exclusive
+   by construction: `not selector(:has(*))` is true only where :has() is
+   unsupported, so an engine applies one or the other and never both. Where the
+   fallback does run, :focus-within also fires for the optional quick-add
+   control, which is acceptable — the ring is still correct, it is just drawn
+   for one more element. An engine too old to understand @supports selector()
+   treats the condition as false and gets neither rule, which is why the
+   anchor's own outline is suppressed with :focus-visible rather than :focus:
+   those engines fall back to the browser's default ring. */
+@supports not selector(:has(*)) {
+  .product-card:focus-within {
+    outline: var(--focus-width) solid var(--focus-ring);
+    outline-offset: var(--focus-offset);
+  }
+}
+
+/* ------------------------------------------------------------------ media
+   One ratio for the whole catalogue, set once by the product_image_ratio
+   theme setting (Phase 2 section 27.6.5). Never per section, never per
+   product: mixed ratios are what force a contain fit and break the grid's
+   rhythm. */
+
+.product-card__media {
+  position: relative;
+  width: 100%;
+  aspect-ratio: var(--product-aspect);
+  overflow: hidden;
+  background-color: var(--color-surface-tile);
+}
+
+.product-card__image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transition: transform var(--transition-medium);
+}
+
+.product-card__image--empty {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Hover is gated on the pointer, never on viewport width. The prototype's
+   only two media queries were width-based, which is why a tablet with a mouse
+   and a phone were treated identically (Phase 2 section 13.6). */
+@media (hover: hover) and (pointer: fine) {
+  .product-card__link:hover .product-card__image {
+    transform: scale(var(--hover-image-scale));
+  }
+}
+
+/* --------------------------------------------------------- secondary image
+   Laid over the primary inside the same aspect-ratio box, so the swap cannot
+   move anything: both images occupy one slot whose height was already reserved
+   by --product-aspect before either arrived.
+
+   It is hidden by default and revealed ONLY inside the hover-capable query, so
+   a touch device never depends on a hover it cannot perform. That guarantee is
+   only as strong as the cascade: the hiding rule has to actually win, which is
+   why the sold-out dim below excludes this class explicitly.
+
+   The fade is a transition on opacity, so prefers-reduced-motion collapses it
+   to 1ms through base.css's global rule rather than needing its own override:
+   the swap still happens, it simply does not animate. */
+.product-card__image--secondary {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .product-card__image--secondary {
+    transition: opacity var(--transition-medium);
+  }
+
+  .product-card__link:hover .product-card__image--secondary,
+  .product-card__link:focus-visible .product-card__image--secondary {
+    opacity: 1;
+  }
+
+  /* Revealed on a sold-out card it takes the same dim as the primary, so the
+     hover does not make an unavailable product look more available. */
+  .product-card--sold-out .product-card__link:hover .product-card__image--secondary,
+  .product-card--sold-out .product-card__link:focus-visible .product-card__image--secondary {
+    opacity: 0.6;
+  }
+}
+
+/* ------------------------------------------------------------------ badge
+   Phase 2 section 13.4 geometry with section 27.3's semantics. The fill is
+   solid ink with a cream label rather than section 27.3's outlined treatment,
+   because this badge sits on a photograph: solid is 17.04:1 whatever is
+   behind it, and an outline over an unknown image is not measurable. The
+   badge text is inside the card's one anchor, so the sold-out state is part
+   of the link's accessible name — section 13.4 requires that. */
+
+.product-card__badge {
+  position: absolute;
+  top: var(--space-3);
+  left: var(--space-3);
+  padding: var(--space-1) var(--space-3);
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  font-family: var(--font-body);
+  font-size: var(--type-caption-size);
+  font-weight: var(--type-caption-weight);
+  letter-spacing: var(--type-caption-ls);
+  line-height: 1.6;
+  text-transform: uppercase;
+  border-radius: var(--radius-none);
+}
+
+/* Opacity is the secondary cue and never the only one — the badge carries the
+   fact in text (Phase 2 section 13.4). */
+.product-card--sold-out .product-card__image:not(.product-card__image--secondary) {
+  opacity: 0.6;
+}
+
+/* :not() above is load-bearing, not tidiness. The secondary image carries BOTH
+   classes, so a bare `.product-card--sold-out .product-card__image` (0,2,0)
+   out-specifies the rule that hides it (0,1,0) and repaints it at 0.6 — two
+   garments superimposed, on every device including touch, because the rule
+   doing the hiding is the one that loses. */
+
+/* ------------------------------------------------------------------ title
+   A real heading, because Phase 1 HTML-03 recorded that product names were
+   <div>s and heading navigation could not reach a single product.
+
+   Two lines maximum (Phase 2 section 27.1), and the box always reserves both,
+   so prices align across a row whatever the titles do. Phase 2 section 13.9
+   left subgrid open pending a support matrix; reserving the height needs no
+   support matrix and produces the same alignment.
+
+   Clamping is visual only. The complete title stays in the DOM, so it is read
+   in full by assistive technology and carried in the link's accessible name. */
+
+.product-card__title {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  min-height: calc(2em * var(--product-title-lh));
+  margin: var(--space-4) 0 0;
+  color: inherit;
+  font-family: var(--font-body);
+  font-size: var(--type-label-size);
+  font-weight: var(--type-label-weight);
+  letter-spacing: var(--type-label-ls);
+  line-height: var(--product-title-lh);
+  text-transform: uppercase;
+  /* Underline reveal rather than a colour change, so the affordance does not
+     spend any of the band's contrast budget. */
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-decoration-thickness: var(--border-width);
+  text-underline-offset: 0.25em;
+  transition: text-decoration-color var(--transition-fast);
+}
+
+/* Phase 18 pointed this at --type-label-lh rather than repeating 1.45. The card
+   chose the value first and the token now carries it, so the cart line title can
+   render a wrapped product name with the same leading instead of inheriting
+   `normal`. The local name stays because the two-line min-height below is
+   calculated from it and reads better as a title measurement than as a
+   type-scale one. */
+.product-grid,
+.product-card {
+  --product-title-lh: var(--type-label-lh);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .product-card__link:hover .product-card__title {
+    text-decoration-color: currentColor;
+  }
+}
+
+/* ------------------------------------------------------------------ price
+   Phase 2 section 27.6.1: tracking stops at numerals. --type-price-ls is 0em
+   by design — a tracked price is unreadable at a glance and defeats the
+   question the price is there to answer. Price is never muted and never gold. */
+
+.product-card__price {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: center;
+  gap: var(--space-2);
+  margin: var(--space-2) 0 0;
+  color: inherit;
+  font-family: var(--font-body);
+  font-size: var(--type-price-size);
+  font-weight: var(--type-price-weight);
+  letter-spacing: var(--type-price-ls);
+}
+
+.product-card__price-prefix {
+  font-size: var(--type-label-size);
+  font-weight: var(--type-label-weight);
+  letter-spacing: var(--type-label-ls);
+  text-transform: uppercase;
+}
+
+/* Never red. The compare-at price is the sale signal and it is muted, struck
+   and labelled — Phase 2 section 27.2. */
+.product-card__price-compare {
+  color: var(--color-text-current-muted);
+  font-weight: var(--weight-regular);
+}
+
+/* --------------------------------------------------------------- swatches
+   Information, not controls (Phase 2 section 27.4: "The card shows swatches
+   as information, not as a control"). Because they are not controls, SC 2.5.8
+   does not govern their size, so the 16px --swatch-size applies here and the
+   20px-in-24px target rule stays with the real radio controls on the product
+   page. The dots are aria-hidden; the colourway names sit beside them as
+   visually hidden text, so the information is never colour alone.
+
+   The ring is --color-text-current-muted rather than --swatch-ring. The token
+   composites to 1.82:1, which cannot reveal a cream colourway on the cream
+   tile — and a dot nobody can see is not information. */
+
+.product-card__swatches {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+
+.product-card__swatch {
+  display: block;
+  width: var(--swatch-size);
+  height: var(--swatch-size);
+  border: var(--border-width) solid var(--color-text-current-muted);
+  border-radius: var(--radius-full);
+  background-color: var(--swatch-fill, transparent);
+}
+
+.product-card__swatch--image {
+  background-image: var(--swatch-image);
+  background-size: cover;
+  background-position: center;
+}
+
+/* --------------------------------------------------------------- actions
+   The optional quick action. Present at rest or absent — never revealed on
+   hover, which is a pointer-only affordance (Phase 2 sections 22.1 and 27.5).
+   Off in every shipped configuration; see the snippet's header. */
+
+.product-card__actions {
+  width: 100%;
+  margin-top: var(--space-4);
+}
+
+.product-card__actions form {
+  margin: 0;
+}
+
+/* ----------------------------------------------------------- quick add error
+   Phase 14. The quick-add form's own failure line. It had markup and no rules
+   at all, so even once assets/cart.js could find it — it could not, until
+   Phase 14 corrected the attribute it carried — the message would have
+   rendered as unstyled body text under the button.
+
+   Left-ruled rather than boxed, which is the form-error treatment
+   section-main-product.css established for the product page. */
+
+.product-card__error {
+  margin: var(--space-2) 0 0;
+  padding-inline-start: var(--space-3);
+  border-inline-start: var(--border-width-strong) solid var(--color-error);
+  color: inherit;
+  font-family: var(--font-body);
+  font-size: var(--type-caption-size);
+}
+
+.surface-dark .product-card__error {
+  border-inline-start-color: var(--color-error-on-dark);
+}

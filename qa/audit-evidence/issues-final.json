@@ -1,0 +1,2977 @@
+[
+ {
+  "id": "ARCH-01",
+  "area": "Rendering architecture",
+  "problem": "The page is a Claude Design dc document: every visible node sits inside <x-dc> and is compiled by support.js into React elements at runtime (sc-for/sc-if/helmet custom elements, {{ }} interpolation, style-hover, a DCLogic class evaluated with new Function), so there is no static HTML page at all.",
+  "impact": "Shopify Online Store 2.0 renders Liquid sections server-side under Theme Editor schema; a client-side React template compiler cannot be hosted by that model, so nothing in the current render pipeline can be carried over.",
+  "recommendation": "Treat the prototype as a visual baseline only and rebuild the markup as Liquid sections in Phase 10, starting from the rendered DOM rather than the template source.",
+  "severity": "CRITICAL",
+  "priority": "P0",
+  "phase": "PHASE 10 — SHOPIFY THEME CONVERSION",
+  "categories": [
+   "ARCHITECTURE",
+   "SHOPIFY-BLOCKER"
+  ],
+  "evidence": "God Squad Website.html lines 9-10, 107-120, 143-149, 169-188; support.js lines 150-200, 842-851"
+ },
+ {
+  "id": "ARCH-02",
+  "area": "Template syntax",
+  "problem": "The template uses {{ products }}, {{ p.name }}, {{ p.price }}, background:{{ s }}, {{ v.icon }} and similar expressions, the same delimiters as Liquid output tags, and the data they reference exists only in the data-dc-script.",
+  "impact": "Pasted into a .liquid file the expressions evaluate as undefined and silently output empty product and value tiles, while <sc-for>, <sc-if>, <x-dc> and <helmet> remain as unknown elements.",
+  "recommendation": "In Phase 10 rewrite the loops as {% for product in collection.products %} and section blocks with schema; never copy the sc-* template verbatim into a section.",
+  "severity": "CRITICAL",
+  "priority": "P0",
+  "phase": "PHASE 10 — SHOPIFY THEME CONVERSION",
+  "categories": [
+   "ARCHITECTURE",
+   "SHOPIFY-BLOCKER"
+  ],
+  "evidence": "findings-verified.json TECHNICAL-3; God Squad Website.html lines 107-120, 143-149; evidence-render.md line 24"
+ },
+ {
+  "id": "SHOP-01",
+  "area": "Theme structure",
+  "problem": "No Shopify theme structure exists: the deliverable is a single Claude Design dc document plus a generated runtime, with none of layout/, sections/, snippets/, templates/, assets/, config/ or locales/.",
+  "impact": "Nothing can be uploaded to a Shopify store or opened in the Theme Editor, so the production architecture does not exist yet in any form.",
+  "recommendation": "Phase 10 will scaffold god-squad-theme/ with the seven directories and the layout, groups, sections, snippets and templates listed in §29, starting from an empty scaffold rather than from the prototype files.",
+  "severity": "CRITICAL",
+  "priority": "P0",
+  "phase": "PHASE 10 — SHOPIFY THEME CONVERSION",
+  "categories": [
+   "SHOPIFY-BLOCKER",
+   "ARCHITECTURE"
+  ],
+  "evidence": "inventory.tsv (44 files, no theme directories); God Squad Website.html lines 9-168; evidence-render.md"
+ },
+ {
+  "id": "ECOM-01",
+  "area": "Product page",
+  "problem": "No product page or product template exists.",
+  "impact": "There is no way to view details, choose variants or buy any product.",
+  "recommendation": "Build templates/product.json with a main-product section (media, description, variant picker, product form) once product data is supplied.",
+  "severity": "CRITICAL",
+  "priority": "P1",
+  "phase": "PHASE 8 — PRODUCT & SHOPPING UX",
+  "categories": [
+   "UX"
+  ],
+  "evidence": "inventory.tsv (single HTML file); God Squad Website.html lines 106-121 (no product links)"
+ },
+ {
+  "id": "ECOM-02",
+  "area": "Cart and checkout",
+  "problem": "There is no cart, cart drawer, add-to-cart, quantity control or checkout pathway; the cart icon is an inert image with a literal 0 badge.",
+  "impact": "No purchase can be completed.",
+  "recommendation": "Implement the product form, cart template, quantity controls and checkout button using Shopify's cart forms and Ajax API; decide drawer vs page.",
+  "severity": "CRITICAL",
+  "priority": "P1",
+  "phase": "PHASE 8 — PRODUCT & SHOPPING UX",
+  "categories": [
+   "UX"
+  ],
+  "evidence": "css-html-stats.txt (forms 0, buttons 0); God Squad Website.html line 78"
+ },
+ {
+  "id": "A11Y-01",
+  "area": "Header controls",
+  "problem": "Search, Account and Cart are bare img elements and the hamburger is a span, so none of them is focusable, operable or exposed as a control, and the page has zero button elements.",
+  "impact": "Keyboard and screen-reader users cannot reach any header function at any width, and below 900px they have no navigation of any kind.",
+  "recommendation": "In Phase 4 build each control as a button or link with a visible focus state and an accessible name (menu, search, account, cart with item count); the functional wiring is the NAV register's item.",
+  "severity": "HIGH",
+  "priority": "P1",
+  "phase": "PHASE 4 — HEADER & NAVIGATION",
+  "categories": [
+   "ACCESSIBILITY",
+   "UX",
+   "MOBILE"
+  ],
+  "evidence": "God Squad Website.html lines 75-78; evidence-render.md (zero button, tabIndex -1 on icons); css-html-stats.txt (buttons 0, tabindex 0); findings-verified.json C5, C6"
+ },
+ {
+  "id": "A11Y-03",
+  "area": "Nav contrast over the hero",
+  "problem": "Collections, Our Story and Verse are 12px white text over the bright sky between the models where the top fade has thinned to about 0.4 alpha, measuring 2.4-2.9:1 composited across 1440 and 1024, and the gold Home link drops to about 3.5:1 at 1024px.",
+  "impact": "Three of five primary links fail WCAG AA at 1440 and 1024, and legibility varies with whatever photo is uploaded.",
+  "recommendation": "In Phase 4 give the header a solid or stronger top band (or move it out of the hero as the header section), so contrast no longer depends on the photo.",
+  "severity": "HIGH",
+  "priority": "P1",
+  "phase": "PHASE 4 — HEADER & NAVIGATION",
+  "categories": [
+   "ACCESSIBILITY",
+   "UX",
+   "BRAND"
+  ],
+  "evidence": "evidence-render.md nav contrast (median 5.7/4.7/4.6, brightest-2% 2.5/2.4/2.4); findings-verified.json critic addition 1 (\"Effective contrast is 2.4-2.9:1\"; 1440 composited 2.8/2.4/2.4, 1024 2.9/2.4/2.4, Home 3.5 at 1024); desktop-1440.png; laptop-1024.png; God Squad Website.html line 66"
+ },
+ {
+  "id": "A11Y-11",
+  "area": "Document-level semantics",
+  "problem": "The html element carries no lang attribute and document.title is empty, so the page declares neither its language nor a name.",
+  "impact": "Two outright WCAG 2.1 Level A failures (SC 3.1.1 Language of Page, SC 2.4.2 Page Titled) that are live today for every assistive-technology user: screen readers fall back to their default pronunciation rules and the page announces no title on load, in a tab list or in a window switcher. These are the only Level A failures on the page and, unlike the header findings, they do not depend on any control being wired.",
+  "recommendation": "In Phase 10 set lang on the html element and a real title in layout/theme.liquid (page_title plus shop name); the title copy and the store's content language are BUSINESS INFORMATION REQUIRED, and the SEO register owns the same head work (title, meta description, canonical, Open Graph) so the two should be specified together.",
+  "severity": "HIGH",
+  "priority": "P1",
+  "phase": "PHASE 10 — SHOPIFY THEME CONVERSION",
+  "categories": [
+   "ACCESSIBILITY",
+   "SEO",
+   "ARCHITECTURE"
+  ],
+  "evidence": "css-html-stats.txt (`<title>`: ABSENT; lang attr: ABSENT); evidence-render.md (document.title empty, `<html>` has no lang); findings-verified.json C7"
+ },
+ {
+  "id": "ARCH-03",
+  "area": "Runtime availability",
+  "problem": "support.js hides <x-dc> synchronously with x-dc{display:none!important} and reveals content only after React 18.3.1 and ReactDOM are fetched from unpkg.com; the failure path only logs and rethrows with no fallback.",
+  "impact": "Any blocked CDN (ad-blocker, corporate proxy, captive portal, offline, SRI mismatch) leaves the entire page black with no message, and with JavaScript disabled the raw template shows literal {{ p.name }} placeholders and a broken image.",
+  "recommendation": "Remove the runtime dependency entirely in Phase 10; do not self-host React as a workaround, because the theme needs no React at all.",
+  "severity": "HIGH",
+  "priority": "P1",
+  "phase": "PHASE 10 — SHOPIFY THEME CONVERSION",
+  "categories": [
+   "ARCHITECTURE",
+   "PERFORMANCE"
+  ],
+  "evidence": "support.js lines 1818-1822, 1838-1847, 1906-1910; findings-verified.json C13 and critic addition 2"
+ },
+ {
+  "id": "ASSET-03",
+  "area": "Assets / product imagery",
+  "problem": "The three product images are 215-235 px WebP crops of the 1024x1536 mockup, upscaled 1.23-1.34x at 1440 and 2.8x in device pixels on phones, with the cap non-square.",
+  "impact": "The only commercial imagery on the store looks soft on every screen and cannot support a product page, zoom or additional views.",
+  "recommendation": "Phase 3 will source original product photography (2000 px or more on the long edge, consistent square framing, one set per colour) and upload it as product media; the crops remain placeholders until then (BUSINESS INFORMATION REQUIRED).",
+  "severity": "HIGH",
+  "priority": "P1",
+  "phase": "PHASE 3 — ASSET PREPARATION",
+  "categories": [
+   "ASSET",
+   "UX",
+   "MOBILE"
+  ],
+  "evidence": "README.txt; inventory.tsv; findings-verified.json C2 and FIDELITY-3; measurements.md 375 and 1440"
+ },
+ {
+  "id": "ASSET-04",
+  "area": "Assets / story imagery",
+  "problem": "The Our Story slot is filled by a 650x480 mockup-hero crop rendered at 998x520 (1.53x, 3.07x on 2x screens) with 29% of its height cropped, and the unused alternative images/our-story.webp is smaller still (535x348) with caption fragments at its right edge.",
+  "impact": "The editorial section is a cropped fragment of an upscaled fragment at every width, and no file in the project can fix it.",
+  "recommendation": "Phase 3 will obtain an original photograph at least 2000 px wide for the story section (BUSINESS INFORMATION REQUIRED); subject and composition, including the baked-in text, are in the STORY register.",
+  "severity": "HIGH",
+  "priority": "P1",
+  "phase": "PHASE 3 — ASSET PREPARATION",
+  "categories": [
+   "ASSET",
+   "CONTENT"
+  ],
+  "evidence": "findings-verified.json C1 and critic addition on the story slot; our-story.webp; 01-hero-model-mu98p88t-7jig.webp; measurements.md 1440"
+ },
+ {
+  "id": "COLL-01",
+  "area": "Collection page",
+  "problem": "No collection page, template or collection data exists; the Collections and Shop links resolve to the homepage anchor #shop.",
+  "impact": "There is no browse surface beyond three hard-coded products, so the store cannot present a catalogue.",
+  "recommendation": "Build templates/collection.json with a main product grid (paginate, sort, empty state) once collections and products exist in admin.",
+  "severity": "HIGH",
+  "priority": "P1",
+  "phase": "PHASE 6 — COLLECTIONS & BEST SELLERS",
+  "categories": [
+   "UX",
+   "DATA"
+  ],
+  "evidence": "inventory.tsv (single HTML file); God Squad Website.html lines 72, 98"
+ },
+ {
+  "id": "CSS-01",
+  "area": "Colour tokens",
+  "problem": "Colours are hard-coded literals with no custom properties: 18 distinct in the stats block (3 primaries #0d0c0a/#f3efe6/#d8c08a, 3 secondaries #bdb6a8/#ebe6dc/#e9e4d8, the dead #0230, 11 rgba variants) and 21 once the two style-hover shades #2a2823/#e6d3a6 and the swatch olive #4b5443 are counted; #0d0c0a alone appears 18 times whole-file.",
+  "impact": "Nothing can be driven by settings_schema.json colour schemes, and any palette change means editing every occurrence including the swatch data.",
+  "recommendation": "Define the palette as :root custom properties fed by theme settings, derive alpha variants from rgb triplets, and confirm the three secondary, the olive and the two hover values with the owner (BUSINESS INFORMATION REQUIRED).",
+  "severity": "HIGH",
+  "priority": "P1",
+  "phase": "PHASE 2 — DESIGN SYSTEM",
+  "categories": [
+   "BRAND",
+   "ARCHITECTURE"
+  ],
+  "evidence": "css-html-stats.txt COLOURS block; God Squad Website.html lines 104, 132 (hover hexes), 175-177 (swatch hexes); findings-verified.json TECHNICAL-11 grep counts"
+ },
+ {
+  "id": "CSS-02",
+  "area": "Inline-style architecture",
+  "problem": "77 style attributes (6,421 chars, 69% of the CSS) carry all layout and typography, the source has zero classes, and complete recipes (eyebrow, label, CTA, hamburger bar, icon size) are repeated verbatim.",
+  "impact": "No component can be restyled in one place, the cascade is inverted so every override needs !important, and Theme Editor settings cannot reach any property.",
+  "recommendation": "Replace inline styles with BEM-ish component and section classes in a base stylesheet plus per-section CSS files, keeping only Liquid-generated custom properties on section roots.",
+  "severity": "HIGH",
+  "priority": "P1",
+  "phase": "PHASE 10 — SHOPIFY THEME CONVERSION",
+  "categories": [
+   "ARCHITECTURE"
+  ],
+  "evidence": "css-html-stats.txt SIZES and IDENTICAL INLINE STYLE STRINGS blocks; God Squad Website.html lines 55-164"
+ },
+ {
+  "id": "CSS-03",
+  "area": "Responsive layer / !important",
+  "problem": "The responsive layer is 31 rules in two max-width queries keyed on 26 editor data-r hooks (32 data-r rules including the base hamburger rule; 34 selector uses) with 55 !important declarations (49 in the 900px query, 6 in the 520px query), plus order:-2/-1 reordering of hero children.",
+  "impact": "Nothing downstream — colour schemes, section padding settings, later media queries — can override these rules, so the layer cannot be carried into a theme in any form.",
+  "recommendation": "Rewrite mobile-first with class selectors and min-width queries so that no !important is needed, and keep source order equal to visual order instead of using order.",
+  "severity": "HIGH",
+  "priority": "P1",
+  "phase": "PHASE 10 — SHOPIFY THEME CONVERSION",
+  "categories": [
+   "ARCHITECTURE",
+   "MOBILE"
+  ],
+  "evidence": "God Squad Website.html lines 17-51; css-html-stats.txt (!important in <style> 55; data-r selectors 34); findings-verified.json TECHNICAL-11"
+ },
+ {
+  "id": "DATA-01",
+  "area": "Product catalogue",
+  "problem": "The three products (name, price string, image path, three swatch hexes) exist only as object literals inside the data-dc-script class; there are no handles, descriptions, variants, sizes, inventory, SKUs, compare-at prices, vendor, type, tags, secondary images or product URLs.",
+  "impact": "Nothing about the catalogue can be managed in Shopify admin and the product card has no product.url to link to.",
+  "recommendation": "In Phase 6 render the New Drop grid from a collection chosen in section settings (collection.products, product.title, product.price | money, product.featured_image, product.url); the actual catalogue content is BUSINESS INFORMATION REQUIRED.",
+  "severity": "HIGH",
+  "priority": "P1",
+  "phase": "PHASE 6 — COLLECTIONS & BEST SELLERS",
+  "categories": [
+   "DATA",
+   "CONTENT"
+  ],
+  "evidence": "God Squad Website.html lines 174-178; findings-verified.json TECHNICAL-4"
+ },
+ {
+  "id": "DATA-02",
+  "area": "Price and currency",
+  "problem": "Prices are string concatenations of a symbol and a literal (cur + '1,290') and the Claude Design editor prop currency (enum ₱/$/€, default ₱, section \"Shop\") only swaps the symbol without converting the amount; no numeric price exists and the prop has no Shopify equivalent.",
+  "impact": "Selecting $ renders $1,290 for the same item, the amounts are unverified placeholders, and the prop would have to be dropped rather than ported.",
+  "recommendation": "Drop the data-props prop entirely; render product.price through the store money format and, if multi-currency is wanted, through Shopify Markets: the market and currency strategy is a BUSINESS DECISION REQUIRED and real prices are BUSINESS INFORMATION REQUIRED.",
+  "severity": "HIGH",
+  "priority": "P1",
+  "phase": "PHASE 6 — COLLECTIONS & BEST SELLERS",
+  "categories": [
+   "DATA",
+   "CONTENT"
+  ],
+  "evidence": "God Squad Website.html lines 169, 172-177; css-html-stats.txt line 213; pasted-1789874322321-0.png (currency dropdown)"
+ },
+ {
+  "id": "DATA-05",
+  "area": "Navigation and utility data",
+  "problem": "The five menu labels and hrefs (Home #, Shop #shop, Collections #shop, Our Story #story, Verse #) and the hard-coded gold active underline on Home are literals in the markup, the utility icon destinations are not bound to any route object, and the cart badge is the literal text 0 rather than a cart value.",
+  "impact": "Menus cannot be managed in Navigation admin, the active state is not derived from the current page, and the badge never reflects the cart.",
+  "recommendation": "Drive the menu from a link_list section setting with active state from link.current, bind the icon destinations to routes.search_url / routes.account_url / routes.cart_url and the badge to cart.item_count, and obtain the real destinations for Shop, Collections, Verse and Our Story: BUSINESS INFORMATION REQUIRED; the inert controls and placeholder hrefs themselves are in the NAV register.",
+  "severity": "HIGH",
+  "priority": "P1",
+  "phase": "PHASE 4 — HEADER & NAVIGATION",
+  "categories": [
+   "DATA",
+   "UX"
+  ],
+  "evidence": "God Squad Website.html lines 71-78; findings-verified.json TECHNICAL-4"
+ },
+ {
+  "id": "ECOM-03",
+  "area": "Search",
+  "problem": "There is no search form or search template; the search icon is a bare image.",
+  "impact": "Visitors cannot find products by name or keyword.",
+  "recommendation": "Add a search form to the header (modal with predictive search) and templates/search.json.",
+  "severity": "HIGH",
+  "priority": "P1",
+  "phase": "PHASE 8 — PRODUCT & SHOPPING UX",
+  "categories": [
+   "UX"
+  ],
+  "evidence": "God Squad Website.html line 76; css-html-stats.txt (inputs 0)"
+ },
+ {
+  "id": "ECOM-04",
+  "area": "Variants and availability",
+  "problem": "There is no variant model (no sizes anywhere, colours as inert hex swatches) and no availability or sold-out state.",
+  "impact": "A streetwear store cannot sell without size selection and stock awareness.",
+  "recommendation": "Model colour and size as product options in admin (size run BUSINESS INFORMATION REQUIRED) and render a variant picker with availability from variant.available.",
+  "severity": "HIGH",
+  "priority": "P1",
+  "phase": "PHASE 8 — PRODUCT & SHOPPING UX",
+  "categories": [
+   "UX",
+   "DATA"
+  ],
+  "evidence": "God Squad Website.html lines 114-118, 175-177"
+ },
+ {
+  "id": "FOOT-01",
+  "area": "Footer content",
+  "problem": "The footer holds only a logo, two taglines and two placeholder social links; it has no navigation, policy, contact, copyright or newsletter content.",
+  "impact": "Buyers have nowhere to check shipping, returns or contact details, mobile users have no way back to the menu, and standard legal links are absent.",
+  "recommendation": "Rebuild the footer as a section-group footer with SHOP / ABOUT / HELP / FOLLOW menu blocks, policy links from shop policies, contact, copyright and newsletter, using business-supplied content.",
+  "severity": "HIGH",
+  "priority": "P1",
+  "phase": "PHASE 4 — HEADER & NAVIGATION",
+  "categories": [
+   "UX",
+   "CONTENT",
+   "SEO"
+  ],
+  "evidence": "God Squad Website.html lines 153-166; findings-verified.json critic addition (footer has no copyright, policy, contact or navigation links)"
+ },
+ {
+  "id": "HERO-01",
+  "area": "Hero — CTA strategy",
+  "problem": "The hero contains no link or button; on 1366x768 and 1280x720 the first screen is the hero alone and the nearest CTA (\"View All Products\", href=\"#\") is below the fold.",
+  "impact": "The store's primary conversion surface offers no path to a collection, so laptop and phone visitors see a full screen with nothing to act on.",
+  "recommendation": "Phase 5 should add one primary hero CTA to a collection (handle and label are BUSINESS INFORMATION REQUIRED) and optionally a secondary link, placed to be visible on 720-768px-high laptops and on phones above the copy stack.",
+  "severity": "HIGH",
+  "priority": "P1",
+  "phase": "PHASE 5 — HERO",
+  "categories": [
+   "UX"
+  ],
+  "evidence": "God Squad Website.html lines 82-94, 104; laptop-1366-fold.png; laptop-1280-fold.png; evidence-render.md Full-page renders"
+ },
+ {
+  "id": "HERO-02",
+  "area": "Hero — header backing and scrim",
+  "problem": "The vertical scrim under the nav thins from .55 to 0 by 30% of the hero height, so Collections, Our Story and Verse sit on open sky between the models where the mockup's nav sits on a dark facade; the measured contrast figures and WCAG classification are in the A11Y register.",
+  "impact": "Primary navigation legibility depends on the photograph, and the current photo makes three of five links fail on their brightest backing.",
+  "recommendation": "Phase 5 (with Phase 4) should give the header a solid ink band or a scrim that stays at or above .8 alpha under the nav, so the header never depends on the hero image; moving the header out of the hero section resolves it structurally.",
+  "severity": "HIGH",
+  "priority": "P1",
+  "phase": "PHASE 5 — HERO",
+  "categories": [
+   "BRAND",
+   "UX"
+  ],
+  "evidence": "God Squad Website.html line 66; evidence-render.md Nav-link contrast; findings-verified.json critic addition on nav contrast; desktop-1440.png; laptop-1024.png"
+ },
+ {
+  "id": "HTML-01",
+  "area": "Document structure / landmarks",
+  "problem": "There is no <header> or <main>; the <nav> is nested inside the hero <section> and absolutely positioned over it, the announcement bar is a plain div, and no section carries an accessible name.",
+  "impact": "Assistive technology gets no header/main landmarks, the header cannot become a Shopify header-group section without re-laying out the hero, and the coupling is the direct cause of the hero-fade offset and nav-contrast failures recorded in the RESP and A11Y registers.",
+  "recommendation": "Rebuild the header (announcement bar + nav) as independent sections in the header group with a <header> landmark, wrap page sections in <main>, and give each section an aria-labelledby pointing at its heading.",
+  "severity": "HIGH",
+  "priority": "P1",
+  "phase": "PHASE 4 — HEADER & NAVIGATION",
+  "categories": [
+   "ACCESSIBILITY",
+   "ARCHITECTURE",
+   "SEO"
+  ],
+  "evidence": "God Squad Website.html lines 58, 64, 68, 82, 90; evidence-render.md; findings-verified.json C7, TECHNICAL-11"
+ },
+ {
+  "id": "HTML-03",
+  "area": "Heading hierarchy",
+  "problem": "The outline is one h1 and two h2s; product names and value titles are <div>s and the values section has no heading at all.",
+  "impact": "Heading navigation cannot reach any product or value and the document outline does not describe the page.",
+  "recommendation": "Make each product-card title an h3 inside the product-card snippet, give the brand-values section an h2 (visually hidden if the design requires) with h3 block titles, and keep one h1 per template.",
+  "severity": "HIGH",
+  "priority": "P1",
+  "phase": "PHASE 6 — COLLECTIONS & BEST SELLERS",
+  "categories": [
+   "ACCESSIBILITY",
+   "SEO"
+  ],
+  "evidence": "God Squad Website.html lines 84, 101, 112, 130, 146; css-html-stats.txt headings list; evidence-render.md"
+ },
+ {
+  "id": "HTML-04",
+  "area": "Interactive element semantics",
+  "problem": "The page has zero <button> elements: the hamburger is a role-less <span> carrying an aria-label and the search, account and cart controls are bare <img> elements.",
+  "impact": "None of these can receive focus or activation, and the aria-label on a generic span is prohibited by ARIA 1.2 and ignored by most screen readers.",
+  "recommendation": "Author the menu toggle, search and cart controls as <button> elements (or <a> for account/cart routes) with SVG icons and visible text or aria-label; the wiring and destinations are in the NAV register.",
+  "severity": "HIGH",
+  "priority": "P1",
+  "phase": "PHASE 4 — HEADER & NAVIGATION",
+  "categories": [
+   "ACCESSIBILITY",
+   "UX"
+  ],
+  "evidence": "God Squad Website.html lines 75-78; css-html-stats.txt (buttons: 0, role=: 0); findings-verified.json C6 and the hamburger critic addition"
+ },
+ {
+  "id": "INV-05",
+  "area": "Inventory completeness / master sources",
+  "problem": "The only layered logo sources (OG LOGO.psd 613,320 B, OG LOGO 300x300.psd 209,976 B and PNG exports) live outside the project at Desktop/GODSQUAD/PSD FILES, the original export zip lives in Downloads, and no vector logo (SVG/AI/EPS) or original photography master has been located anywhere; every image in the project is a mockup crop, an AI-generated sheet or a padded PNG export.",
+  "impact": "The rebuild cannot produce a crisp SVG wordmark or full-resolution hero, story and product imagery from what the project contains.",
+  "recommendation": "In Phase 3 gather masters into a source/ folder adjacent to (not inside) the theme and obtain a vector logo and original photography from the owner: BUSINESS INFORMATION REQUIRED.",
+  "severity": "HIGH",
+  "priority": "P1",
+  "phase": "PHASE 3 — ASSET PREPARATION",
+  "categories": [
+   "ASSET",
+   "BRAND"
+  ],
+  "evidence": "evidence-render.md line 13; README.txt lines 15-16; directory listing of PSD FILES"
+ },
+ {
+  "id": "JS-01",
+  "area": "support.js purpose and fit",
+  "problem": "support.js is a 69,150 B (19,037 B gz), 1,911-line generated Claude Design editor/streaming runtime (\"GENERATED from dc-runtime/src/*.ts — do not edit\") whose job is to compile the dc template into React and talk to the design editor; roughly 600 of its lines (x-import/Babel loader, deck-stage keying, streaming placeholders, sibling-component fetch, stream tracker, canvas mode, editor bridge API) are code paths this page never enters.",
+  "impact": "A store would ship an unmodifiable editor runtime plus React to render three products and four value tiles that Liquid renders server-side for free.",
+  "recommendation": "REMOVE DURING SHOPIFY CONVERSION: carry nothing from support.js into the theme and author the small amount of real interaction JS fresh in Phases 4 and 8.",
+  "severity": "HIGH",
+  "priority": "P1",
+  "phase": "PHASE 10 — SHOPIFY THEME CONVERSION",
+  "categories": [
+   "ARCHITECTURE",
+   "PERFORMANCE"
+  ],
+  "evidence": "support.js line 1 and line ranges 486-549, 661-770, 1155-1354, 1363-1419, 1791-1815, 1871-1900; bundle-sizes.txt"
+ },
+ {
+  "id": "JS-02",
+  "area": "Render-blocking JavaScript chain",
+  "problem": "First paint requires three dependent network hops after the document (support.js synchronous in head; React and ReactDOM fetched in parallel with async=false; then boot() on DOMContentLoaded), about 211 KB raw / 66 KB gzipped of JavaScript that is all effectively render-blocking because the template is hidden until React mounts.",
+  "impact": "On a throttled mobile connection the page stays black for the whole chain and LCP is gated by script delivery rather than by the hero image.",
+  "recommendation": "Resolved by removing the runtime in Phase 10; in Phase 12 verify the Liquid theme ships no framework and that the hero image is the LCP element.",
+  "severity": "HIGH",
+  "priority": "P1",
+  "phase": "PHASE 10 — SHOPIFY THEME CONVERSION",
+  "categories": [
+   "PERFORMANCE",
+   "ARCHITECTURE"
+  ],
+  "evidence": "measurements.md line 30; bundle-sizes.txt; support.js lines 1823-1847, 1906-1910; findings-verified.json TECHNICAL-7"
+ },
+ {
+  "id": "NAV-01",
+  "area": "Mobile navigation",
+  "problem": "Below 900px the nav links are display:none and the hamburger is a span with no role, tabindex or handler, so there is no navigation at all on phones and tablets.",
+  "impact": "Mobile visitors cannot reach Shop, Collections, Our Story or Verse except by scrolling; the store is unnavigable on its most important device class.",
+  "recommendation": "Build a real menu button (button with aria-expanded) opening a drawer that holds the menu and utility links, driven by the Shopify navigation menu.",
+  "severity": "HIGH",
+  "priority": "P1",
+  "phase": "PHASE 4 — HEADER & NAVIGATION",
+  "categories": [
+   "UX",
+   "MOBILE",
+   "ACCESSIBILITY"
+  ],
+  "evidence": "God Squad Website.html lines 30-31, 75; support.js (no click binding, no nav-menu reference); measurements.md 375/768; findings-verified.json C5"
+ },
+ {
+  "id": "NAV-02",
+  "area": "Header utilities",
+  "problem": "Search, Account and Cart are bare img elements with tabIndex -1 and no link or button wrapper.",
+  "impact": "None of the three utility functions can be used by mouse, touch or keyboard.",
+  "recommendation": "Wrap each in a link or button bound to routes.search_url, routes.account_url and routes.cart_url, with accessible names and 44px targets.",
+  "severity": "HIGH",
+  "priority": "P1",
+  "phase": "PHASE 4 — HEADER & NAVIGATION",
+  "categories": [
+   "UX",
+   "ACCESSIBILITY"
+  ],
+  "evidence": "God Squad Website.html lines 76-78; evidence-render.md (tabIndex -1); findings-verified.json C6"
+ },
+ {
+  "id": "NAV-03",
+  "area": "Navigation URLs",
+  "problem": "Six of nine links (Home, Verse, View All Products, Our Story CTA, Facebook, Instagram) are href=\"#\" and scroll to the top of the page.",
+  "impact": "Most calls to action produce a jarring jump instead of a destination, and crawlers see six identical placeholder targets.",
+  "recommendation": "Bind each link to its Shopify route, page or setting (routes.root_url, collection.url, page URL, social settings) once the destinations are supplied.",
+  "severity": "HIGH",
+  "priority": "P1",
+  "phase": "PHASE 4 — HEADER & NAVIGATION",
+  "categories": [
+   "UX",
+   "SEO"
+  ],
+  "evidence": "css-html-stats.txt links list; findings-verified.json TECHNICAL-4; God Squad Website.html lines 71-72, 104, 132, 160-161"
+ },
+ {
+  "id": "PERF-01",
+  "area": "Performance / hero image weight",
+  "problem": "images/hero-group.png is a 1,989,201-byte 1672x941 RGB PNG with no alpha channel and is served unchanged at every viewport, including a 375x320 band.",
+  "impact": "One file is 80% of the page's bytes and the largest contentful paint at every width; on a phone it downloads 2 MB to show about two thirds of the picture, the 375x320 cover crop discarding roughly 34% of the scaled width.",
+  "recommendation": "Phase 3 will keep the PNG as the master and generate responsive WebP derivatives through the Shopify CDN (image_url widths); the reviewers expect the format change alone to cut the file by roughly an order of magnitude at equal visual quality, to be measured.",
+  "severity": "HIGH",
+  "priority": "P1",
+  "phase": "PHASE 3 — ASSET PREPARATION",
+  "categories": [
+   "PERFORMANCE",
+   "ASSET",
+   "MOBILE"
+  ],
+  "evidence": "inventory.tsv; findings-verified.json C10 and critic addition \"Hero PNG has no alpha\"; measurements.md 375 and 1440; God Squad Website.html lines 21 and 65 (object-fit:cover; height 62vw / min-height 320px below 900px)"
+ },
+ {
+  "id": "PERF-02",
+  "area": "Performance / LCP delivery",
+  "problem": "The hero image has no preload, fetchpriority, srcset/sizes or width/height, and its paint is gated behind the runtime's three-hop JavaScript chain.",
+  "impact": "The LCP element starts at default priority, cannot be resized per viewport, and paints only after about 66 KB gz of JavaScript has executed and the page has rendered twice.",
+  "recommendation": "Phase 5 will build the hero section with image_tag (explicit widths and sizes, intrinsic dimensions, preload: true) plus a fetchpriority=\"high\" attribute written on the img itself, and no JavaScript dependency; Phase 12 will measure the result.",
+  "severity": "HIGH",
+  "priority": "P1",
+  "phase": "PHASE 5 — HERO",
+  "categories": [
+   "PERFORMANCE",
+   "MOBILE"
+  ],
+  "evidence": "God Squad Website.html line 65; evidence-render.md (no srcset, sizes, loading, width/height); support.js lines 1818-1821, 1906-1910; laptop-1366-fold.png"
+ },
+ {
+  "id": "PROD-01",
+  "area": "Product cards",
+  "problem": "No product card contains a link; product names are divs and the grid holds zero anchors.",
+  "impact": "A product cannot be opened, so the homepage cannot lead to a purchase.",
+  "recommendation": "Wrap image and title in an anchor to product.url in a product-card snippet, with the title as a heading.",
+  "severity": "HIGH",
+  "priority": "P1",
+  "phase": "PHASE 8 — PRODUCT & SHOPPING UX",
+  "categories": [
+   "UX"
+  ],
+  "evidence": "God Squad Website.html lines 106-121; findings-verified.json TECHNICAL-4 (0 anchors in [data-r=products])"
+ },
+ {
+  "id": "PROD-02",
+  "area": "Quick add",
+  "problem": "There is no add-to-cart or quick-add control on the cards or anywhere on the page (zero forms, zero buttons).",
+  "impact": "Nothing can be added to a cart from the homepage.",
+  "recommendation": "Add a quick-add control on cards (product form with the first available variant, or a variant chooser for sized products) once the product form and cart exist.",
+  "severity": "HIGH",
+  "priority": "P1",
+  "phase": "PHASE 8 — PRODUCT & SHOPPING UX",
+  "categories": [
+   "UX"
+  ],
+  "evidence": "css-html-stats.txt (forms 0, buttons 0); God Squad Website.html lines 108-119"
+ },
+ {
+  "id": "RESP-01",
+  "area": "Hero (<=900px)",
+  "problem": "Below 900px the hero fade is anchored to the section top while the image sits under the 88px in-flow nav, so the gradient goes solid black 88px above the photo's bottom and the last 88px of photo reappear unfaded with a hard edge.",
+  "impact": "Every phone and tablet hero (the LCP element) shows a black band through the seated model and a hard cut instead of a fade, and zoomed desktops get the same.",
+  "recommendation": "In Phase 5 anchor the fade to the image (wrap image and fade in one relative container or offset the fade by the nav height) or move the nav out of the hero section; verify at 375, 768, 812x375 and 720.",
+  "severity": "HIGH",
+  "priority": "P1",
+  "phase": "PHASE 5 — HERO",
+  "categories": [
+   "UX",
+   "MOBILE"
+  ],
+  "evidence": "measurements.md 375 (fade 59-379 vs img 147-467), 768 (41-517 vs 129-605); tablet-768.png; mobile-375-true.png; God Squad Website.html lines 21-22, 29; findings-verified.json RESPONSIVE-1"
+ },
+ {
+  "id": "RISK-01",
+  "area": "Risk: assets",
+  "problem": "Every image in the project is a mockup crop or a single AI PNG, and no vector logo has been seen, so no asset is fit for its slot at 2x.",
+  "impact": "Sections rebuilt around these files will look soft on phones and the premium positioning fails regardless of code quality.",
+  "recommendation": "Phase 3 will acquire original photography and a vector wordmark before any section build, treating the mockup crops as ARCHIVE-class references. Resolution and weight defects: see the ASSET register.",
+  "severity": "HIGH",
+  "priority": "P1",
+  "phase": "PHASE 3 — ASSET PREPARATION",
+  "categories": [
+   "ASSET",
+   "BRAND",
+   "PERFORMANCE"
+  ],
+  "evidence": "findings-verified.json C2, C10, FIDELITY-4 and critic additions ADD-4 (Our Story slot needs an image of at least 2,000 px) and ADD-5 (hero PNG has no alpha), numbered per §24.2; evidence-render.md assets; measurements.md 375 row (327x327 from 235 natural = 2.8x device upscale)"
+ },
+ {
+  "id": "RISK-02",
+  "area": "Risk: business information",
+  "problem": "The prototype contains no store facts: no destinations, policies, contacts, social URLs, catalogue, sizes, markets or verse content, and the footer has no copyright, policy or navigation links in either the build or the mockup.",
+  "impact": "Templates cannot be completed without invention, and invention is prohibited by the spec.",
+  "recommendation": "Phase 2 will run the business-information intake checklist and gate Phase 4 on navigation URLs, Phase 8 on the catalogue and Phase 15 on legal text.",
+  "severity": "HIGH",
+  "priority": "P1",
+  "phase": "PHASE 2 — DESIGN SYSTEM",
+  "categories": [
+   "CONTENT",
+   "DATA"
+  ],
+  "evidence": "evidence-render.md links (six of nine href=\"#\"); God Squad Website.html lines 153-166; findings-verified.json TECHNICAL-4 and critic addition ADD-7 (footer has no copyright, policy, contact or navigation links; the mockup omits them too)"
+ },
+ {
+  "id": "RISK-03",
+  "area": "Risk: brand fidelity",
+  "problem": "The build already departs from the approved mockup in hero photo, headline lockup, wordmark size, product tiles, social icons and globe colour, leaving two competing baselines.",
+  "impact": "The rebuild could inherit either baseline at random, producing a theme that matches neither the mockup nor the owner's edits.",
+  "recommendation": "Phase 2 will record a signed decision per deviation and freeze the design baseline that the rebuild targets.",
+  "severity": "HIGH",
+  "priority": "P1",
+  "phase": "PHASE 2 — DESIGN SYSTEM",
+  "categories": [
+   "BRAND",
+   "UX"
+  ],
+  "evidence": "findings-verified.json C18 (refuted as overstated), FIDELITY-1 to FIDELITY-10; evidence-render.md mockup vs render"
+ },
+ {
+  "id": "RISK-04",
+  "area": "Risk: runtime confusion",
+  "problem": "The prototype boots from a double-click and looks reusable, but its template syntax collides with Liquid and its first paint depends on fetching React from unpkg.com.",
+  "impact": "Reuse produces silently empty tiles in Liquid or a blank page when unpkg is unreachable, and wastes conversion effort on a generated editor runtime.",
+  "recommendation": "Phase 10 will start from an empty theme scaffold under a written rule that no prototype file is copied, with the prototype archived read-only. Runtime removal: see the ARCH register.",
+  "severity": "HIGH",
+  "priority": "P1",
+  "phase": "PHASE 10 — SHOPIFY THEME CONVERSION",
+  "categories": [
+   "ARCHITECTURE"
+  ],
+  "evidence": "findings-verified.json TECHNICAL-3, C13 and critic addition ADD-2 (whole page blank if React cannot be fetched; file:// itself is fine); support.js lines 1, 1818-1822, 1906-1910; evidence-render.md runtime facts"
+ },
+ {
+  "id": "RISK-05",
+  "area": "Risk: mobile regression",
+  "problem": "The mobile layer is 31 media-query rules (26 at max-width 900px, 5 at max-width 520px) that override the desktop rules with !important, it carries a live hero-fade defect, and no genuine device captures or pass criteria exist for the rebuild.",
+  "impact": "Phone layouts can regress unnoticed while desktop parity is being chased.",
+  "recommendation": "Phase 9 will define acceptance renders per width from the mobile-*-true.png series and rebuild mobile-first. Layout outcomes: see the RESP register.",
+  "severity": "HIGH",
+  "priority": "P1",
+  "phase": "PHASE 9 — MOBILE UX",
+  "categories": [
+   "MOBILE",
+   "UX"
+  ],
+  "evidence": "css-html-stats.txt (rules in 900px query 26, in 520px query 5; !important in <style> 55, inline 0); findings-verified.json RESPONSIVE-1, TECHNICAL-1, FIDELITY-2 (refined in gaps: the two-line lockup only appears below roughly 540px), gaps; measurements.md (88px fade offset at 375, 390, 430, 720, 768, 900)"
+ },
+ {
+  "id": "RISK-06",
+  "area": "Risk: scope",
+  "problem": "The programme is framed as a conversion but the prototype is a homepage with no commerce, so the real scope is a complete theme with one designed page and at least nine undesigned storefront templates, about twenty once the customer, gift card and blog routes are counted.",
+  "impact": "Product, collection, cart and search experiences will be built last and worst if the scope is not priced and sequenced.",
+  "recommendation": "Phase 8 will fix the launch feature set using the ECOM register's CURRENT / MISSING / REQUIRED / OPTIONAL classification and budget every template in §29.5.",
+  "severity": "HIGH",
+  "priority": "P1",
+  "phase": "PHASE 8 — PRODUCT & SHOPPING UX",
+  "categories": [
+   "UX",
+   "ARCHITECTURE"
+  ],
+  "evidence": "findings-verified.json TECHNICAL-4; desktop-1440.png (homepage only); §29.5 template list; SHOP-09"
+ },
+ {
+  "id": "RISK-07",
+  "area": "Risk: working copy",
+  "problem": "The project lives in a personal OneDrive folder with no git history, no build tooling, an in-place rename performed by the owner and a sibling assets folder that has already disappeared.",
+  "impact": "The design baseline can drift or be lost silently, and there is no history to recover from.",
+  "recommendation": "Before Phase 2 work, the theme will be initialised in git outside OneDrive and the prototype folder and export zip archived as a read-only baseline.",
+  "severity": "HIGH",
+  "priority": "P1",
+  "phase": "PHASE 2 — DESIGN SYSTEM",
+  "categories": [
+   "ARCHITECTURE"
+  ],
+  "evidence": "evidence-render.md project location and files (rename by the user on 2026-09-20 at 15:34; 'Original-Assets' folder missing from its recorded path)"
+ },
+ {
+  "id": "RISK-10",
+  "area": "Risk: performance budget",
+  "problem": "No performance budget exists and the prototype carries a 1.99 MB hero PNG, 308 KB of PNG icons and ~211 KB of render-blocking JavaScript.",
+  "impact": "Assets carried over uncritically will miss any reasonable LCP target on mobile networks, and the outcome is fixed at asset acceptance rather than at the later performance pass.",
+  "recommendation": "Phase 2 will set the budget (LCP image, above-fold bytes, JS bytes), Phase 3 will enforce it at asset acceptance — where it is actually met or missed — and Phase 12 will confirm it with throttled Lighthouse runs.",
+  "severity": "HIGH",
+  "priority": "P1",
+  "phase": "PHASE 3 — ASSET PREPARATION",
+  "categories": [
+   "PERFORMANCE",
+   "ASSET"
+  ],
+  "evidence": "findings-verified.json C10, TECHNICAL-6; measurements.md external bundle sizes (~211 KB raw JS per load); bundle-sizes.txt; §27.4 RISK-10 x RISK-01"
+ },
+ {
+  "id": "RISK-14",
+  "area": "Risk: accessibility debt",
+  "problem": "The transparent nav over the hero photo measures below WCAG AA for Collections, Our Story and Verse at 1024 and 1440 — 2.4-2.9:1 when the fade alpha is composited over sampled photo luminance, and 2.4-2.5:1 over the brightest 2% of the render's pixels although 4.6-5.7:1 on the median — while at 1024 the gold Home link drops to ~3.5:1 and the header has no operable controls.",
+  "impact": "A theme that reproduces the prototype's header composition fails WCAG AA before any content is added.",
+  "recommendation": "Phase 4 will build the header on a solid or strengthened band, sized to pass on the brightest sample rather than the median, with real buttons; Phase 14 will verify with axe and a keyboard pass. Defects: see the A11Y register.",
+  "severity": "HIGH",
+  "priority": "P1",
+  "phase": "PHASE 14 — ACCESSIBILITY",
+  "categories": [
+   "ACCESSIBILITY",
+   "UX"
+  ],
+  "evidence": "findings-verified.json critic addition ADD-1 (2.4-2.9:1 composited; gold Home ~3.5:1 at 1024), C6, C7; evidence-render.md nav-link contrast at 1440 (Collections 5.7/5.0/2.5, Our Story 4.7/4.4/2.4, Verse 4.6/4.2/2.4)"
+ },
+ {
+  "id": "SEO-01",
+  "area": "SEO / head metadata",
+  "problem": "The document has no <title> element, so document.title is empty at runtime.",
+  "impact": "The page has no name in tabs, bookmarks, history, share sheets or search results, and no title copy exists to carry into the theme.",
+  "recommendation": "Phase 13 will define the <title> pattern (page_title plus shop name) in layout/theme.liquid; the homepage title copy is BUSINESS INFORMATION REQUIRED.",
+  "severity": "HIGH",
+  "priority": "P1",
+  "phase": "PHASE 13 — SEO",
+  "categories": [
+   "SEO",
+   "CONTENT"
+  ],
+  "evidence": "css-html-stats.txt (<title>: ABSENT); God Squad Website.html lines 3-7; evidence-render.md (document.title empty)"
+ },
+ {
+  "id": "SEO-02",
+  "area": "SEO / head metadata",
+  "problem": "No meta description exists anywhere in the document.",
+  "impact": "Search engines and link previews must synthesise a snippet from about 120 words of tracked-caps copy, and no approved description exists for the theme.",
+  "recommendation": "Phase 13 will output page_description with a shop-level fallback; the description copy is BUSINESS INFORMATION REQUIRED.",
+  "severity": "HIGH",
+  "priority": "P1",
+  "phase": "PHASE 13 — SEO",
+  "categories": [
+   "SEO",
+   "CONTENT"
+  ],
+  "evidence": "css-html-stats.txt (meta description: ABSENT); God Squad Website.html lines 3-7"
+ },
+ {
+  "id": "SHOP-02",
+  "area": "Theme Editor",
+  "problem": "No section schemas, JSON templates or section groups exist; the only editable value in the project is the Claude Design currency prop in data-props.",
+  "impact": "The merchant could change no text, image, colour, menu or product selection in Shopify's Theme Editor.",
+  "recommendation": "Phase 11 will implement the schema settings and blocks in §29.7 with presets and block.shopify_attributes, after agreeing the settings surface with the owner.",
+  "severity": "HIGH",
+  "priority": "P1",
+  "phase": "PHASE 11 — THEME EDITOR",
+  "categories": [
+   "ARCHITECTURE",
+   "UX"
+  ],
+  "evidence": "God Squad Website.html line 169; pasted-1789874193900-0.png (currency dropdown)"
+ },
+ {
+  "id": "SHOP-03",
+  "area": "Configuration",
+  "problem": "There is no config/settings_schema.json or settings_data.json: brand colours are literals repeated across the 77 inline styles and the 2,916 B <style> block (all sources: #0d0c0a x14, #d8c08a x10, #f3efe6 x9, #bdb6a8 x3; inline-only the repeats are background:#0d0c0a x6, background:#f3efe6 x6, color:#d8c08a x5); fonts are hardcoded in the <style> and in a body-level Google Fonts link (line 12); the logo is a hardcoded <img src> (lines 69, 155); and no social URLs exist at all, both social links being href=\"#\" (BUSINESS INFORMATION REQUIRED).",
+  "impact": "Global theme settings cannot exist, and the palette, type, logo and social set cannot be changed or themed without editing markup.",
+  "recommendation": "Phase 10 will create settings_schema.json with the areas in §29.6 and a css-variables snippet that maps settings to custom properties; token definitions themselves are owned by the BRAND register, and the social URLs are BUSINESS INFORMATION REQUIRED.",
+  "severity": "HIGH",
+  "priority": "P1",
+  "phase": "PHASE 10 — SHOPIFY THEME CONVERSION",
+  "categories": [
+   "ARCHITECTURE",
+   "BRAND"
+  ],
+  "evidence": "css-html-stats.txt colours (hex + rgba, all sources), sizes, repeated inline declarations and links list; God Squad Website.html lines 12, 69, 155, 160-161"
+ },
+ {
+  "id": "SHOP-04",
+  "area": "Section groups",
+  "problem": "The nav is absolutely positioned inside the hero section and the hero copy reserves 170 px / 190 px of top padding to clear it, so the announcement bar and header cannot be extracted into a header section group without re-laying the hero.",
+  "impact": "The header group required by Online Store 2.0 cannot be formed from the current composition, and the hero-fade offset defect below 900 px is a direct consequence of the coupling.",
+  "recommendation": "Phase 4 will build header and announcement-bar as independent sections in sections/header-group.json with a transparent_over_hero option and a solid top band; the hero will stop reserving padding for the nav. Markup semantics: see the HTML register.",
+  "severity": "HIGH",
+  "priority": "P1",
+  "phase": "PHASE 4 — HEADER & NAVIGATION",
+  "categories": [
+   "ARCHITECTURE",
+   "UX"
+  ],
+  "evidence": "God Squad Website.html lines 64, 68, 82, 90; findings-verified.json TECHNICAL-11, TECHNICAL-1"
+ },
+ {
+  "id": "SHOP-09",
+  "area": "Template coverage",
+  "problem": "Only the homepage exists; product, collection, list-collections, cart, search, page, page.our-story, 404, password, gift card and customer templates that Shopify serves have no prototype design at all.",
+  "impact": "Shopify serves an error page for a storefront route whose template is missing, so the conversion cannot launch without designing and building at least nine additional templates, rising to about twenty once the seven customer templates, gift card, blog and article are counted; templates/customers/* are needed only if classic customer accounts are chosen, and password and gift_card only if those features are enabled.",
+  "recommendation": "Phase 8 will design the storefront template set in §29.5 with minimal but on-brand sections, classifying each as REQUIRED, OPTIONAL or BUSINESS DECISION REQUIRED. Feature behaviour: see the ECOM register.",
+  "severity": "HIGH",
+  "priority": "P1",
+  "phase": "PHASE 8 — PRODUCT & SHOPPING UX",
+  "categories": [
+   "UX",
+   "ARCHITECTURE"
+  ],
+  "evidence": "desktop-1440.png (homepage only); God Squad Website.html lines 71-78 (search, account, cart with no destinations); §29.5 template list"
+ },
+ {
+  "id": "STORY-01",
+  "area": "Our Story — image asset",
+  "problem": "The section uses ./01-hero-model-mu98p88t-7jig.webp, a 650x480 crop of the mockup's hero with the headline fragments \"A PURPOSE\", \"K BY\", \"TH.\" and the \"More Than Clothing\" script baked into the pixels, while the mockup's three-model story image (images/our-story.webp) is unused.",
+  "impact": "Visible stray lettering appears at every width and a section titled \"Real People\" shows one model instead of the community the copy describes.",
+  "recommendation": "Replace the asset with a purpose-shot or re-rendered story image that matches the mockup's three-model intent (Phase 3 sources it, Phase 7 places it); the required master resolution and delivery strategy are in the ASSET register.",
+  "severity": "HIGH",
+  "priority": "P1",
+  "phase": "PHASE 7 — OUR STORY",
+  "categories": [
+   "ASSET",
+   "BRAND",
+   "CONTENT"
+  ],
+  "evidence": "findings-verified.json C1; inventory.tsv DUP-05; scratchpad/crops/d1440-story-values-footer.png, t768-story-values-footer.png, m375-story-values.png"
+ },
+ {
+  "id": "UX-01",
+  "area": "Hero / conversion path",
+  "problem": "The hero contains no link or button, so the first screen asks nothing of the visitor and on 1366x768 and 1280x720 laptops no product or CTA is visible without scrolling.",
+  "impact": "The primary above-the-fold conversion opportunity is unused and the only route into the shop is the nav Shop link or scrolling.",
+  "recommendation": "Add one primary CTA to the drop collection (and an optional secondary CTA to Our Story) as button blocks in the hero section, with label and URL editable.",
+  "severity": "HIGH",
+  "priority": "P1",
+  "phase": "PHASE 5 — HERO",
+  "categories": [
+   "UX"
+  ],
+  "evidence": "God Squad Website.html lines 82-94 (no <a>); laptop-1366-fold.png; laptop-1280-fold.png"
+ },
+ {
+  "id": "CSS-04",
+  "area": "Breakpoint system",
+  "problem": "Only two desktop-first max-width breakpoints exist (900px and 520px) with no min-width queries and no step between 901 and 1440.",
+  "impact": "768px tablets receive phone rules while 920-1279px laptops receive the full three-column hero with 8.5vw type, producing the wrapping and orphaning measured in the RESP register.",
+  "recommendation": "Define mobile-first min-width steps (750px and 990px, with an optional 1200px step for the hero copy column) in the design system rather than from the current code, then apply and verify them per width in the mobile UX phase.",
+  "severity": "MEDIUM",
+  "priority": "P1",
+  "phase": "PHASE 2 — DESIGN SYSTEM",
+  "categories": [
+   "MOBILE",
+   "UX"
+  ],
+  "evidence": "God Squad Website.html lines 18, 46; measurements.md 768/900/901/920/1024; band-920.png; tablet-768.png"
+ },
+ {
+  "id": "CSS-07",
+  "area": "Interaction states",
+  "problem": "Hover exists only as a global a:hover colour (invisible on Home and on the image-only social links) and two runtime-generated .scp0/.scp1 :hover rules from style-hover; there are no :focus-visible, :active or transition rules and the hover shades #2a2823/#e6d3a6 are undocumented.",
+  "impact": "The CTA hover works today but only under support.js, keyboard users get the browser default ring only, and the theme has no defined state system to implement.",
+  "recommendation": "Define hover, focus-visible, active and reduced-motion-guarded transition rules once in base.css with named hover tokens; contrast and keyboard measurements are in the A11Y register.",
+  "severity": "MEDIUM",
+  "priority": "P1",
+  "phase": "PHASE 2 — DESIGN SYSTEM",
+  "categories": [
+   "UX",
+   "BRAND",
+   "ACCESSIBILITY"
+  ],
+  "evidence": "God Squad Website.html lines 16, 104, 132; support.js lines 428-429, 1567-1589; evidence-render.md hover facts; findings-verified.json TECHNICAL-2; css-html-stats.txt (transition 0)"
+ },
+ {
+  "id": "CSS-08",
+  "area": "Typography tokens",
+  "problem": "Typography is hard-coded as six px sizes between 9 and 15px plus four clamp() headings, six letter-spacing values, nine line-heights and three repeated font-family stacks, with no named scale.",
+  "impact": "Type cannot be set from font_picker settings or adjusted per breakpoint in one place, and the mobile scale never reaches 16px.",
+  "recommendation": "Extract a named type scale (sizes, tracking, leading, families) into custom properties in Phase 2 and confirm whether the 11-13px tracked caps are brand-mandated on phones (BUSINESS INFORMATION REQUIRED).",
+  "severity": "MEDIUM",
+  "priority": "P1",
+  "phase": "PHASE 2 — DESIGN SYSTEM",
+  "categories": [
+   "BRAND"
+  ],
+  "evidence": "css-html-stats.txt FONT-FAMILY / FONT-SIZE / LETTER-SPACING / LINE-HEIGHT blocks; God Squad Website.html lines 84, 101, 130; findings-verified.json RESPONSIVE-11"
+ },
+ {
+  "id": "DEBT-12",
+  "area": "Process debt",
+  "problem": "The project is not a git repository, has no package.json or build tooling, lives inside a personal OneDrive folder, the spec still names the old file name, and four unreferenced root-level exports (chatgpt-image-…png, white-font-300x300-…png, two white-font-trans-…png) sit beside the referenced story WebP in the root.",
+  "impact": "There is no history to diff the prototype against, sync conflicts or accidental edits are unrecoverable, and naming drift confuses every later phase.",
+  "recommendation": "Create a repository for the theme via Shopify CLI in the conversion phase, and commit the frozen prototype and this audit's evidence as the baseline before then (store and Git host availability: BUSINESS INFORMATION REQUIRED); the root-level asset placement itself is classified in the ASSET/PERF register.",
+  "severity": "MEDIUM",
+  "priority": "P1",
+  "phase": "PHASE 10 — SHOPIFY THEME CONVERSION",
+  "categories": [
+   "ARCHITECTURE"
+  ],
+  "evidence": "evidence-render.md lines 6-14; inventory.tsv root-level rows (referenced_by none for the four exports, html for 01-hero-model-mu98p88t-7jig.webp)"
+ },
+ {
+  "id": "DEBT-13",
+  "area": "Baseline drift",
+  "problem": "The prototype remains editable in Claude Design and has already diverged from the mockup by deliberate edits (group hero photo, gold globe, two social boxes removed); each further edit adds inline styles and invalidates this audit's measurements.",
+  "impact": "The audit's numbers are only valid for the file at md5 787068e3…; unlogged edits would silently move the design baseline.",
+  "recommendation": "Freeze the file as the design baseline, record its hash, and log the open design decisions (hero photo, globe colour, social set) for confirmation in Phase 2 (BUSINESS DECISION REQUIRED).",
+  "severity": "MEDIUM",
+  "priority": "P1",
+  "phase": "PHASE 2 — DESIGN SYSTEM",
+  "categories": [
+   "ARCHITECTURE",
+   "CONTENT"
+  ],
+  "evidence": "evidence-render.md editor history; inventory.tsv (html md5); uploads/pasted-1789874193900-0.png; findings-verified.json FIDELITY-1, FIDELITY-9, C14"
+ },
+ {
+  "id": "HERO-05",
+  "area": "Hero — photo direction decision",
+  "problem": "The build's hero is a three-model generated group image (images/hero-group.png, identical to the ChatGPT upload) that the user substituted for the mockup's single capped model, so hero and story imagery are inverted relative to the approved mockup.",
+  "impact": "Until the direction is confirmed, Phase 3 cannot know which image to master and Phase 5 cannot finalise the composition, scrim and nav backing.",
+  "recommendation": "Record the group photo as the approved direction or revert to the single model (BUSINESS INFORMATION REQUIRED), and confirm whether real photography or a higher-resolution master exists for whichever is chosen.",
+  "severity": "MEDIUM",
+  "priority": "P1",
+  "phase": "PHASE 5 — HERO",
+  "categories": [
+   "BRAND",
+   "ASSET",
+   "CONTENT"
+  ],
+  "evidence": "findings-verified.json FIDELITY-1; pasted-1789874193900-0.png; inventory.tsv DUP-01; 00-full-mockup-reference.webp"
+ },
+ {
+  "id": "HTML-02",
+  "area": "Root element",
+  "problem": "The <html> element has no lang attribute.",
+  "impact": "Screen readers pick a default voice and search engines cannot confirm the page language.",
+  "recommendation": "Set lang from Shopify's request.locale.iso_code in layout/theme.liquid once the store locale is confirmed (BUSINESS INFORMATION REQUIRED).",
+  "severity": "MEDIUM",
+  "priority": "P1",
+  "phase": "PHASE 10 — SHOPIFY THEME CONVERSION",
+  "categories": [
+   "ACCESSIBILITY",
+   "SEO"
+  ],
+  "evidence": "God Squad Website.html line 2; css-html-stats.txt (lang attr ABSENT); findings-verified.json C7"
+ },
+ {
+  "id": "HTML-05",
+  "area": "Nonstandard elements and attributes",
+  "problem": "The markup depends on runtime-only constructs: <x-dc>, <helmet>, three <sc-for>, two <sc-if>, two style-hover, four data-screen-label, five hint-placeholder-* attributes and a text/x-dc data script.",
+  "impact": "The file is not valid standalone HTML and cannot be copied into a Liquid section; every construct must be transcribed by hand.",
+  "recommendation": "Transcribe the sections into Liquid with {% for %}/{% if %}, ordinary CSS hover rules and no editor metadata; the runtime dependency and Liquid-delimiter collision are recorded in the ARCH/JS register.",
+  "severity": "MEDIUM",
+  "priority": "P1",
+  "phase": "PHASE 10 — SHOPIFY THEME CONVERSION",
+  "categories": [
+   "ARCHITECTURE"
+  ],
+  "evidence": "God Squad Website.html lines 9-10, 64, 104, 107-120, 132, 143-149, 169; css-html-stats.txt nonstandard attributes; support.js lines 428-429"
+ },
+ {
+  "id": "HTML-06",
+  "area": "Image attributes",
+  "problem": "None of the 12 images carries width, height, srcset, sizes, loading or decoding attributes.",
+  "impact": "The browser cannot reserve layout space (layout shift risk) or choose a size-appropriate candidate, so the 1.99 MB hero and the upscaled product crops are served identically at every width.",
+  "recommendation": "Emit every image through Shopify's image_tag filter with widths and sizes, eager/high-priority for the hero and lazy for below-fold images; file resolution and weight are in the ASSET/PERF register.",
+  "severity": "MEDIUM",
+  "priority": "P1",
+  "phase": "PHASE 10 — SHOPIFY THEME CONVERSION",
+  "categories": [
+   "PERFORMANCE",
+   "SEO"
+  ],
+  "evidence": "evidence-render.md (no srcset, sizes, loading, decoding or width/height on any image); God Squad Website.html lines 60-161; findings-verified.json C10"
+ },
+ {
+  "id": "HTML-09",
+  "area": "Head content in body",
+  "problem": "The stylesheet, the Google Fonts link and the preconnect live inside <helmet> in the body and are only hoisted into <head> by the runtime.",
+  "impact": "Without support.js the document has no head-level presentation, the font request starts late, and no head snippet exists to port.",
+  "recommendation": "Author a head snippet in layout/theme.liquid that carries fonts, base stylesheet, preconnects and metadata; font loading strategy is in the PERF register and meta tags in the SEO register.",
+  "severity": "MEDIUM",
+  "priority": "P1",
+  "phase": "PHASE 10 — SHOPIFY THEME CONVERSION",
+  "categories": [
+   "PERFORMANCE",
+   "ARCHITECTURE",
+   "SEO"
+  ],
+  "evidence": "God Squad Website.html lines 3-7, 10-54; evidence-render.md (helmet manager clones link/style into head); findings-verified.json TECHNICAL-9"
+ },
+ {
+  "id": "INV-01",
+  "area": "Project inventory / source control",
+  "problem": "The project is a single working copy inside the owner's personal OneDrive with no git repository, no package manifest and no build tooling, so the audited state (44 files, 17,185,754 bytes) has no tagged baseline.",
+  "impact": "Any later edit or OneDrive sync conflict silently changes the design baseline that the Shopify rebuild must be measured against.",
+  "recommendation": "Before Phase 2 work starts, place the folder under version control (or at minimum create a dated read-only archive alongside the original export zip) and tag it as the Phase 1 baseline.",
+  "severity": "MEDIUM",
+  "priority": "P1",
+  "phase": "PHASE 2 — DESIGN SYSTEM",
+  "categories": [
+   "ARCHITECTURE"
+  ],
+  "evidence": "evidence-render.md line 6; directory listing of the project root"
+ },
+ {
+  "id": "JS-08",
+  "area": "Interaction layer",
+  "problem": "The runtime wires only on* attributes present in markup and the markup has none, so zero interaction JavaScript exists: no menu toggle, search, account, cart, variant or quick-add behaviour is available to port.",
+  "impact": "Every store interaction must be written from scratch; there is no behaviour to preserve, only visual states, and the hamburger and utility icons are inert (their controls are in the NAV register).",
+  "recommendation": "Plan Phase 4 (menu drawer, predictive search, cart drawer) and Phase 8 (product form, variant picker) as new framework-free theme JavaScript that re-initialises on the shopify:section:load and shopify:section:unload Theme Editor events.",
+  "severity": "MEDIUM",
+  "priority": "P1",
+  "phase": "PHASE 4 — HEADER & NAVIGATION",
+  "categories": [
+   "UX",
+   "ARCHITECTURE"
+  ],
+  "evidence": "support.js lines 317-359, 438-439, 1407, 1904; evidence-render.md line 23; css-html-stats.txt line 209"
+ },
+ {
+  "id": "NAV-09",
+  "area": "Cart badge",
+  "problem": "The cart badge is the literal text 0 with no relationship to any cart.",
+  "impact": "The header signals an empty cart regardless of state and cannot reflect purchases.",
+  "recommendation": "Bind the badge to cart.item_count inside a cart link and update it after Ajax cart changes.",
+  "severity": "MEDIUM",
+  "priority": "P1",
+  "phase": "PHASE 4 — HEADER & NAVIGATION",
+  "categories": [
+   "UX",
+   "DATA"
+  ],
+  "evidence": "God Squad Website.html line 78; findings-verified.json TECHNICAL-4"
+ },
+ {
+  "id": "PROD-04",
+  "area": "Pricing display",
+  "problem": "Prices are displayed without money formatting, compare-at/sale, from-pricing or sold-out states, and the currency prop only swaps the symbol on the same number.",
+  "impact": "Pricing cannot express sales, ranges or availability and would show wrong amounts if the symbol were changed.",
+  "recommendation": "Render product.price and product.compare_at_price with the money filters and add sale/sold-out badges; remove the symbol prop in favour of store currency and Markets.",
+  "severity": "MEDIUM",
+  "priority": "P1",
+  "phase": "PHASE 8 — PRODUCT & SHOPPING UX",
+  "categories": [
+   "UX",
+   "DATA"
+  ],
+  "evidence": "God Squad Website.html lines 113, 169, 172-177; findings-verified.json TECHNICAL-4"
+ },
+ {
+  "id": "A11Y-02",
+  "area": "Bypass blocks and landmarks",
+  "problem": "There is no skip link and no main landmark; the nav lives inside the hero section, and the four section elements have no accessible name so they are exposed as generic containers rather than regions (data-screen-label is editor metadata and names nothing). The only landmarks on the page are the unnamed nav and the footer as contentinfo.",
+  "impact": "Keyboard and screen-reader users must tab through the header on every page load, cannot jump to content, and a landmark list offers two entries with no banner, no main and no named regions to orient by.",
+  "recommendation": "In Phase 10 add a skip link as the first focusable element in layout/theme.liquid pointing at a main landmark that wraps the template content, with header and footer as their own landmarks, and give each section an accessible name (aria-labelledby on its heading) so it is exposed as a region.",
+  "severity": "MEDIUM",
+  "priority": "P2",
+  "phase": "PHASE 10 — SHOPIFY THEME CONVERSION",
+  "categories": [
+   "ACCESSIBILITY"
+  ],
+  "evidence": "evidence-render.md (no header, no main; SECTION x4 + FOOTER; focus order); css-html-stats.txt (role= 0; section[data-screen-label] x4); God Squad Website.html lines 64, 98, 125, 142, 153; findings-verified.json C7"
+ },
+ {
+  "id": "A11Y-04",
+  "area": "Focus states",
+  "problem": "No :focus or :focus-visible rule exists; the browser default ring is the only indicator, and the two raster social icon links have no hover or focus state at all.",
+  "impact": "Focus is unbranded, inconsistent across browsers and unverified against the dark photo and cream band.",
+  "recommendation": "In Phase 14 add a token-driven :focus-visible style (gold ring with offset) for links, buttons and icon controls, and verify it on every background.",
+  "severity": "MEDIUM",
+  "priority": "P2",
+  "phase": "PHASE 14 — ACCESSIBILITY",
+  "categories": [
+   "ACCESSIBILITY"
+  ],
+  "evidence": "God Squad Website.html line 16 (only a:hover); evidence-render.md (no custom focus styles); findings-verified.json TECHNICAL-2, TECHNICAL-6, gaps"
+ },
+ {
+  "id": "A11Y-05",
+  "area": "Colour swatches",
+  "problem": "The nine swatches are empty spans with inline backgrounds and no name, role or text, and the cream swatch on the cream section is distinguished only by a ~1.8:1 border.",
+  "impact": "Screen-reader users get no colour information and low-vision users cannot see the cream option.",
+  "recommendation": "In Phase 8 render swatches from variant options with a visually hidden colour name (or aria-hidden swatches plus text), a 3:1 border and, once selectable, real controls.",
+  "severity": "MEDIUM",
+  "priority": "P2",
+  "phase": "PHASE 8 — PRODUCT & SHOPPING UX",
+  "categories": [
+   "ACCESSIBILITY",
+   "UX"
+  ],
+  "evidence": "God Squad Website.html line 116; evidence-render.md (9 empty spans); findings-verified.json TECHNICAL-5"
+ },
+ {
+  "id": "A11Y-08",
+  "area": "Heading outline",
+  "problem": "The outline is one h1 and two h2s whose DOM text is TheFaithful and Real People.Bigger Purpose. (line breaks via br), while product names and value titles are divs.",
+  "impact": "Heading navigation never reaches a product or value, and heading lists can read the section titles as single words.",
+  "recommendation": "In Phase 14 make product titles h3 inside the product card snippet, value titles h3 inside the block, add headings for Values and the footer, and replace layout br elements with block elements or spans.",
+  "severity": "MEDIUM",
+  "priority": "P2",
+  "phase": "PHASE 14 — ACCESSIBILITY",
+  "categories": [
+   "ACCESSIBILITY",
+   "SEO"
+  ],
+  "evidence": "God Squad Website.html lines 101, 112, 130, 146; css-html-stats.txt headings; evidence-render.md headings"
+ },
+ {
+  "id": "A11Y-09",
+  "area": "Alt text",
+  "problem": "Of the 12 image tags in the source, 4 are wrong (Search, Account and Cart name functions that do not exist; the story alt says community but the picture shows one man and carries baked-in headline fragments), 3 are redundant (the product template alt repeats the name shown below it, and both social alts repeat the link's aria-label) and 1 is generic (the hero alt omits the on-garment message and the setting). Only 4 are correct: the announcement globe, both wordmarks and the value icons.",
+  "impact": "Screen-reader users hear inaccurate or doubled descriptions on 8 of 12 images, including the LCP photo and every product card.",
+  "recommendation": "In Phase 14 set descriptive alts for the two photos from business-supplied descriptions (BUSINESS INFORMATION REQUIRED), empty alts on images inside named controls and links, and drive product alts from product.featured_image.alt.",
+  "severity": "MEDIUM",
+  "priority": "P2",
+  "phase": "PHASE 14 — ACCESSIBILITY",
+  "categories": [
+   "ACCESSIBILITY",
+   "CONTENT"
+  ],
+  "evidence": "css-html-stats.txt images list (12 img tags with alt values); God Squad Website.html lines 60, 65, 69, 76-78, 110, 126, 145, 155, 160-161; findings-verified.json C1, gaps"
+ },
+ {
+  "id": "A11Y-10",
+  "area": "Target sizes",
+  "problem": "The hamburger is 22x16, the utility icons 24x24, the social links 28x28 and the swatches 16x16 at every width.",
+  "impact": "The hamburger and swatches fail the 24px minimum and nothing in the header reaches the 44px phone guidance, which the rebuild will inherit from the mockup.",
+  "recommendation": "In Phase 9 set a 44x44 minimum hit area token for header, social and swatch controls (icon glyphs can stay 24px inside the larger target).",
+  "severity": "MEDIUM",
+  "priority": "P2",
+  "phase": "PHASE 9 — MOBILE UX",
+  "categories": [
+   "ACCESSIBILITY",
+   "MOBILE",
+   "UX"
+  ],
+  "evidence": "measurements.md tap targets; findings-verified.json C15; God Squad Website.html lines 75-78, 116, 160-161"
+ },
+ {
+  "id": "ARCH-04",
+  "area": "Head and asset delivery",
+  "problem": "The only stylesheet (2,916 B <style>) and the Google Fonts <link> are authored inside <helmet> in the body and reach <head> only because the helmet manager clones them at render time; the real <head> holds only charset, viewport and the runtime script.",
+  "impact": "Without the runtime the page has no head-managed styles or preloads, and there is no place today for title, meta, canonical, favicon or font preload hints (the tags themselves are in the SEO register).",
+  "recommendation": "In Phase 10 author theme.liquid's <head> explicitly (content_for_header, stylesheet_tag, font preloads) and move the CSS into assets/.",
+  "severity": "MEDIUM",
+  "priority": "P2",
+  "phase": "PHASE 10 — SHOPIFY THEME CONVERSION",
+  "categories": [
+   "ARCHITECTURE"
+  ],
+  "evidence": "God Squad Website.html lines 3-7, 10-54; support.js lines 1420-1493; findings-verified.json TECHNICAL-9"
+ },
+ {
+  "id": "ASSET-05",
+  "area": "Assets / hero master",
+  "problem": "The hero master is a 1672x941 image whose upload filename (\"ChatGPT Image Sep 20, 2026, 11_06_34 AM.png\") indicates AI generation, unconfirmed by the business (BUSINESS INFORMATION REQUIRED); it is 0.85x at 1440 on 1x displays but about 1.7x upscaled on 2x displays, with no portrait or higher-resolution source.",
+  "impact": "HiDPI desktops and the phone crop both run out of pixels, and the image's status (provenance, approved final, licensed, regenerable) is undocumented.",
+  "recommendation": "Phase 3 will confirm with the business whether the group image is final and how it was produced, obtain a higher-resolution or regenerated source plus a phone crop, and record usage rights if it is AI-generated (BUSINESS INFORMATION REQUIRED).",
+  "severity": "MEDIUM",
+  "priority": "P2",
+  "phase": "PHASE 3 — ASSET PREPARATION",
+  "categories": [
+   "ASSET",
+   "BRAND"
+  ],
+  "evidence": "inventory.tsv DUP-01 (upload filename); evidence-render.md; hero-group.png; measurements.md 1440; findings-verified.json FIDELITY-1"
+ },
+ {
+  "id": "ASSET-06",
+  "area": "Assets / logo",
+  "problem": "The only logo files are raster PNGs; the wordmark in use is a 500x500 canvas with large transparent padding (visible mark 66x50 px in a 78 px box), byte-identical to a Desktop PNG, and no SVG, AI or EPS was seen anywhere.",
+  "impact": "The mark renders at half the mockup's relative size, cannot scale cleanly for HiDPI, favicon, share image or print, and cannot be recoloured.",
+  "recommendation": "Phase 3 will export a trimmed SVG wordmark and a square mark from the Desktop PSDs if their layers are vector, otherwise obtain vector artwork from the designer (BUSINESS INFORMATION REQUIRED); if no vector can be obtained the fallback is a trimmed PNG re-export, a Phase 3 decision. The padded rendering size itself is in the BRAND register.",
+  "severity": "MEDIUM",
+  "priority": "P2",
+  "phase": "PHASE 3 — ASSET PREPARATION",
+  "categories": [
+   "ASSET",
+   "BRAND"
+  ],
+  "evidence": "inventory.tsv; md5 c247ae94 match between images/WHITE FONT LOGO.png and Desktop \"WHITE FONT Trans.png\"; Desktop PSD FILES listing; findings-verified.json FIDELITY-4"
+ },
+ {
+  "id": "BRAND-01",
+  "area": "Brand — colour tokens",
+  "problem": "The three brand colours exist only as raw literals (#0d0c0a x14, #d8c08a x10, #f3efe6 x9 in the stats) with no named tokens, and the CTA hover tints #2a2823/#e6d3a6 exist only inside editor-only style-hover attributes.",
+  "impact": "Nothing can be driven by Shopify colour or colour-scheme settings and every re-implementation risks colour drift from the approved identity.",
+  "recommendation": "Phase 2 should name the tokens (ink, cream, gold, ink-hover, gold-hover) with their computed contrast pairs and map them to settings_schema colour-scheme roles before any section is written.",
+  "severity": "MEDIUM",
+  "priority": "P2",
+  "phase": "PHASE 2 — DESIGN SYSTEM",
+  "categories": [
+   "BRAND",
+   "ARCHITECTURE"
+  ],
+  "evidence": "css-html-stats.txt COLOURS; God Squad Website.html lines 104, 132"
+ },
+ {
+  "id": "BRAND-03",
+  "area": "Brand — currency and arrow glyphs",
+  "problem": "Jost's loaded faces do not contain U+20B1 (₱) or U+2192 (→), so every price and both CTA arrows are drawn by a per-platform fallback font that differs from the mockup's sans ₱.",
+  "impact": "Prices and buttons — the most commercial typography on the site — look different on Windows, macOS, iOS and Android and never match the approved design.",
+  "recommendation": "Phase 2 should decide the currency treatment (a face that includes ₱, a small subset font for the symbol, or a money format tested with Shopify's currency settings) and replace text arrows with an SVG icon in the button component.",
+  "severity": "MEDIUM",
+  "priority": "P2",
+  "phase": "PHASE 2 — DESIGN SYSTEM",
+  "categories": [
+   "BRAND",
+   "UX"
+  ],
+  "evidence": "evidence-render.md Fonts; findings-verified.json critic addition on ₱/→; God Squad Website.html lines 104, 113, 132, 172-177; scratchpad/crops/d1440-price-row.png"
+ },
+ {
+  "id": "BRAND-04",
+  "area": "Brand — type scale and label roles",
+  "problem": "The type system is six fixed sizes (9-15px) plus four clamps, six letter-spacings and nine line-heights, with the tracked-caps label drawn in several unrelated variants (eyebrow 13px .3em at weight 400 or 500; taglines 14px .3em and 13px .24em; captions 11-12px at .2/.22/.26em), and Playfair 700 requested but unused.",
+  "impact": "Labels and captions cannot be built as reusable components, and the mobile page is dominated by 11-14px tracked caps with no role definitions.",
+  "recommendation": "Define a type ramp (display xl/l/m, script, eyebrow, label l/m/s, body, badge) with fixed tracking and leading per role, and drop the unused 700 weight from the font request.",
+  "severity": "MEDIUM",
+  "priority": "P2",
+  "phase": "PHASE 2 — DESIGN SYSTEM",
+  "categories": [
+   "BRAND",
+   "MOBILE"
+  ],
+  "evidence": "css-html-stats.txt FONT-SIZE / LETTER-SPACING / LINE-HEIGHT; God Squad Website.html lines 83, 100, 103, 129; evidence-render.md Fonts; findings-verified.json C12, RESPONSIVE-11"
+ },
+ {
+  "id": "BRAND-05",
+  "area": "Brand — wordmark asset and scale",
+  "problem": "images/WHITE FONT LOGO.png is a 500x500 PNG with large transparent padding, so the wordmark renders at 66x50 px at 1440 (mockup 114x87 on a 1024 canvas) and 47x36 in the footer, and no vector master has been seen (only PSDs outside the project).",
+  "impact": "The brand mark has about half its intended presence in the header and footer, and cannot be scaled crisply for HiDPI, favicon or social preview uses.",
+  "recommendation": "Obtain or trace an SVG wordmark trimmed to its ink bounds and set minimum rendered sizes for nav, footer and mobile in the design system; file duplication and format belong to the ASSET register.",
+  "severity": "MEDIUM",
+  "priority": "P2",
+  "phase": "PHASE 2 — DESIGN SYSTEM",
+  "categories": [
+   "BRAND",
+   "ASSET"
+  ],
+  "evidence": "findings-verified.json FIDELITY-4; evidence-render.md Project location (PSD files); God Squad Website.html lines 69, 155; scratchpad/crops/d1440-logo-nav.png"
+ },
+ {
+  "id": "BRAND-07",
+  "area": "Brand — icon system",
+  "problem": "Three icon vocabularies coexist (gold outline value icons plus the same gold globe in the announcement bar, cream outline utility icons, circled social glyphs vs the mockup's plain glyphs), all as raster PNGs with colour baked in, and the same globe file is drawn at 16px and 44px.",
+  "impact": "Icons cannot follow colour tokens, hover or colour-scheme settings, and the header, values and footer read as three different icon styles.",
+  "recommendation": "Specify one SVG icon set on a 24px grid with a single stroke weight using currentColor (search, account, cart, menu, close, arrow, globe, crown, community, diamond, facebook, instagram); social style to follow the mockup unless the circled style is confirmed. Format and weight are in the ASSET register.",
+  "severity": "MEDIUM",
+  "priority": "P2",
+  "phase": "PHASE 2 — DESIGN SYSTEM",
+  "categories": [
+   "BRAND",
+   "ASSET"
+  ],
+  "evidence": "findings-verified.json TECHNICAL-6, FIDELITY-8, FIDELITY-9; God Squad Website.html lines 60, 182; desktop-1440.png header, values row and footer"
+ },
+ {
+  "id": "COLL-02",
+  "area": "Collection index",
+  "problem": "There is no collection index and no defined collection taxonomy, so Collections and Shop are indistinguishable.",
+  "impact": "The COLLECTIONS nav item cannot be wired and category-led discovery is impossible.",
+  "recommendation": "Confirm the collection structure with the business (BUSINESS INFORMATION REQUIRED) and add templates/list-collections.json with collection images and descriptions.",
+  "severity": "MEDIUM",
+  "priority": "P2",
+  "phase": "PHASE 6 — COLLECTIONS & BEST SELLERS",
+  "categories": [
+   "UX",
+   "CONTENT"
+  ],
+  "evidence": "God Squad Website.html line 72"
+ },
+ {
+  "id": "COLL-03",
+  "area": "Merchandising model",
+  "problem": "The New Drop / The Faithful section implies drop-based merchandising but no collection is defined for it and its three products are a hard-coded array.",
+  "impact": "The drop cannot be updated without editing code and the relationship between drops and categories is undefined.",
+  "recommendation": "Define The Faithful (and future drops) as collections and bind the featured-collection section to a collection picker.",
+  "severity": "MEDIUM",
+  "priority": "P2",
+  "phase": "PHASE 6 — COLLECTIONS & BEST SELLERS",
+  "categories": [
+   "DATA",
+   "UX"
+  ],
+  "evidence": "God Squad Website.html lines 100-101, 174-178"
+ },
+ {
+  "id": "CSS-09",
+  "area": "Spacing tokens",
+  "problem": "Spacing uses 44 distinct px values across 22 padding, 14 margin and 17 gap strings, three competing gutters (48/24/16px) and bespoke fr ratios per section grid.",
+  "impact": "No base unit exists, so section padding settings and consistent rhythm cannot be expressed.",
+  "recommendation": "Derive a 4px-based spacing scale and a stepped --gutter token from the mockup in Phase 2 and express section grids as reusable column templates.",
+  "severity": "MEDIUM",
+  "priority": "P2",
+  "phase": "PHASE 2 — DESIGN SYSTEM",
+  "categories": [
+   "BRAND"
+  ],
+  "evidence": "css-html-stats.txt PADDING / MARGIN / GAP / GRID-TEMPLATE-COLUMNS / DISTINCT PX VALUES blocks; God Squad Website.html lines 50, 58, 82, 90"
+ },
+ {
+  "id": "DATA-03",
+  "area": "Colour swatches",
+  "problem": "Each product carries the same three hex values (#0d0c0a, #f3efe6, #4b5443) as an unnamed array not tied to any variant, rendered as inert spans.",
+  "impact": "The swatches cannot represent real stock or be selected, and have no accessible colour name (labelling is in the A11Y register).",
+  "recommendation": "Model colour as a variant option and drive swatches from variant option values plus a colour metafield or the native Color category metafield; real colour names and per-product availability are BUSINESS INFORMATION REQUIRED.",
+  "severity": "MEDIUM",
+  "priority": "P2",
+  "phase": "PHASE 6 — COLLECTIONS & BEST SELLERS",
+  "categories": [
+   "DATA"
+  ],
+  "evidence": "God Squad Website.html lines 115-117, 175-177; findings-verified.json TECHNICAL-5"
+ },
+ {
+  "id": "DATA-04",
+  "area": "Brand values data",
+  "problem": "The four value tiles (title, sub, icon path) are an array in the data-dc-script rendered through sc-for, with icons as paths to raster PNGs.",
+  "impact": "The strip cannot be edited without editing JavaScript, and the \"Worldwide / Shipping Available\" tile asserts a shipping policy nobody has confirmed.",
+  "recommendation": "Make the strip a section with up to four blocks (icon select or image_picker, title, subtitle) in Phase 11, seeded with the current strings; confirm the shipping claim: BUSINESS INFORMATION REQUIRED.",
+  "severity": "MEDIUM",
+  "priority": "P2",
+  "phase": "PHASE 11 — THEME EDITOR",
+  "categories": [
+   "DATA",
+   "CONTENT"
+  ],
+  "evidence": "God Squad Website.html lines 143-149, 179-184"
+ },
+ {
+  "id": "DATA-06",
+  "area": "Copy strings",
+  "problem": "All copy (announcement, hero eyebrow/heading/verse/taglines, New Drop heading and subheading, story heading/paragraph/caption, footer taglines, button labels) is inline text in the template, frequently with layout-bearing <br> tags.",
+  "impact": "No copy can be changed in the Theme Editor and the intended line breaks are welded to the strings.",
+  "recommendation": "Expose each string as a text, inline_richtext or richtext section setting in Phase 11 with the current strings as schema defaults, and move UI labels (Search, Cart, Menu, Account) to locales/en.default.json.",
+  "severity": "MEDIUM",
+  "priority": "P2",
+  "phase": "PHASE 11 — THEME EDITOR",
+  "categories": [
+   "DATA",
+   "CONTENT"
+  ],
+  "evidence": "God Squad Website.html lines 58-60, 83-93, 100-104, 129-136, 156, 164; css-html-stats.txt line 181"
+ },
+ {
+  "id": "DATA-07",
+  "area": "Image references",
+  "problem": "All 15 referenced image files (17 references) are relative file paths hard-coded in the template or the data script (images/..., ./01-hero-model-mu98p88t-7jig.webp), including the logo path with spaces used twice.",
+  "impact": "No image can be swapped from the Theme Editor or served through Shopify's image CDN with srcset.",
+  "recommendation": "Map logo, hero and story images to image_picker settings rendered with image_url/image_tag, product images to product.featured_image, and UI/value icons to SVG snippets during Phases 10 and 11.",
+  "severity": "MEDIUM",
+  "priority": "P2",
+  "phase": "PHASE 11 — THEME EDITOR",
+  "categories": [
+   "DATA",
+   "ASSET"
+  ],
+  "evidence": "God Squad Website.html lines 60, 65, 69, 76-78, 126, 155, 160-161, 175-183; evidence-render.md line 28"
+ },
+ {
+  "id": "DATA-08",
+  "area": "Social links",
+  "problem": "Facebook and Instagram point to \"#\" and the mockup's TikTok and YouTube are absent by a deliberate editor removal, so no social destination exists in the data.",
+  "impact": "Nothing connects to a real profile and the final network set is undecided.",
+  "recommendation": "Use theme settings (social_facebook_link, social_instagram_link, social_tiktok_link, social_youtube_link) rendered only when populated; the URLs are BUSINESS INFORMATION REQUIRED and the final set is a BUSINESS DECISION REQUIRED.",
+  "severity": "MEDIUM",
+  "priority": "P2",
+  "phase": "PHASE 11 — THEME EDITOR",
+  "categories": [
+   "DATA",
+   "CONTENT"
+  ],
+  "evidence": "God Squad Website.html lines 160-161; findings-verified.json C14; pasted-1789874322321-0.png"
+ },
+ {
+  "id": "ECOM-05",
+  "area": "Customer account",
+  "problem": "The account icon is inert and no account pathway or decision on customer accounts exists.",
+  "impact": "Returning customers have no login, order history or saved details.",
+  "recommendation": "Decide whether accounts are enabled and which type (BUSINESS DECISION REQUIRED), then link the icon to routes.account_url and include the account templates.",
+  "severity": "MEDIUM",
+  "priority": "P2",
+  "phase": "PHASE 8 — PRODUCT & SHOPPING UX",
+  "categories": [
+   "UX"
+  ],
+  "evidence": "God Squad Website.html line 77"
+ },
+ {
+  "id": "ECOM-06",
+  "area": "Filters and sorting",
+  "problem": "No sorting or filtering exists because there is no collection page.",
+  "impact": "Browse cannot be ordered or narrowed once the catalogue grows.",
+  "recommendation": "Implement native sort_by on the collection template in Phase 6; add storefront filters only if the catalogue size (BUSINESS INFORMATION REQUIRED) justifies the Search & Discovery app (BUSINESS DECISION REQUIRED).",
+  "severity": "MEDIUM",
+  "priority": "P2",
+  "phase": "PHASE 6 — COLLECTIONS & BEST SELLERS",
+  "categories": [
+   "UX"
+  ],
+  "evidence": "God Squad Website.html (no collection surface); inventory.tsv"
+ },
+ {
+  "id": "ECOM-09",
+  "area": "Currency and markets",
+  "problem": "The prototype implies PHP pricing with a ₱/$/€ symbol-only toggle and no market, shipping-destination or currency strategy is defined.",
+  "impact": "International selling (promised by Worldwide Shipping) cannot be configured and the toggle would misprice products.",
+  "recommendation": "Decide store currency, selling markets and shipping zones (BUSINESS DECISION REQUIRED); use store currency, money filters and Shopify Markets instead of a theme prop.",
+  "severity": "MEDIUM",
+  "priority": "P2",
+  "phase": "PHASE 8 — PRODUCT & SHOPPING UX",
+  "categories": [
+   "UX",
+   "DATA"
+  ],
+  "evidence": "God Squad Website.html lines 60, 169, 172; findings-verified.json TECHNICAL-4"
+ },
+ {
+  "id": "FOOT-02",
+  "area": "Footer social links",
+  "problem": "Facebook and Instagram link to # and the network set (two in the build, four in the mockup) is an undecided editor change.",
+  "impact": "Social entry points are dead and the brand's actual channels are unknown.",
+  "recommendation": "Confirm profile URLs and the channel set (BUSINESS INFORMATION REQUIRED) and drive the links from theme settings with SVG icons.",
+  "severity": "MEDIUM",
+  "priority": "P2",
+  "phase": "PHASE 4 — HEADER & NAVIGATION",
+  "categories": [
+   "UX",
+   "CONTENT"
+  ],
+  "evidence": "God Squad Website.html lines 160-161; findings-verified.json C14; uploads/pasted-1789874476205-0.png"
+ },
+ {
+  "id": "FOOT-03",
+  "area": "Newsletter",
+  "problem": "There is no email capture anywhere on the page.",
+  "impact": "No mechanism exists to retain visitors who do not buy on first visit or to announce drops.",
+  "recommendation": "Add a newsletter block using the customer form once the provider, copy and incentive are decided (BUSINESS DECISION REQUIRED).",
+  "severity": "MEDIUM",
+  "priority": "P2",
+  "phase": "PHASE 4 — HEADER & NAVIGATION",
+  "categories": [
+   "UX",
+   "CONTENT"
+  ],
+  "evidence": "css-html-stats.txt (forms 0); God Squad Website.html lines 153-166"
+ },
+ {
+  "id": "HERO-03",
+  "area": "Hero — headline lockup",
+  "problem": "The h1 stacks WALK / BY / FAITH. on three lines at 1024, 1440 and 1920 and collapses to one line at 768-900, reproducing the mockup's two-line lockup only at phone widths, because the copy column (about 450px at 1440) cannot hold \"WALK BY\" at the 112px clamp and text-wrap:balance redistributes the break.",
+  "impact": "The signature lockup — gold FAITH. under WALK BY — is never seen on a desktop or laptop screen.",
+  "recommendation": "Lock the headline to two lines with an explicit break after BY, derive the copy column's minimum width from the clamp (or the clamp from the column) and remove text-wrap:balance from the h1.",
+  "severity": "MEDIUM",
+  "priority": "P2",
+  "phase": "PHASE 5 — HERO",
+  "categories": [
+   "BRAND",
+   "UX"
+  ],
+  "evidence": "findings-verified.json FIDELITY-2; measurements.md h1 sizing; desktop-1440.png; tablet-768.png; wide-1920-fold.png; scratchpad/crops/t768-hero.png"
+ },
+ {
+  "id": "HERO-04",
+  "area": "Hero — copy hierarchy on small screens",
+  "problem": "Six copy elements carry no priority rule, so below 900px all of them stack under the photo band (five taglines, 563px of text under a 320px image, hero 970px tall at 375) and the side captions become orphan blocks.",
+  "impact": "Phone visitors scroll 1.2 screens of taglines before the shop section and the hero's message dilutes into five competing lines.",
+  "recommendation": "Phase 5 should rank the copy (eyebrow, h1, verse essential; tagline stack, script and \"A Higher Purpose.\" optional) and specify which elements hide or merge on phones; the layout mechanics are in the RESP register.",
+  "severity": "MEDIUM",
+  "priority": "P2",
+  "phase": "PHASE 5 — HERO",
+  "categories": [
+   "MOBILE",
+   "UX",
+   "CONTENT"
+  ],
+  "evidence": "findings-verified.json RESPONSIVE-3; measurements.md 375; mobile-375-true.png hero region; scratchpad/crops/m375-hero.png"
+ },
+ {
+  "id": "HTML-07",
+  "area": "Copy markup",
+  "problem": "Twelve <br> elements set layout line breaks, including inside both h2s and every multi-line tagline; the h1 carries none and wraps by column width.",
+  "impact": "Copy that moves into Theme Editor settings cannot carry the breaks, the breaks fight text-wrap:balance, and the Our Story h2 already wraps to three lines at 1440 and four at 1024 despite its break.",
+  "recommendation": "Store copy as plain settings text and control line breaks with column width and max-width tokens; where a deliberate lockup is required, use a richtext setting or a span with display:block.",
+  "severity": "MEDIUM",
+  "priority": "P2",
+  "phase": "PHASE 11 — THEME EDITOR",
+  "categories": [
+   "CONTENT",
+   "UX"
+  ],
+  "evidence": "God Squad Website.html lines 84 (no br), 87, 91, 93, 101, 103, 130, 136, 156; css-html-stats.txt (br: 12); findings-verified.json FIDELITY-2, FIDELITY-5; desktop-1440.png"
+ },
+ {
+  "id": "HTML-10",
+  "area": "Navigation markup",
+  "problem": "The five navigation links are bare anchors in a <div> with no <ul>/<li>, and the <nav> has no aria-label; the utility controls sit outside any list.",
+  "impact": "Screen readers cannot announce the number of items or distinguish the primary nav from future footer navs.",
+  "recommendation": "Render the primary menu from a Shopify linklist as <nav aria-label=\"Primary\"><ul><li><a aria-current=\"page\">…, with the utility group in its own labelled list.",
+  "severity": "MEDIUM",
+  "priority": "P2",
+  "phase": "PHASE 4 — HEADER & NAVIGATION",
+  "categories": [
+   "ACCESSIBILITY"
+  ],
+  "evidence": "God Squad Website.html lines 68-79; css-html-stats.txt (aria-: 3)"
+ },
+ {
+  "id": "ICON-01",
+  "area": "Icons / raster icon system",
+  "problem": "All ten icon placements are nine raster RGBA PNGs (308,521 B on four canvases: 110x110, 130x110, 150x110, 130x130) with cream or gold colour baked into the pixels and soft cut edges from an AI sprite sheet.",
+  "impact": "About 30 KB per glyph, no hover, focus or theme-colour states, edges that soften at 16-28 px, and icons that cannot follow the Phase 2 colour tokens.",
+  "recommendation": "Phase 2 will define a single inline-SVG icon snippet system (24 px grid, 1.5 px stroke, currentColor, aria-hidden) covering search, account, cart, menu, close, arrow, crown, community, globe, diamond and the social glyphs, replacing every PNG.",
+  "severity": "MEDIUM",
+  "priority": "P2",
+  "phase": "PHASE 2 — DESIGN SYSTEM",
+  "categories": [
+   "PERFORMANCE",
+   "BRAND",
+   "ARCHITECTURE"
+  ],
+  "evidence": "inventory.tsv; evidence-render.md (icons); findings-verified.json TECHNICAL-6; icons-sprite.png"
+ },
+ {
+  "id": "ICON-04",
+  "area": "Icons / coverage",
+  "problem": "No icons exist for the interactions the store will need (close, chevron, plus/minus, check, filter, external link), the hamburger is three CSS spans, and the CTA arrows are a text glyph outside Jost.",
+  "impact": "The mobile drawer, cart drawer, accordions, product options and buttons cannot be built from the current asset set.",
+  "recommendation": "Phase 2 will extend the SVG set with the utility icons and an icon-arrow so every control shares one system; the arrow glyph fallback is in the BRAND register.",
+  "severity": "MEDIUM",
+  "priority": "P2",
+  "phase": "PHASE 2 — DESIGN SYSTEM",
+  "categories": [
+   "UX",
+   "ARCHITECTURE"
+  ],
+  "evidence": "God Squad Website.html lines 75, 104, 132; findings-verified.json critic addition on the peso sign and arrow glyphs"
+ },
+ {
+  "id": "JS-04",
+  "area": "Security: code evaluation and CSP",
+  "problem": "The data-dc-script class is evaluated with new Function (evalDcLogic) and any x-import module would be executed the same way after a fetch, which requires 'unsafe-eval' under a Content-Security-Policy.",
+  "impact": "The prototype cannot run under a strict CSP and anyone who can edit the HTML text can execute arbitrary JavaScript; this is not a pattern a storefront should carry.",
+  "recommendation": "Removed with the runtime in Phase 10; the theme's own JavaScript must not use eval or new Function.",
+  "severity": "MEDIUM",
+  "priority": "P2",
+  "phase": "PHASE 10 — SHOPIFY THEME CONVERSION",
+  "categories": [
+   "ARCHITECTURE"
+  ],
+  "evidence": "support.js lines 842-851, 1216-1223"
+ },
+ {
+  "id": "JS-07",
+  "area": "Runtime-generated hover styles",
+  "problem": "The only hover states on the two CTAs come from the style-hover attribute, which support.js converts at runtime into .scp0:hover and .scp1:hover rules with !important; the attribute has no meaning outside the dc-runtime.",
+  "impact": "Removing support.js silently removes both button hover states unless they are re-expressed as ordinary CSS.",
+  "recommendation": "Define the two button hover states (#2a2823/#f3efe6 and #e6d3a6/#0d0c0a) and the gold link hover as tokenised :hover rules in the Phase 2 design system.",
+  "severity": "MEDIUM",
+  "priority": "P2",
+  "phase": "PHASE 2 — DESIGN SYSTEM",
+  "categories": [
+   "UX",
+   "ARCHITECTURE"
+  ],
+  "evidence": "findings-verified.json TECHNICAL-2; support.js lines 428-430, 1567-1589; God Squad Website.html lines 104, 132"
+ },
+ {
+  "id": "NAV-04",
+  "area": "Verse nav item",
+  "problem": "The Verse menu item has no destination (href=\"#\") and no corresponding page or section exists.",
+  "impact": "A primary navigation item is a dead end and its intended target is undefined.",
+  "recommendation": "Decide whether Verse is a page, a blog or a homepage section (BUSINESS INFORMATION REQUIRED) and bind the menu item to it.",
+  "severity": "MEDIUM",
+  "priority": "P2",
+  "phase": "PHASE 4 — HEADER & NAVIGATION",
+  "categories": [
+   "UX",
+   "CONTENT"
+  ],
+  "evidence": "God Squad Website.html line 72"
+ },
+ {
+  "id": "NAV-05",
+  "area": "Shop / Collections",
+  "problem": "Shop and Collections both point at the in-page anchor #shop (the New Drop section), so two primary menu items are indistinguishable and neither reaches a collection.",
+  "impact": "Visitors expecting an all-products page or a collection index land on a three-card grid with no way onward.",
+  "recommendation": "Map Shop to the all-products or designated shop collection and Collections to routes.collections_url once the collection taxonomy is decided.",
+  "severity": "MEDIUM",
+  "priority": "P2",
+  "phase": "PHASE 4 — HEADER & NAVIGATION",
+  "categories": [
+   "UX"
+  ],
+  "evidence": "God Squad Website.html lines 72, 98"
+ },
+ {
+  "id": "NAV-08",
+  "area": "Logo",
+  "problem": "The wordmark renders at 66x50 in the nav and 47x36 in the footer, about half its relative size in the mockup, because the 500x500 PNG has large transparent padding drawn at 78px/56px.",
+  "impact": "Brand presence in the header and footer is weaker than the approved design.",
+  "recommendation": "Use a trimmed logo asset (see the ASSET register) with a logo-width setting in the header section so the wordmark matches the mockup's proportion; confirm whether a vector master exists (BUSINESS INFORMATION REQUIRED).",
+  "severity": "MEDIUM",
+  "priority": "P2",
+  "phase": "PHASE 4 — HEADER & NAVIGATION",
+  "categories": [
+   "BRAND",
+   "UX"
+  ],
+  "evidence": "findings-verified.json FIDELITY-4; God Squad Website.html lines 69, 155; desktop-1440.png vs 00-full-mockup-reference.webp"
+ },
+ {
+  "id": "PERF-03",
+  "area": "Performance / font loading",
+  "problem": "Five Google Fonts files (152,880 B) plus 7,461 B of CSS load from a third party with a preconnect only to fonts.googleapis.com (no crossorigin) and none to fonts.gstatic.com, with display=swap on the 112 px headline face.",
+  "impact": "Each face waits for the CSS and a fresh connection to gstatic, and the Playfair 900 headline paints in Georgia first and then reflows.",
+  "recommendation": "Phase 12 will serve the faces through Shopify font settings or self-hosted woff2 in assets/ with preload for the two above-the-fold faces and correct preconnects; the typeface choices are settled in Phase 2 (BRAND register). Whether Google-hosted fonts may be used at all is BUSINESS INFORMATION REQUIRED (privacy policy).",
+  "severity": "MEDIUM",
+  "priority": "P2",
+  "phase": "PHASE 12 — PERFORMANCE",
+  "categories": [
+   "PERFORMANCE"
+  ],
+  "evidence": "God Squad Website.html lines 11-12; evidence-render.md (fonts); findings-verified.json TECHNICAL-9"
+ },
+ {
+  "id": "PERF-05",
+  "area": "Performance / image loading attributes",
+  "problem": "None of the 12 <img> elements in the source carries loading, decoding, width or height, so all 15 image files download at once and the wordmark's width is unknown until its PNG arrives.",
+  "impact": "The 11 below-fold placements compete with the LCP hero for bandwidth on every load and the nav can shift horizontally when the logo loads.",
+  "recommendation": "Phase 12 will apply loading=\"lazy\" and decoding=\"async\" to below-fold images and let image_tag write intrinsic width and height everywhere; icons become inline SVG (ICON-01).",
+  "severity": "MEDIUM",
+  "priority": "P2",
+  "phase": "PHASE 12 — PERFORMANCE",
+  "categories": [
+   "PERFORMANCE",
+   "MOBILE"
+  ],
+  "evidence": "evidence-render.md (no srcset, sizes, loading, decoding, width/height on any image); God Squad Website.html lines 69, 109, 145; findings-verified.json C10 corrections"
+ },
+ {
+  "id": "PROD-03",
+  "area": "Swatches",
+  "problem": "The nine colour swatches are inert 16px spans bound to hex literals with no colour names, no selection behaviour and no variant mapping.",
+  "impact": "They suggest colour choice without offering it and are too small to become controls as-is.",
+  "recommendation": "Drive swatches from product colour option values with named, focusable controls of adequate size that switch the card image to the variant image.",
+  "severity": "MEDIUM",
+  "priority": "P2",
+  "phase": "PHASE 8 — PRODUCT & SHOPPING UX",
+  "categories": [
+   "UX",
+   "DATA"
+  ],
+  "evidence": "God Squad Website.html lines 114-118, 175-177; findings-verified.json TECHNICAL-5"
+ },
+ {
+  "id": "PROD-05",
+  "area": "Product tile framing",
+  "problem": "Each product image is boxed in a 1:1 #ebe6dc tile with object-fit:cover, so the crop backgrounds read as visible squares and the non-square cap is edge-cropped with its brim touching the tile edge.",
+  "impact": "The cards depart from the mockup's floating-garment look and the cap is visually clipped.",
+  "recommendation": "Present images on the section background (or a consistent studio background) with object-fit:contain and padding, using properly shot product images from the asset phase.",
+  "severity": "MEDIUM",
+  "priority": "P2",
+  "phase": "PHASE 8 — PRODUCT & SHOPPING UX",
+  "categories": [
+   "UX",
+   "BRAND",
+   "ASSET"
+  ],
+  "evidence": "God Squad Website.html lines 109-110; findings-verified.json FIDELITY-3; desktop-1440.png y 808-1096 vs 00-full-mockup-reference.webp"
+ },
+ {
+  "id": "RESP-02",
+  "area": "Product grid (<=520px)",
+  "problem": "The phone rule forces one column, producing 327-382px square tiles from 235px sources and a 1,695px New Drop section whose only control sits above the grid.",
+  "impact": "Three products cost 2.1 screens of scrolling with 2.8x device-pixel upscaling and nothing to tap at the end.",
+  "recommendation": "In Phase 9 use a two-column grid at phone widths (about 154px tiles at 375) and place the collection CTA after the grid; pair it with responsive product images rendered through the theme's image_url: width filters and image_tag with an explicit sizes attribute, so each tile is served at its real display width instead of one fixed source (weight and format: ASSET/PERF register).",
+  "severity": "MEDIUM",
+  "priority": "P2",
+  "phase": "PHASE 9 — MOBILE UX",
+  "categories": [
+   "UX",
+   "MOBILE"
+  ],
+  "evidence": "measurements.md 375/390/430 (327/342/382px tiles); mobile-375-true.png; God Squad Website.html line 47; findings-verified.json RESPONSIVE-4, C2"
+ },
+ {
+  "id": "RESP-04",
+  "area": "Hero and story side captions (<=900px)",
+  "problem": "The desktop overlay captions (More Than Clothing. / A Higher Purpose. and Faith Lives Different Here.) are kept as in-flow blocks after the main copy on small screens.",
+  "impact": "At 375 the phone hero appends 211px of orphaned side-column text after the 352px of main copy that follows the 320px image band (hero 970px total, Shop starts at y=1029), and the story CTA is followed by a 145px orphan caption.",
+  "recommendation": "In Phase 9 hide the side columns below 900px or fold one line into the main copy, and keep the story caption on the photo or drop it; hiding the hero side column recovers 211px at 375.",
+  "severity": "MEDIUM",
+  "priority": "P2",
+  "phase": "PHASE 9 — MOBILE UX",
+  "categories": [
+   "UX",
+   "MOBILE",
+   "CONTENT"
+  ],
+  "evidence": "findings-verified.json RESPONSIVE-3 (375x812: heroImg h=320 at 147-467, heroCopy y=467 h=352, heroSide y=819 h=211, drop y=1029; storyCta y=3285 h=50, storySide y=3375 h=145), FIDELITY-7; mobile-375-true.png; tablet-768.png; God Squad Website.html lines 25-27, 39, 51"
+ },
+ {
+  "id": "RESP-07",
+  "area": "Hero headline line breaks",
+  "problem": "The h1 renders on three lines (WALK / BY / FAITH.) from 901 to 1920px and on one line from about 540 to 900px; the approved two-line lockup appears only below about 540px.",
+  "impact": "The brand's primary lockup is wrong on every desktop and tablet width.",
+  "recommendation": "In Phase 5 size the hero copy column and the h1 clamp together so WALK BY fits on line one at every desktop width, and force the break before FAITH. at tablet widths.",
+  "severity": "MEDIUM",
+  "priority": "P2",
+  "phase": "PHASE 5 — HERO",
+  "categories": [
+   "BRAND",
+   "UX"
+  ],
+  "evidence": "measurements.md h1 lines column (captured at 375, 390, 430, 768, 900, 901, 920, 1024, 1440, 1920); findings-verified.json gaps (\"the headline stays on one line at 56px down to at least 560px ... the two-line lockup only appears below roughly 540px\"), FIDELITY-2; desktop-1440.png; laptop-1024.png; tablet-768.png; mobile-375-true.png"
+ },
+ {
+  "id": "RESP-10",
+  "area": "Hero crop on phones",
+  "problem": "At 375px object-fit:cover scales the 1672x941 landscape photo by 0.34 to 568x320 and crops 193px (34%), cutting the third model and the back-print message, while object-position:center 30% has no effect.",
+  "impact": "The phone hero shows a two-person crop that loses the group composition and the only on-garment message.",
+  "recommendation": "In Phase 5 art-direct the phone hero: expose a separate mobile image setting on the hero section and render a `<picture>` whose sources are built with image_url: width: … and image_tag, so the phone crop is its own theme-editor image rather than a CSS crop of the desktop file (availability of a portrait source is BUSINESS INFORMATION REQUIRED); image weight and format are in the ASSET/PERF register.",
+  "severity": "MEDIUM",
+  "priority": "P2",
+  "phase": "PHASE 5 — HERO",
+  "categories": [
+   "UX",
+   "MOBILE",
+   "ASSET"
+  ],
+  "evidence": "mobile-375-true.png; measurements.md 375 (375x320 band); God Squad Website.html lines 23, 65; findings-verified.json RESPONSIVE-8"
+ },
+ {
+  "id": "RESP-12",
+  "area": "900px breakpoint and 200% zoom",
+  "problem": "The 900px max-width query removes the primary navigation and shows the inert hamburger, and that layout is also what a 1440 desktop gets from 160% zoom (1440/1.6 = 900 CSS px) and any laptop up to 1800px gets at 200%. A 1366 laptop stays on the desktop layout at 150% (1366/1.5 = 911 CSS px) and only crosses the breakpoint at the next zoom step, 175% (781 CSS px).",
+  "impact": "Zoomed desktop users lose all navigation, and on phones the header (position:relative) scrolls away on a 5.4-screen page with no sticky header or back-to-top.",
+  "recommendation": "In Phase 9 make the mobile header functional at every width the query covers (menu build: NAV register) and add a sticky or re-appearing header; consider raising or lowering the breakpoint once the menu exists.",
+  "severity": "MEDIUM",
+  "priority": "P2",
+  "phase": "PHASE 9 — MOBILE UX",
+  "categories": [
+   "UX",
+   "MOBILE",
+   "ACCESSIBILITY"
+  ],
+  "evidence": "zoom200-720.png (720 CSS px = 200% of 1440); measurements.md 375 (docH 4382, nav relative), 720 row; God Squad Website.html lines 29-31; findings-verified.json RESPONSIVE-10, C5"
+ },
+ {
+  "id": "RISK-08",
+  "area": "Risk: fonts",
+  "problem": "Three Google Fonts families are assumed available on Shopify, with no library check and no licence file in the project.",
+  "impact": "A family absent from Shopify's library must be self-hosted, which changes loading strategy and requires licence confirmation.",
+  "recommendation": "Phase 2 will verify each family in the font_picker library and confirm licences before specifying self-hosting; any self-hosted woff2 goes in the flat assets/ folder, which has no subfolders.",
+  "severity": "MEDIUM",
+  "priority": "P2",
+  "phase": "PHASE 2 — DESIGN SYSTEM",
+  "categories": [
+   "BRAND",
+   "PERFORMANCE"
+  ],
+  "evidence": "God Squad Website.html line 12; evidence-render.md fonts (Jost 400/500/600, Kaushan Script 400, Playfair Display 900 used; 700 requested but unused); findings-verified.json C12"
+ },
+ {
+  "id": "RISK-09",
+  "area": "Risk: price glyphs",
+  "problem": "The peso sign and arrow fall back to a per-OS system face because Jost's loaded faces lack them, and the store money format has not been chosen.",
+  "impact": "Prices and CTAs will look different on Windows, macOS, iOS and Android and none will match the mockup.",
+  "recommendation": "Phase 2 will choose the price typeface or a symbol subset and an SVG arrow; Phase 15 will check rendering across platforms. Glyph fallback: see the BRAND register.",
+  "severity": "MEDIUM",
+  "priority": "P2",
+  "phase": "PHASE 2 — DESIGN SYSTEM",
+  "categories": [
+   "BRAND",
+   "DATA"
+  ],
+  "evidence": "findings-verified.json critic addition ADD-3 (peso sign and arrow are not in Jost); evidence-render.md fonts"
+ },
+ {
+  "id": "RISK-11",
+  "area": "Risk: editor expectations",
+  "problem": "The owner has been editing by natural-language prompt in Claude Design, whereas Shopify exposes only what section schemas declare.",
+  "impact": "A settings surface that is too thin frustrates the owner; one that is too wide lets the design hierarchy be broken.",
+  "recommendation": "Phase 11 will agree the settings and locked values in §29.6-29.8 with the owner before implementation.",
+  "severity": "MEDIUM",
+  "priority": "P2",
+  "phase": "PHASE 11 — THEME EDITOR",
+  "categories": [
+   "UX",
+   "ARCHITECTURE"
+  ],
+  "evidence": "pasted-1789874193900-0.png (editor prompt history); God Squad Website.html line 169"
+ },
+ {
+  "id": "RISK-12",
+  "area": "Risk: currency and markets",
+  "problem": "The prototype's currency selector swaps only the symbol, and no decision exists on selling currencies.",
+  "impact": "A store launched with ₱/$/€ without Shopify Markets would display wrong prices.",
+  "recommendation": "Decide the selling currencies (BUSINESS DECISION REQUIRED); if more than ₱, Phase 15 will configure and test Shopify Markets conversions.",
+  "severity": "MEDIUM",
+  "priority": "P2",
+  "phase": "PHASE 15 — ECOMMERCE QA",
+  "categories": [
+   "DATA",
+   "UX"
+  ],
+  "evidence": "God Squad Website.html line 172; findings-verified.json TECHNICAL-4"
+ },
+ {
+  "id": "RISK-13",
+  "area": "Risk: acceptance baseline",
+  "problem": "No Lighthouse, axe, screen-reader, throttled-load, cross-browser or real-device results exist for the prototype, and no QA matrix has been written.",
+  "impact": "Phases 9, 12 and 14 have no pass criteria and regressions will be argued from screenshots; a matrix owned by Phase 15 would arrive after the phases it is meant to judge.",
+  "recommendation": "Phase 2 will define the QA matrix (devices, browsers, throttling, tools) so that each of Phases 9, 12 and 14 has measurable acceptance before it runs; Phase 15 will execute it as ecommerce QA.",
+  "severity": "MEDIUM",
+  "priority": "P2",
+  "phase": "PHASE 2 — DESIGN SYSTEM",
+  "categories": [
+   "PERFORMANCE",
+   "ACCESSIBILITY",
+   "MOBILE"
+  ],
+  "evidence": "findings-verified.json gaps (no Lighthouse/axe runs, no genuine device captures); measurements.md"
+ },
+ {
+  "id": "SEO-03",
+  "area": "SEO / head metadata",
+  "problem": "No canonical link is declared.",
+  "impact": "Content reachable through several URLs (hash variants, the space-encoded filename, and later the myshopify versus custom domain) has no declared preferred URL.",
+  "recommendation": "Phase 13 will emit canonical_url on every template.",
+  "severity": "MEDIUM",
+  "priority": "P2",
+  "phase": "PHASE 13 — SEO",
+  "categories": [
+   "SEO"
+  ],
+  "evidence": "css-html-stats.txt (canonical: ABSENT); evidence-render.md (request for God%20Squad%20Website.html)"
+ },
+ {
+  "id": "SEO-04",
+  "area": "SEO / social metadata",
+  "problem": "No Open Graph or Twitter Card tags exist and no share-format image (1200x630 or similar) exists among the 44 site files.",
+  "impact": "Sharing the URL on Facebook, Messenger, Instagram DMs or X produces a card with no title, description or image for a brand whose footer is built around social channels.",
+  "recommendation": "Phase 13 will add a meta-tags snippet driven by page data and a theme-settings share image; the image and copy are BUSINESS INFORMATION REQUIRED.",
+  "severity": "MEDIUM",
+  "priority": "P2",
+  "phase": "PHASE 13 — SEO",
+  "categories": [
+   "SEO",
+   "CONTENT",
+   "ASSET"
+  ],
+  "evidence": "css-html-stats.txt (og: ABSENT); inventory.tsv (no share-format asset); findings-verified.json critic addition on favicon/description/OG"
+ },
+ {
+  "id": "SEO-05",
+  "area": "SEO / favicon",
+  "problem": "No favicon of any kind is declared, so a normal tab will request /favicon.ico and receive a 404 (predicted; not observed in this capture).",
+  "impact": "The tab, bookmarks and mobile home screen show a generic document icon, and no icon asset exists to carry into the theme.",
+  "recommendation": "Phase 13 will wire the theme favicon setting (image_url width 32 plus an Apple touch icon); a square brand mark must first be sourced (section 21, BUSINESS INFORMATION REQUIRED).",
+  "severity": "MEDIUM",
+  "priority": "P2",
+  "phase": "PHASE 13 — SEO",
+  "categories": [
+   "SEO",
+   "BRAND",
+   "ASSET"
+  ],
+  "evidence": "css-html-stats.txt (favicon link: ABSENT); evidence-render.md; findings-verified.json gaps (\"neither the headless capture nor the Browser pane requested /favicon.ico\")"
+ },
+ {
+  "id": "SEO-07",
+  "area": "SEO / structured data",
+  "problem": "No structured data (JSON-LD) is present for the organization, products or breadcrumbs.",
+  "impact": "Search engines cannot surface rich results (price, availability, brand logo, sitelinks) for the products or the brand.",
+  "recommendation": "Phase 13 will add a structured-data snippet emitting Organization on every page and Product plus Offer and BreadcrumbList on product and collection templates; price, currency, availability and social URLs are BUSINESS INFORMATION REQUIRED.",
+  "severity": "MEDIUM",
+  "priority": "P2",
+  "phase": "PHASE 13 — SEO",
+  "categories": [
+   "SEO",
+   "DATA"
+  ],
+  "evidence": "css-html-stats.txt (ld+json: ABSENT)"
+ },
+ {
+  "id": "SEO-09",
+  "area": "SEO / URL architecture",
+  "problem": "The whole store is a single URL whose nine links are hash anchors, six of them href=\"#\", with Shop and Collections both pointing at #shop.",
+  "impact": "There are no crawlable product, collection or policy URLs, no internal-link graph and no distinct destinations for two primary navigation labels.",
+  "recommendation": "Phase 13 will validate the Shopify URL architecture (routes, collection.url, product.url, policy pages) once the intended destinations for Verse and Collections are supplied (BUSINESS INFORMATION REQUIRED); the placeholder hrefs themselves are in the NAV register.",
+  "severity": "MEDIUM",
+  "priority": "P2",
+  "phase": "PHASE 13 — SEO",
+  "categories": [
+   "SEO",
+   "ARCHITECTURE"
+  ],
+  "evidence": "css-html-stats.txt links list; God Squad Website.html lines 71-72, 104, 132, 160-161"
+ },
+ {
+  "id": "SEO-10",
+  "area": "SEO / indexability",
+  "problem": "Product and value content exists only as hidden template placeholders and a JS data block that React renders after loading from unpkg, so a client that does not run the script reads the raw template — product cards reading literal {{ p.name }} with broken {{ p.img }} images — while a client that runs the script but cannot reach unpkg gets a blank page, because hideRawTemplate() hides <x-dc> before React is even requested.",
+  "impact": "Any crawler or fetcher that does not execute JavaScript indexes raw placeholders, one that executes it but is blocked from unpkg indexes a blank page, and even Googlebot depends on the CDN to see the products.",
+  "recommendation": "Phase 10 will render all content server-side in Liquid, which removes the dependency by construction; the runtime itself is covered in the ARCH register.",
+  "severity": "MEDIUM",
+  "priority": "P2",
+  "phase": "PHASE 10 — SHOPIFY THEME CONVERSION",
+  "categories": [
+   "SEO",
+   "ARCHITECTURE"
+  ],
+  "evidence": "God Squad Website.html lines 107-120, 143-149, 169-188; support.js lines 1818-1821, 1906-1910; findings-verified.json C13 and its critic addition; evidence-render.md"
+ },
+ {
+  "id": "SHOP-05",
+  "area": "Locales",
+  "problem": "No locales/ directory exists; every storefront string and every future schema label is inline in the markup, and the store's language set is unknown.",
+  "impact": "The theme cannot be translated, schema labels cannot be localised, and Shopify's translation tooling has nothing to read.",
+  "recommendation": "Phase 10 will add locales/en.default.json and en.default.schema.json and route all strings through the t filter; launch languages are BUSINESS DECISION REQUIRED.",
+  "severity": "MEDIUM",
+  "priority": "P2",
+  "phase": "PHASE 10 — SHOPIFY THEME CONVERSION",
+  "categories": [
+   "ARCHITECTURE",
+   "CONTENT"
+  ],
+  "evidence": "God Squad Website.html lines 59-164; inventory.tsv (no locales/)"
+ },
+ {
+  "id": "SHOP-06",
+  "area": "Assets folder",
+  "problem": "Assets live in an images/ subfolder, the project root and uploads/, with space-containing names (images/WHITE FONT LOGO.png) and non-theme files mixed in — the mockup PNG, editor screenshots, sprites, the editor-generated .thumbnail preview, and .claude/launch.json, which is dev-server tooling added by the audit lead and not a site file; Shopify assets/ is flat, has no subfolders and must contain only theme files.",
+  "impact": "None of the current paths or names can be reproduced in a theme, and copying the folder would upload 17,185,754 B of which only 2,491,648 B is referenced by the page at all.",
+  "recommendation": "Phase 3 will produce a clean asset manifest: URL-safe flat names for the few true theme assets (logo SVGs, CSS, JS, optional woff2 fonts) and Shopify Files or product media for every content image; the non-theme files stay in the archived prototype. Weight, format and duplicates: see the ASSET register.",
+  "severity": "MEDIUM",
+  "priority": "P2",
+  "phase": "PHASE 3 — ASSET PREPARATION",
+  "categories": [
+   "ASSET",
+   "ARCHITECTURE"
+  ],
+  "evidence": "inventory.tsv (44 files, 17,185,754 B); measurements.md inventory summary (17 referenced files, 2,491,648 B; 9 md5 duplicate groups, 11 redundant copies); findings-verified.json TECHNICAL-10; evidence-render.md project files (.thumbnail is an editor-generated preview; .claude/launch.json was added by the audit lead)"
+ },
+ {
+  "id": "SHOP-07",
+  "area": "Fonts",
+  "problem": "Fonts are delivered by a Google Fonts link inside the body-level helmet element (Playfair Display 700/900, Jost 400/500/600, Kaushan Script), with no font_picker settings and no verification that the families exist in Shopify's font library.",
+  "impact": "The theme would either depend on an external font host that Shopify settings cannot control or ship families whose availability and licence for self-hosting are unconfirmed.",
+  "recommendation": "Phase 2 will check each family against Shopify's font_picker library and specify font_face output in theme.liquid, self-hosting subset woff2 files with flat names directly in assets/ (no fonts/ subfolder) only for families that are absent and whose licence permits it. Glyph fallback for the peso sign and arrow: see the BRAND register.",
+  "severity": "MEDIUM",
+  "priority": "P2",
+  "phase": "PHASE 2 — DESIGN SYSTEM",
+  "categories": [
+   "BRAND",
+   "PERFORMANCE",
+   "ARCHITECTURE"
+  ],
+  "evidence": "God Squad Website.html lines 11-12; evidence-render.md fonts; findings-verified.json C12, TECHNICAL-9"
+ },
+ {
+  "id": "SHOP-08",
+  "area": "Currency",
+  "problem": "Currency is a template prop enum (₱/$/€) concatenated onto string prices, with no Shopify mechanism (store money format, money filter, Shopify Markets) behind it.",
+  "impact": "Selecting another symbol shows the same number with a different sign, and the theme has no correct way to present prices until the store currency and markets are decided.",
+  "recommendation": "Phase 15 will validate prices rendered through the money filter against the store's money format and, if more than one selling currency is required, Shopify Markets; the selling currencies are BUSINESS DECISION REQUIRED. Hardcoded price data: see the DATA register.",
+  "severity": "MEDIUM",
+  "priority": "P2",
+  "phase": "PHASE 15 — ECOMMERCE QA",
+  "categories": [
+   "DATA",
+   "UX"
+  ],
+  "evidence": "God Squad Website.html lines 169-177; findings-verified.json TECHNICAL-4"
+ },
+ {
+  "id": "STORY-02",
+  "area": "Our Story — slot composition",
+  "problem": "The image slot (left:30%, width:70%, object-fit:cover, object-position:center top) discards about 29% of the picture's height at 1440 — the hands and chest that carry the mockup's gesture — and starts the photo at 30% of the section so the subject's face lands under the copy column's right edge, with no aspect-ratio or focal-point rule for the slot.",
+  "impact": "Even after the asset swap the section will show a cropped fragment whose subject collides with the copy, and the visible crop changes unpredictably per width.",
+  "recommendation": "Phase 7 should define the slot's aspect ratio per breakpoint and a focal-point rule (using the Shopify image focal point) so the subject and gesture stay visible; the required master resolution and delivery strategy are in the ASSET register.",
+  "severity": "MEDIUM",
+  "priority": "P2",
+  "phase": "PHASE 7 — OUR STORY",
+  "categories": [
+   "BRAND",
+   "UX"
+  ],
+  "evidence": "God Squad Website.html line 126; findings-verified.json critic addition on the story slot (crop arithmetic); scratchpad/crops/d1440-story-values-footer.png"
+ },
+ {
+  "id": "STORY-06",
+  "area": "Our Story — Theme Editor editability",
+  "problem": "Eyebrow, heading, paragraph, CTA label and link, side caption, image, alt and scrim are all inline copy or hard paths with no settings schema.",
+  "impact": "The brand cannot change its story, photo or CTA without a code deploy, which defeats the purpose of an Online Store 2.0 section.",
+  "recommendation": "Build our-story.liquid with settings for eyebrow, heading (inline_richtext, which has no line breaks — use two text settings for the two lines or rely on the STORY-05 column width for the wrap), body (richtext), CTA label and url, side caption, image_picker, image side, scrim strength, colour scheme and mobile caption visibility; the global content inventory is in the DATA register.",
+  "severity": "MEDIUM",
+  "priority": "P2",
+  "phase": "PHASE 11 — THEME EDITOR",
+  "categories": [
+   "ARCHITECTURE",
+   "CONTENT"
+  ],
+  "evidence": "God Squad Website.html lines 125-138"
+ },
+ {
+  "id": "UI-01",
+  "area": "UI — button component",
+  "problem": "The two CTAs differ in font weight (500 vs 600) for no hierarchical reason, their hover exists only through the Claude-Design style-hover attribute, the arrow is a text glyph, and no focus, active or disabled state is defined.",
+  "impact": "Buttons cannot be reproduced consistently outside the dc-runtime and give keyboard users no visible state.",
+  "recommendation": "Specify primary (ink fill, cream text) and accent (gold fill, ink text) buttons with default, hover, focus-visible, active and disabled states in plain CSS, an SVG arrow slot and a 48px minimum height; keep the existing hover tints as tokens.",
+  "severity": "MEDIUM",
+  "priority": "P2",
+  "phase": "PHASE 2 — DESIGN SYSTEM",
+  "categories": [
+   "UX",
+   "BRAND",
+   "ACCESSIBILITY"
+  ],
+  "evidence": "God Squad Website.html lines 104, 132; support.js line 428, lines 1567-1590; evidence-render.md style-hover"
+ },
+ {
+  "id": "UI-02",
+  "area": "UI — product card media treatment",
+  "problem": "Each product image sits in a 1:1 box with object-fit:cover over a #ebe6dc background, so the crop's own off-white box is visible against the cream section, garments run to the box edges and the 215x190 cap is edge-cropped with its brim touching the tile edge, unlike the mockup's floated garments.",
+  "impact": "The New Drop grid looks boxed and soft rather than premium, and the card cannot be reused for products with different aspect ratios.",
+  "recommendation": "Specify the card with a fixed media ratio, object-fit:contain on the section cream (or transparent product masters), a two-line name clamp so prices align, and hover/link states defined with the ECOM register; resolution is in the ASSET register.",
+  "severity": "MEDIUM",
+  "priority": "P2",
+  "phase": "PHASE 6 — COLLECTIONS & BEST SELLERS",
+  "categories": [
+   "UX",
+   "BRAND"
+  ],
+  "evidence": "findings-verified.json FIDELITY-3, C9; God Squad Website.html lines 108-113; scratchpad/crops/d-cap.png, d-tee.png; desktop-1440.png product row"
+ },
+ {
+  "id": "UX-02",
+  "area": "Homepage flow / Best Sellers",
+  "problem": "The Best Sellers / Product Discovery step of the intended flow does not exist; the page has four sections and goes straight from New Drop to Our Story.",
+  "impact": "The homepage exposes exactly three products with no category or best-seller entry points, limiting discovery and depth of browse.",
+  "recommendation": "Add a best-sellers / featured-collection section bound to a collection whose admin sort order is Best selling, or manual product blocks, reusing the product-card snippet.",
+  "severity": "MEDIUM",
+  "priority": "P2",
+  "phase": "PHASE 6 — COLLECTIONS & BEST SELLERS",
+  "categories": [
+   "UX",
+   "CONTENT"
+  ],
+  "evidence": "css-html-stats.txt (section count 4); God Squad Website.html lines 122-125; desktop-1440.png"
+ },
+ {
+  "id": "UX-03",
+  "area": "Homepage flow / Verse",
+  "problem": "There is no Verse / Faith section although Verse is a primary nav item; the only scripture is the hero's 2 Corinthians 5:7 line.",
+  "impact": "The brand's most distinctive menu promise leads nowhere, weakening the faith-driven positioning and creating a dead end.",
+  "recommendation": "Add a verse section (verse text, reference, optional image) with editable settings once the verse selection, translation and attribution terms are confirmed.",
+  "severity": "MEDIUM",
+  "priority": "P2",
+  "phase": "PHASE 7 — OUR STORY",
+  "categories": [
+   "UX",
+   "CONTENT",
+   "BRAND"
+  ],
+  "evidence": "God Squad Website.html lines 72, 85, 150-153; desktop-1440.png"
+ },
+ {
+  "id": "UX-07",
+  "area": "Our Story",
+  "problem": "The nav Our Story item scrolls to the story section while the section's own Our Story CTA scrolls to the top, and neither leads to fuller story content.",
+  "impact": "Two prominent promises of a story page resolve circularly, eroding trust in the navigation.",
+  "recommendation": "Point the CTA at a real Our Story page once its content is supplied, and decide whether the nav item targets the page or the homepage section.",
+  "severity": "MEDIUM",
+  "priority": "P2",
+  "phase": "PHASE 7 — OUR STORY",
+  "categories": [
+   "UX",
+   "CONTENT"
+  ],
+  "evidence": "God Squad Website.html lines 72, 132"
+ },
+ {
+  "id": "VAL-01",
+  "area": "Brand Values — section blocks",
+  "problem": "The four values are hard-coded objects in the data-dc-script rendered by sc-for, with no way to add, reorder, relabel or link a value.",
+  "impact": "Marketing content that will change per market or season is locked in code; the templating collision itself is in the ARCH register.",
+  "recommendation": "Build brand-values.liquid with value blocks (icon select from an SVG snippet set or image_picker, title, subtitle, optional link; max 6, preset 4) and section settings for columns, dividers, colour scheme and padding; the data inventory is in the DATA register.",
+  "severity": "MEDIUM",
+  "priority": "P2",
+  "phase": "PHASE 11 — THEME EDITOR",
+  "categories": [
+   "ARCHITECTURE",
+   "CONTENT"
+  ],
+  "evidence": "God Squad Website.html lines 142-150, 179-184"
+ },
+ {
+  "id": "VAL-04",
+  "area": "Brand Values — shipping claim",
+  "problem": "\"Worldwide / Shipping Available\" is a checkable business claim and no shipping policy, destination list or rate table has been seen in the project.",
+  "impact": "If shipping is regional the tile and the announcement bar make a false promise at launch.",
+  "recommendation": "Confirm the shipping scope and policy (BUSINESS INFORMATION REQUIRED) before Phase 15 sign-off and make the value's subtitle and optional link editable so it can be corrected per market.",
+  "severity": "MEDIUM",
+  "priority": "P2",
+  "phase": "PHASE 15 — ECOMMERCE QA",
+  "categories": [
+   "CONTENT"
+  ],
+  "evidence": "God Squad Website.html lines 60, 182"
+ },
+ {
+  "id": "CSS-05",
+  "area": "Dead rule",
+  "problem": "The first rule of the 900px query targets [data-r=pad], and no element in the markup carries data-r=\"pad\".",
+  "impact": "The announcement bar keeps its 48px inline gutter between 521 and 900px while every other section moves to 24px, so the left edges disagree on tablets.",
+  "recommendation": "Give the announcement bar the same gutter token as the header when it is rebuilt as a header-group section.",
+  "severity": "LOW",
+  "priority": "P2",
+  "phase": "PHASE 4 — HEADER & NAVIGATION",
+  "categories": [
+   "MOBILE",
+   "UX"
+  ],
+  "evidence": "God Squad Website.html line 19; css-html-stats.txt (hooks styled but absent: ['pad']); measurements.md 768; findings-verified.json RESPONSIVE-6"
+ },
+ {
+  "id": "CSS-11",
+  "area": "Global link reset",
+  "problem": "a{color:inherit;text-decoration:none} removes the underline affordance from all nine links and a:hover applies the gold colour to every anchor including image-only links.",
+  "impact": "Links in running text are indistinguishable from text and the hover rule is inconsistent across link types.",
+  "recommendation": "Scope the reset to navigation and button-style links and give in-copy links an underline or visible affordance in base.css.",
+  "severity": "LOW",
+  "priority": "P2",
+  "phase": "PHASE 2 — DESIGN SYSTEM",
+  "categories": [
+   "ACCESSIBILITY",
+   "UX"
+  ],
+  "evidence": "God Squad Website.html line 16; evidence-render.md hover facts"
+ },
+ {
+  "id": "DATA-09",
+  "area": "Business facts embedded in copy",
+  "problem": "The page asserts business facts that have not been confirmed: \"Worldwide Shipping\" (announcement), \"Worldwide / Shipping Available\" (values), \"Philippine streetwear brand\" (story) and peso pricing.",
+  "impact": "Publishing unconfirmed shipping, market or origin claims creates customer-service and legal exposure on day one.",
+  "recommendation": "Confirm shipping zones, selling markets and the brand-origin statement with the owner before Phase 11 copy is finalised: BUSINESS INFORMATION REQUIRED.",
+  "severity": "LOW",
+  "priority": "P2",
+  "phase": "PHASE 11 — THEME EDITOR",
+  "categories": [
+   "CONTENT",
+   "DATA"
+  ],
+  "evidence": "God Squad Website.html lines 60, 131, 182"
+ },
+ {
+  "id": "HTML-08",
+  "area": "Wrappers",
+  "problem": "Two empty spacer <div>s stand in for grid columns, two logo wrappers exist only to carry a dead background, and the single 1440px wrapper carries the page background and overflow:hidden for every section.",
+  "impact": "Extra DOM without meaning, and section backgrounds cannot be full-bleed above 1440px (outcome measured in the RESP register).",
+  "recommendation": "Place grid items with grid-column instead of spacer elements, drop the logo wrappers, and make each section full-width with its own inner max-width container.",
+  "severity": "LOW",
+  "priority": "P2",
+  "phase": "PHASE 10 — SHOPIFY THEME CONVERSION",
+  "categories": [
+   "ARCHITECTURE"
+  ],
+  "evidence": "God Squad Website.html lines 55, 69, 89, 134, 155; findings-verified.json TECHNICAL-8, TECHNICAL-10"
+ },
+ {
+  "id": "HTML-11",
+  "area": "Alt text quality",
+  "problem": "The story image alt says \"God Squad community\" but the file shows a single capped model with baked headline text; the inert search/account/cart images announce as controls; the social images duplicate their link's aria-label.",
+  "impact": "Screen-reader users receive a description that contradicts the picture and control names for things that do nothing.",
+  "recommendation": "Rewrite alt text when the story asset is replaced, make icon images inside labelled controls alt=\"\" (or inline SVG aria-hidden), and keep a single accessible name per control.",
+  "severity": "LOW",
+  "priority": "P2",
+  "phase": "PHASE 14 — ACCESSIBILITY",
+  "categories": [
+   "ACCESSIBILITY",
+   "SEO"
+  ],
+  "evidence": "God Squad Website.html lines 76-78, 126, 160-161; css-html-stats.txt images list; findings-verified.json C1"
+ },
+ {
+  "id": "INV-03",
+  "area": "Root folder hygiene",
+  "problem": "The project root mixes the entry page and runtime with five unreferenced Claude Design export artefacts (.thumbnail, chatgpt-image-...-evm9.png, white-font-300x300-...png, two white-font-trans-...png; 2,125,399 bytes) carrying unstable hash-suffixed names, and the one live root asset (01-hero-model-mu98p88t-7jig.webp) also has a hash suffix.",
+  "impact": "Root-level files that serve no page would be copied into a theme's assets/ by any naive migration, and hash-suffixed names cannot be referenced reliably by hand.",
+  "recommendation": "In Phase 3 move export artefacts to an archive folder outside the theme source and give the one live root asset a stable name under images/; byte-identical duplicates are classified in the ASSET register.",
+  "severity": "LOW",
+  "priority": "P2",
+  "phase": "PHASE 3 — ASSET PREPARATION",
+  "categories": [
+   "ASSET",
+   "ARCHITECTURE"
+  ],
+  "evidence": "inventory.tsv rows 2-9; God Squad Website.html line 126; measurements.md line 32"
+ },
+ {
+  "id": "INV-04",
+  "area": "Asset naming",
+  "problem": "The live logo asset is images/WHITE FONT LOGO.png (spaces, uppercase, requested as /images/WHITE%20FONT%20LOGO.png, the only referenced file with an unsafe name) and the unreferenced uploads folder uses names with spaces and commas such as \"ChatGPT Image Sep 20, 2026, 10_11_00 AM.png\".",
+  "impact": "Shopify asset_url and CSS url() handling of names with spaces invites double-encoding bugs and makes paths error-prone to type in Liquid.",
+  "recommendation": "Adopt a lowercase kebab-case naming convention in Phase 3 and rename on copy into the theme, never in place during Phase 1.",
+  "severity": "LOW",
+  "priority": "P2",
+  "phase": "PHASE 3 — ASSET PREPARATION",
+  "categories": [
+   "ASSET"
+  ],
+  "evidence": "findings-verified.json TECHNICAL-10; inventory.tsv rows 10, 29-32; God Squad Website.html lines 69, 155"
+ },
+ {
+  "id": "JS-05",
+  "area": "Security: editor bridge and cross-window messaging",
+  "problem": "The runtime posts __dc_booted and __dc_design_mode to window.parent with target origin \"*\", acts on __dc_theme/__dc_probe messages from any origin without checking e.origin, exposes __dcUpdate/__dcSetProps/__dcRegistry/DCLogic on window, and stamps 137 data-dc-tpl attributes and 14 .sc-interp spans into the rendered DOM.",
+  "impact": "Editor bookkeeping and an unauthenticated global write surface ship to every visitor; exposure today is limited to theme and canvas toggling, but any same-origin script could replace the template or props at runtime.",
+  "recommendation": "Removed with the runtime in Phase 10; the theme should expose no global write API and no cross-window listeners.",
+  "severity": "LOW",
+  "priority": "P2",
+  "phase": "PHASE 10 — SHOPIFY THEME CONVERSION",
+  "categories": [
+   "ARCHITECTURE"
+  ],
+  "evidence": "support.js lines 1384-1390, 1407-1419, 1855-1866, 1871-1901; findings-verified.json TECHNICAL-7"
+ },
+ {
+  "id": "NAV-06",
+  "area": "Active state",
+  "problem": "The Home link's active gold underline is hard-coded inline and never changes with scroll position or page.",
+  "impact": "In a multi-template theme every page would show Home as current, misleading orientation.",
+  "recommendation": "Derive the active state from link.current / link.child_active on the menu object and style it from design-system tokens.",
+  "severity": "LOW",
+  "priority": "P2",
+  "phase": "PHASE 4 — HEADER & NAVIGATION",
+  "categories": [
+   "UX"
+  ],
+  "evidence": "God Squad Website.html line 71"
+ },
+ {
+  "id": "A11Y-06",
+  "area": "CTA arrow glyph",
+  "problem": "Both CTAs contain a bare span with the arrow character and no aria-hidden.",
+  "impact": "The links are announced as View All Products rightwards arrow and Our Story rightwards arrow.",
+  "recommendation": "In Phase 14 mark the arrow aria-hidden or replace it with an inline SVG icon snippet (the font fallback of the glyph is in the BRAND register).",
+  "severity": "LOW",
+  "priority": "P3",
+  "phase": "PHASE 14 — ACCESSIBILITY",
+  "categories": [
+   "ACCESSIBILITY"
+  ],
+  "evidence": "God Squad Website.html lines 104, 132; evidence-render.md (rightwards arrow)"
+ },
+ {
+  "id": "A11Y-07",
+  "area": "Hamburger label",
+  "problem": "aria-label=\"Menu\" sits on a span with no role.",
+  "impact": "ARIA prohibits naming generic elements, so the label is ignored and the control is invisible to assistive technology even before its handler exists.",
+  "recommendation": "In Phase 4 replace the span with a button carrying aria-expanded and aria-controls for the menu panel.",
+  "severity": "LOW",
+  "priority": "P3",
+  "phase": "PHASE 4 — HEADER & NAVIGATION",
+  "categories": [
+   "ACCESSIBILITY"
+  ],
+  "evidence": "God Squad Website.html line 75; support.js lines 432-441 (aria-* passed through unchanged); findings-verified.json critic addition 8"
+ },
+ {
+  "id": "ASSET-01",
+  "area": "Assets / duplicates",
+  "problem": "Nine md5 duplicate groups hold 11 byte-identical redundant copies totalling 6,733,692 bytes, 39% of the 17.2 MB of site files.",
+  "impact": "Three copies of the hero, three of the icon sheet and duplicated crops make it unclear which file is canonical and risk the wrong copy being uploaded to the theme.",
+  "recommendation": "Phase 3 will designate one canonical copy per group and move the other 11 to an archive outside the theme; nothing is deleted in Phase 1.",
+  "severity": "LOW",
+  "priority": "P3",
+  "phase": "PHASE 3 — ASSET PREPARATION",
+  "categories": [
+   "ASSET",
+   "ARCHITECTURE"
+  ],
+  "evidence": "inventory.tsv dup_group DUP-01 to DUP-09; findings-verified.json TECHNICAL-10"
+ },
+ {
+  "id": "ASSET-02",
+  "area": "Assets / icon sheets",
+  "problem": "Two unreferenced AI-generated icon sheets (icons-sprite.png 833,929 B, social-sprite.png 927,973 B) with heavy matting halos and baked-in labels sit in images/ alongside three duplicate uploads.",
+  "impact": "1.76 MB of unusable raster sits in the production images folder, and the sheets are the source of every soft-edged icon on the page.",
+  "recommendation": "Phase 3 will archive one copy of each sheet for provenance and exclude them from the theme; Phase 2 replaces their cut-outs with SVG (ICON-01).",
+  "severity": "LOW",
+  "priority": "P3",
+  "phase": "PHASE 3 — ASSET PREPARATION",
+  "categories": [
+   "ASSET",
+   "PERFORMANCE"
+  ],
+  "evidence": "inventory.tsv (referenced_by none); icons-sprite.png; social-sprite.png"
+ },
+ {
+  "id": "ASSET-07",
+  "area": "Assets / naming and location",
+  "problem": "Production assets have URL-unsafe or generated names and stray locations: \"WHITE FONT LOGO.png\" (spaces and upper case, requested as WHITE%20FONT%20LOGO.png), the live story image at the project root with a hash suffix, and uploads named \"ChatGPT Image Sep 20, 2026, 10_11_00 AM.png\".",
+  "impact": "Such names need encoding or break in Shopify assets/ and make provenance unreadable.",
+  "recommendation": "Phase 3 will adopt a lower-case hyphenated naming convention (for example logo-wordmark-white.svg, hero-group.jpg) and place every web asset under one folder before theme upload.",
+  "severity": "LOW",
+  "priority": "P3",
+  "phase": "PHASE 3 — ASSET PREPARATION",
+  "categories": [
+   "ASSET",
+   "ARCHITECTURE"
+  ],
+  "evidence": "inventory.tsv paths; evidence-render.md (network request for WHITE%20FONT%20LOGO.png); findings-verified.json TECHNICAL-10"
+ },
+ {
+  "id": "ASSET-08",
+  "area": "Assets / generated and reference files",
+  "problem": "Unreferenced generated and reference files (the editor .thumbnail, three root wordmark exports of which two are same-size different-md5 encodes, three 1920x1009 editor screenshots totalling 3,861,192 B, a pasted globe crop and the 1.87 MB mockup PNG) live next to production images with no separation.",
+  "impact": "A 17.2 MB working folder serves a 2.5 MB page, with no way to tell master from export from screenshot.",
+  "recommendation": "Phase 3 will split the project into masters, web assets and an archive (mockups, screenshots, README) and record which white-wordmark export is the approved one (BUSINESS INFORMATION REQUIRED).",
+  "severity": "LOW",
+  "priority": "P3",
+  "phase": "PHASE 3 — ASSET PREPARATION",
+  "categories": [
+   "ASSET"
+  ],
+  "evidence": "inventory.tsv (44 site files, 17,185,754 B); evidence-render.md (project files); md5 check of the root and Desktop wordmark PNGs"
+ },
+ {
+  "id": "BRAND-02",
+  "area": "Brand — secondary neutrals and scrims",
+  "problem": "Three near-identical creams (#e9e4d8 paragraph, #ebe6dc tile, #f3efe6 base), the muted #bdb6a8, the olive #4b5443 swatch (data only) and seven rgba alphas of ink across 12 gradient stops plus three hairline alphas have no roles or names.",
+  "impact": "The design system cannot reproduce the page's tonal relationships and gradient recipes, so scrims and neutrals will be re-guessed per section.",
+  "recommendation": "Define a neutral ramp (ink, cream, body-on-ink, muted, tile) and four named scrim recipes (hero-h, hero-v, story-h, mobile-v) plus one hairline alpha; retire #ebe6dc if the product media treatment changes (UI-02).",
+  "severity": "LOW",
+  "priority": "P3",
+  "phase": "PHASE 2 — DESIGN SYSTEM",
+  "categories": [
+   "BRAND"
+  ],
+  "evidence": "css-html-stats.txt COLOURS; God Squad Website.html lines 66, 109, 127, 131, 147, 175-177"
+ },
+ {
+  "id": "BRAND-06",
+  "area": "Brand — spacing rhythm",
+  "problem": "Roughly two dozen distinct spacing values (out of 44 distinct px values of all kinds) are used with no scale: section paddings 12/22/26/44/48/56/170/190, 14 distinct gap values (17 listed entries) from 5 to 44px, margins 14/26/36/38.",
+  "impact": "Spacing cannot be tokenised or exposed as theme settings and every section will be re-tuned by eye during conversion.",
+  "recommendation": "Adopt a 4/8-based scale (4, 8, 12, 16, 24, 32, 48, 64, 96) with section padding tokens; most current values sit within one step of it, and the hero's 170/190px offsets disappear once the header leaves the hero section.",
+  "severity": "LOW",
+  "priority": "P3",
+  "phase": "PHASE 2 — DESIGN SYSTEM",
+  "categories": [
+   "BRAND"
+  ],
+  "evidence": "css-html-stats.txt DISTINCT PX VALUES / PADDING / GAP / MARGIN; God Squad Website.html lines 82, 90"
+ },
+ {
+  "id": "BRAND-08",
+  "area": "Brand — tagline system",
+  "problem": "Four taglines are used with inconsistent punctuation and repetition: \"Different People Same Purpose\" (hero, no punctuation) vs \"Different People. Same Purpose.\" (footer), and \"More Than Clothing.\" appears both as the hero script and as the Faith Driven value subtitle.",
+  "impact": "The brand voice reads as unedited and the first value tile restates the hero instead of adding a proof point.",
+  "recommendation": "Produce a brand copy deck that fixes the canonical taglines, punctuation and placement (BUSINESS INFORMATION REQUIRED), then apply it as section settings in Phase 11.",
+  "severity": "LOW",
+  "priority": "P3",
+  "phase": "PHASE 2 — DESIGN SYSTEM",
+  "categories": [
+   "BRAND",
+   "CONTENT"
+  ],
+  "evidence": "God Squad Website.html lines 59, 87, 91, 156, 164, 180"
+ },
+ {
+  "id": "CSS-06",
+  "area": "Dead and redundant declarations",
+  "problem": "background:#0230 (alpha 0) on both logo wrappers, flex-wrap:wrap on a grid container, an object-position value duplicated between inline and the 900px query, and a [data-r=hero-img] rule split in two.",
+  "impact": "No visual effect today, but they signal an accreted style block and would be copied into the theme by anyone porting mechanically.",
+  "recommendation": "Drop them during transcription and lint the new stylesheets for no-op declarations.",
+  "severity": "LOW",
+  "priority": "P3",
+  "phase": "PHASE 10 — SHOPIFY THEME CONVERSION",
+  "categories": [
+   "ARCHITECTURE"
+  ],
+  "evidence": "God Squad Website.html lines 21, 23, 65, 69, 98, 155; findings-verified.json TECHNICAL-10 (computed rgba(0,34,51,0))"
+ },
+ {
+  "id": "CSS-10",
+  "area": "Browser support of modern CSS",
+  "problem": "text-wrap:balance and overflow-wrap:anywhere are used on the headings alongside aspect-ratio, inset, max() and clamp(), with no confirmed support matrix.",
+  "impact": "Older Safari versions render the h1 without balancing, changing the line breaks the design depends on.",
+  "recommendation": "Confirm the target browser matrix (BUSINESS DECISION REQUIRED) and keep these idioms with progressive-enhancement fallbacks in the design system.",
+  "severity": "LOW",
+  "priority": "P3",
+  "phase": "PHASE 2 — DESIGN SYSTEM",
+  "categories": [
+   "UX"
+  ],
+  "evidence": "God Squad Website.html lines 84, 101, 109; findings-verified.json gaps (text-wrap:balance support in older Safari)"
+ },
+ {
+  "id": "ECOM-07",
+  "area": "Recommendations and related products",
+  "problem": "No product recommendations or related products exist.",
+  "impact": "Cross-sell and basket depth opportunities are absent.",
+  "recommendation": "Add a recommendations section on the product page using the Product Recommendations API (related intent; complementary if configured) after the product page exists.",
+  "severity": "LOW",
+  "priority": "P3",
+  "phase": "PHASE 8 — PRODUCT & SHOPPING UX",
+  "categories": [
+   "UX"
+  ],
+  "evidence": "God Squad Website.html (no product page)"
+ },
+ {
+  "id": "ECOM-08",
+  "area": "Wishlist",
+  "problem": "No wishlist exists and Shopify has no native wishlist.",
+  "impact": "Visitors cannot save items for later; relevance depends on the launch catalogue size (BUSINESS INFORMATION REQUIRED).",
+  "recommendation": "Treat as optional; decide after launch whether an app or theme-level wishlist is wanted (BUSINESS DECISION REQUIRED; no apps in Phase 1).",
+  "severity": "LOW",
+  "priority": "P3",
+  "phase": "PHASE 16 — FINAL POLISH",
+  "categories": [
+   "UX"
+  ],
+  "evidence": "God Squad Website.html (no save/wishlist control)"
+ },
+ {
+  "id": "FOOT-04",
+  "area": "Footer trust and localization",
+  "problem": "No payment icons and no country/currency selector exist.",
+  "impact": "Checkout trust cues and the market/currency choice implied by the ₱/$/€ prop are not surfaced.",
+  "recommendation": "Add payment icons from shop.enabled_payment_types and a localization form if Markets are enabled, after the payment and market decisions are made.",
+  "severity": "LOW",
+  "priority": "P3",
+  "phase": "PHASE 15 — ECOMMERCE QA",
+  "categories": [
+   "UX"
+  ],
+  "evidence": "God Squad Website.html lines 153-166, 169"
+ },
+ {
+  "id": "HERO-06",
+  "area": "Hero — top edge seam",
+  "problem": "The announcement bar is a solid strip outside the hero section and the photo begins directly beneath it with sky and tower tops, producing a hard horizontal edge at 1024 and 1440 and under the nav strip below 900px, while the mockup's top edge is continuously dark.",
+  "impact": "The hero looks pasted in under the bar rather than bleeding behind the header.",
+  "recommendation": "Phase 5 should either extend the photo behind the header group with a solid-to-transparent top band, or start the hero with an ink band that the scrim dissolves into.",
+  "severity": "LOW",
+  "priority": "P3",
+  "phase": "PHASE 5 — HERO",
+  "categories": [
+   "BRAND"
+  ],
+  "evidence": "findings-verified.json FIDELITY-6; scratchpad/crops/d-topedge.png; desktop-1440.png top edge; tablet-768.png"
+ },
+ {
+  "id": "HERO-07",
+  "area": "Hero — right column collision",
+  "problem": "The \"More Than Clothing.\" script and \"A HIGHER PURPOSE.\" caption are placed by a .7fr column and 190px padding directly over the right model's back-print lettering at 1024-1440.",
+  "impact": "Two lines of copy compete with two lines of printed garment text and both lose legibility.",
+  "recommendation": "Reposition the side column (or the crop's horizontal focal point) so the caption sits on a quiet area of the photo, or drop the side column at widths where it collides.",
+  "severity": "LOW",
+  "priority": "P3",
+  "phase": "PHASE 5 — HERO",
+  "categories": [
+   "BRAND",
+   "UX"
+  ],
+  "evidence": "findings-verified.json C17; God Squad Website.html lines 64, 90-93; desktop-1440.png right third of the hero; scratchpad/crops/d1440-hero.png"
+ },
+ {
+  "id": "HERO-08",
+  "area": "Hero — mobile art direction",
+  "problem": "There is no portrait source for phones: the 375x320 band is filled from the 16:9 image by height, cropping 96px from each side so the third model and the back-print message are cut and object-position has no effect.",
+  "impact": "The group composition the hero relies on becomes a two-person crop on the device most visitors use.",
+  "recommendation": "Phase 5 should specify a portrait or square art-directed crop delivered through <picture>/srcset for widths under 768px; the master, format and weight are in the ASSET/PERF register.",
+  "severity": "LOW",
+  "priority": "P3",
+  "phase": "PHASE 5 — HERO",
+  "categories": [
+   "MOBILE",
+   "ASSET"
+  ],
+  "evidence": "findings-verified.json RESPONSIVE-8; measurements.md 375; mobile-375-true.png hero band; scratchpad/crops/m375-hero.png"
+ },
+ {
+  "id": "HTML-12",
+  "area": "Text semantics",
+  "problem": "Only one <p> exists (the story paragraph); every other piece of running text — eyebrows, taglines, prices, footer lines — is a <div> or <span>.",
+  "impact": "Text has no paragraph semantics for assistive technology and copy cannot be targeted by a sensible base stylesheet.",
+  "recommendation": "Use <p> for running text and small <span>/<small> only for inline fragments when the sections are transcribed.",
+  "severity": "LOW",
+  "priority": "P3",
+  "phase": "PHASE 10 — SHOPIFY THEME CONVERSION",
+  "categories": [
+   "ACCESSIBILITY",
+   "SEO"
+  ],
+  "evidence": "God Squad Website.html line 131 (only <p>); css-html-stats.txt tag counts (p: 1, div: 44, span: 12)"
+ },
+ {
+  "id": "ICON-02",
+  "area": "Icons / cart icon artefact",
+  "problem": "icon-cart.png retains a sliver of the sprite sheet's gold \"0\" badge along its right edge while the page overlays its own CSS badge.",
+  "impact": "At larger sizes or on light backgrounds a stray gold arc appears beside the bag, and the badge is effectively drawn twice.",
+  "recommendation": "Phase 2 will replace the file with the SVG cart glyph and a Liquid cart.item_count badge.",
+  "severity": "LOW",
+  "priority": "P3",
+  "phase": "PHASE 2 — DESIGN SYSTEM",
+  "categories": [
+   "BRAND",
+   "ASSET"
+  ],
+  "evidence": "icon-cart.png (110x110); icons-sprite.png (cart cell with badge); God Squad Website.html line 78"
+ },
+ {
+  "id": "ICON-03",
+  "area": "Icons / social icons",
+  "problem": "The Facebook and Instagram icons are two-tone circled badges (gold ring, light disc, gold glyph) cut from the social sheet, unlike the mockup's plain glyphs, and the mockup's TikTok and YouTube have no counterpart.",
+  "impact": "The badges cannot take the theme's link hover colour, will clash with any light footer background, and the set of networks is undecided.",
+  "recommendation": "Phase 2 will adopt official monochrome SVG glyphs for the networks the business confirms (BUSINESS INFORMATION REQUIRED); the circled-versus-plain style decision belongs to the BRAND register.",
+  "severity": "LOW",
+  "priority": "P3",
+  "phase": "PHASE 2 — DESIGN SYSTEM",
+  "categories": [
+   "BRAND",
+   "UX"
+  ],
+  "evidence": "icon-facebook.png; icon-instagram.png; findings-verified.json FIDELITY-8 and C14; 00-full-mockup-reference.webp"
+ },
+ {
+  "id": "ICON-05",
+  "area": "Icons / geometry consistency",
+  "problem": "The icon set has four canvas sizes (110x110, 130x110, 150x110, 130x130), two stroke weights (thin cream nav set, heavier gold feature set) and rendered widths of 52/60/44/52 px at the same 44 px height.",
+  "impact": "The value row reads optically uneven and the nav and feature icons do not look like one family.",
+  "recommendation": "Phase 2 will draw all icons on one 24 px grid with one stroke weight and one optical size.",
+  "severity": "LOW",
+  "priority": "P3",
+  "phase": "PHASE 2 — DESIGN SYSTEM",
+  "categories": [
+   "BRAND"
+  ],
+  "evidence": "inventory.tsv dims; findings-verified.json TECHNICAL-6 (crown 52x44, community 60x44, diamond 52x44, globe 44x44); desktop-1440.png values row"
+ },
+ {
+  "id": "INV-02",
+  "area": "Entry file naming",
+  "problem": "The entry page was renamed from \"God Squad Website.dc.html\" to \"God Squad Website.html\" on 2026-09-20 15:34 while the Phase 1 spec, the runtime's naming convention (rootNameForDocument tests /\\.dc\\.html?$/i and ensureFetched builds \"<name>.dc.html\") and the original export zip still use the .dc.html name.",
+  "impact": "The runtime is indifferent to the suffix: the root is marked fetched at boot (support.js line 155) and dcNameFromPath strips either suffix (line 82); the only place the .dc.html convention survives is ensureFetched's sibling URL (line 1646), which this page never exercises. The remaining cost is documentary: the spec, the export zip and the runtime's convention all say .dc.html while the file does not.",
+  "recommendation": "Record the rename in the Phase 1 baseline notes and treat \"God Squad Website.html\" as the canonical prototype name in every later phase; do not rename it again.",
+  "severity": "LOW",
+  "priority": "P3",
+  "phase": "PHASE 2 — DESIGN SYSTEM",
+  "categories": [
+   "ARCHITECTURE"
+  ],
+  "evidence": "evidence-render.md line 7; support.js lines 75-83, 133-142, 155, 1644-1646"
+ },
+ {
+  "id": "INV-06",
+  "area": "Phase 1 tooling inside the project root",
+  "problem": ".claude/launch.json (228 B, a python http.server dev-server configuration) was created inside the project root at 13:23 on 2026-09-20 by the audit lead so the page could be served over HTTP, although the spec states that the website must not be modified during Phase 1.",
+  "impact": "The mandated closing statement \"NO PROJECT FILES WERE MODIFIED\" is only accurate if this addition is disclosed or reverted, and a naive copy of the folder would carry a non-site file into the theme source.",
+  "recommendation": "Disclose the file in the final audit checklist and have the owner remove it (or move it outside the project) after the audit; it must never be copied into the theme.",
+  "severity": "LOW",
+  "priority": "P3",
+  "phase": "PHASE 2 — DESIGN SYSTEM",
+  "categories": [
+   "ARCHITECTURE"
+  ],
+  "evidence": "evidence-render.md line 10; .claude/launch.json lines 1-11; directory listing (.claude folder mtime 2026-09-20 13:23); PHASE-1-SPEC.md lines 26 and 374"
+ },
+ {
+  "id": "JS-03",
+  "area": "Boot double fetch",
+  "problem": "boot() calls fetch(location.href) and recompiles and re-renders the whole template from the raw text whenever window.__resources is absent, so the HTML document is requested twice and React renders twice on every load (the fetch fails silently on file://).",
+  "impact": "One wasted document request and a duplicate render per page view, and evidence that the runtime is built for editor streaming rather than a static page.",
+  "recommendation": "No separate action; disappears with the runtime removal in Phase 10.",
+  "severity": "LOW",
+  "priority": "P3",
+  "phase": "PHASE 10 — SHOPIFY THEME CONVERSION",
+  "categories": [
+   "PERFORMANCE",
+   "ARCHITECTURE"
+  ],
+  "evidence": "support.js lines 158-164; evidence-render.md line 19; findings-verified.json TECHNICAL-7"
+ },
+ {
+  "id": "JS-06",
+  "area": "Parser-time side effects of the hidden template",
+  "problem": "Because the raw template is real DOM hidden by display:none rather than a <template>, the browser requests \"{{ p.img }}\" and \"{{ v.icon }}\" literally (two 404s per load) and starts downloading all 15 images before the runtime replaces <x-dc>.",
+  "impact": "Two failed requests and two console errors on every page view; visually harmless.",
+  "recommendation": "No fix in the prototype; the artefact disappears once the markup is ported to Liquid in Phase 10.",
+  "severity": "LOW",
+  "priority": "P3",
+  "phase": "PHASE 10 — SHOPIFY THEME CONVERSION",
+  "categories": [
+   "PERFORMANCE"
+  ],
+  "evidence": "findings-verified.json C3; evidence-render.md line 29"
+ },
+ {
+  "id": "NAV-07",
+  "area": "Hover / focus feedback",
+  "problem": "Nav hover relies solely on the global a:hover gold (no visible change for the already-gold Home), the utility icons have no hover or focus state, and the social icon links have none at all because their colour is baked into PNGs.",
+  "impact": "Interactive feedback is inconsistent across the header and footer and absent on every icon control.",
+  "recommendation": "Define hover and focus states for nav links, utility icons and social links as ordinary CSS on design-system tokens with SVG icons that can be recoloured; re-expression of the CTAs' style-hover as CSS: see the CSS register.",
+  "severity": "LOW",
+  "priority": "P3",
+  "phase": "PHASE 4 — HEADER & NAVIGATION",
+  "categories": [
+   "UX",
+   "BRAND"
+  ],
+  "evidence": "God Squad Website.html lines 16, 76-78, 160-161; evidence-render.md hover facts"
+ },
+ {
+  "id": "PERF-04",
+  "area": "Performance / font payload",
+  "problem": "Kaushan Script (34,748 B) is downloaded for a single three-word phrase and Playfair Display 700 is requested but never used.",
+  "impact": "23% of the font payload serves one decorative line, and the unused weight adds CSS noise (no file download).",
+  "recommendation": "Phase 2 will decide whether \"More Than Clothing.\" becomes a subset font, an SVG lockup or stays editable text with the full face, and will drop the 700 weight from the request.",
+  "severity": "LOW",
+  "priority": "P3",
+  "phase": "PHASE 2 — DESIGN SYSTEM",
+  "categories": [
+   "PERFORMANCE",
+   "BRAND"
+  ],
+  "evidence": "evidence-render.md (font sizes); God Squad Website.html line 91; findings-verified.json C12"
+ },
+ {
+  "id": "PERF-06",
+  "area": "Performance / measurement",
+  "problem": "No performance measurement exists: Lighthouse was not run, LCP did not report and CLS read 0 only on a warm localhost load.",
+  "impact": "The cost of the 2 MB hero and the runtime chain cannot be quantified, so there is no baseline to prove improvement against.",
+  "recommendation": "Phase 12 will record a throttled Lighthouse baseline (Slow 4G, 4x CPU) for the prototype and set a Core Web Vitals budget the theme must meet.",
+  "severity": "LOW",
+  "priority": "P3",
+  "phase": "PHASE 12 — PERFORMANCE",
+  "categories": [
+   "PERFORMANCE"
+  ],
+  "evidence": "findings-verified.json gaps (Lighthouse/axe runs; cold-cache throttled load)"
+ },
+ {
+  "id": "PROD-06",
+  "area": "Card hover / focus",
+  "problem": "Product cards have no hover or focus feedback and no secondary image.",
+  "impact": "Cards do not read as interactive and give no confirmation on pointer or keyboard focus.",
+  "recommendation": "Add hover/focus states (image swap to product.images[1], subtle lift or underline) in the product-card snippet.",
+  "severity": "LOW",
+  "priority": "P3",
+  "phase": "PHASE 8 — PRODUCT & SHOPPING UX",
+  "categories": [
+   "UX"
+  ],
+  "evidence": "God Squad Website.html lines 108-119; evidence-render.md hover facts"
+ },
+ {
+  "id": "PROD-07",
+  "area": "Card hierarchy",
+  "problem": "Cards carry no merchandising signals: no New / Sold out badge, no size information, no variant count and no from-price.",
+  "impact": "Shoppers cannot tell availability, size range or price range from the grid.",
+  "recommendation": "Add badge, availability and from-price slots to the product-card snippet, driven by product.available, product.price_varies and product tags or metafields.",
+  "severity": "LOW",
+  "priority": "P3",
+  "phase": "PHASE 8 — PRODUCT & SHOPPING UX",
+  "categories": [
+   "UX"
+  ],
+  "evidence": "God Squad Website.html lines 112-113"
+ },
+ {
+  "id": "RESP-03",
+  "area": "Product grid (521-900px and 200% zoom)",
+  "problem": "The two-column tablet grid leaves the Utility Cap alone on a second row.",
+  "impact": "The three-product set reads as an unfinished grid on tablets and on zoomed laptops.",
+  "recommendation": "In Phase 6 make the tablet column count depend on the collection's product count or use a three-column grid with smaller tiles from about 600px.",
+  "severity": "LOW",
+  "priority": "P3",
+  "phase": "PHASE 6 — COLLECTIONS & BEST SELLERS",
+  "categories": [
+   "UX",
+   "MOBILE"
+  ],
+  "evidence": "tablet-768.png; zoom200-720.png; measurements.md 768 (342.5px columns); findings-verified.json C8"
+ },
+ {
+  "id": "RESP-05",
+  "area": "Values strip (<=900px)",
+  "problem": "Phones get a 698px single-column stack for four short labels, and at 521-900px every tile keeps border-right so a stray 1px rule paints at the viewport edge and the last row's bottom border doubles with the section's own border.",
+  "impact": "86% of a phone screen is spent on four labels and the tablet layout shows visible rendering artefacts.",
+  "recommendation": "In Phase 9 keep the values two-up on phones and compute tile borders per column and row (for example with gap plus background instead of per-tile borders).",
+  "severity": "LOW",
+  "priority": "P3",
+  "phase": "PHASE 9 — MOBILE UX",
+  "categories": [
+   "UX",
+   "MOBILE"
+  ],
+  "evidence": "measurements.md 375 (4x174 = 698), 768 (stray right rule at viewport edge); tablet-768.png; God Squad Website.html lines 40-41, 48-49, 142, 144; findings-verified.json RESPONSIVE-5"
+ },
+ {
+  "id": "RESP-06",
+  "area": "Footer (521-900px)",
+  "problem": "The footer is forced into a column at <=900px although at 768px the two groups (230px + 271px) fit on one row in a 705px content box.",
+  "impact": "Tablets get a 164px stacked footer that loses the single-band composition of the mockup for no layout reason.",
+  "recommendation": "In Phase 9 move the footer stacking breakpoint down to roughly 560px and verify the row with the final footer content.",
+  "severity": "LOW",
+  "priority": "P3",
+  "phase": "PHASE 9 — MOBILE UX",
+  "categories": [
+   "UX",
+   "MOBILE"
+  ],
+  "evidence": "measurements.md 768 (footer column, 164px); tablet-768.png; God Squad Website.html line 42; findings-verified.json RESPONSIVE-9"
+ },
+ {
+  "id": "RESP-08",
+  "area": "901-1100px desktop band",
+  "problem": "There is no tier between 901 and 1440px, so the fluid three-column grid is squeezed to ~230-250px: at 920 the eyebrow, the product names and the View All Products CTA all wrap, and at 1024 \"Signature Oversized Tee\" wraps to two lines so the tee's price drops a line below the other two.",
+  "impact": "Common laptop widths (1024, and 1366 at 125% scaling = 1093 CSS px) show misaligned prices and wrapped labels.",
+  "recommendation": "In Phase 2 add a tablet-landscape tier (about 901-1100px) with narrower gaps, a smaller label size and a two-column hero.",
+  "severity": "LOW",
+  "priority": "P3",
+  "phase": "PHASE 2 — DESIGN SYSTEM",
+  "categories": [
+   "UX"
+  ],
+  "evidence": "band-920.png; laptop-1024.png; breakpoint-901.png; measurements.md 901/920/1024; evidence-render.md (\"At 920 the eyebrow, product names and the View All button all wrap\"); findings-verified.json C9"
+ },
+ {
+  "id": "RESP-09",
+  "area": "Hero image band height",
+  "problem": "The mobile hero band is height:62vw with min-height 320px and no viewport-height cap.",
+  "impact": "On an 812x375 landscape phone the band is 503px (1.34 screens) and the headline starts at y=689, nearly two screens down.",
+  "recommendation": "In Phase 5 cap the band with a vh-based max-height or clamp() on both the image and the fade.",
+  "severity": "LOW",
+  "priority": "P3",
+  "phase": "PHASE 5 — HERO",
+  "categories": [
+   "MOBILE",
+   "UX"
+  ],
+  "evidence": "findings-verified.json RESPONSIVE-7 (heroImg 797x503 at 812x375, h1 y=689); God Squad Website.html lines 21-22"
+ },
+ {
+  "id": "RESP-11",
+  "area": "Phone typography",
+  "problem": "Apart from the four heading clamps there is no phone type scale: secondary text is 11-13px tracked uppercase, prices are 14px, the paragraph 15px and the cart badge 9px, all fixed px inherited from the desktop mockup.",
+  "impact": "Labels are small and light on a 375px screen and nothing responds to user font-size preferences (browser zoom still works).",
+  "recommendation": "In Phase 2 define a phone scale (a 16px body floor, 12-13px minimum for tracked caps, badge at least 11px) alongside the desktop scale.",
+  "severity": "LOW",
+  "priority": "P3",
+  "phase": "PHASE 2 — DESIGN SYSTEM",
+  "categories": [
+   "UX",
+   "MOBILE",
+   "BRAND"
+  ],
+  "evidence": "measurements.md 375 (visible sizes 9, 11, 12, 13, 14, 15, 56); css-html-stats.txt FONT-SIZE (5x 12px, 5x 13px, 4x 11px, 4x 14px, 1x 9px, 1x 15px); God Squad Website.html lines 78, 83, 85, 100, 103, 112, 113, 131, 146, 147; findings-verified.json RESPONSIVE-11, C16"
+ },
+ {
+  "id": "RESP-13",
+  "area": "Laptop fold",
+  "problem": "On 1280x720 and 1366x768 the hero fills the first screen and no product is visible without scrolling.",
+  "impact": "The most common laptop viewports give no commerce signal above the fold.",
+  "recommendation": "In Phase 5 cap the desktop hero height (for example min(100vh - header, 720px)) or surface a product cue above the fold.",
+  "severity": "LOW",
+  "priority": "P3",
+  "phase": "PHASE 5 — HERO",
+  "categories": [
+   "UX"
+  ],
+  "evidence": "laptop-1280-fold.png; laptop-1366-fold.png; measurements.md 1280x720 / 1366x768 row (first-screen capture only); findings-verified.json gaps"
+ },
+ {
+  "id": "RESP-14",
+  "area": "Widths above 1440px",
+  "problem": "Everything sits in a max-width:1440px box with section backgrounds on the inner sections, so the cream New Drop band, the hero photo and the value borders stop at 1440 with dark gutters either side.",
+  "impact": "On 1920px and wider screens the page reads as a boxed layout rather than the full-bleed composition of the mockup.",
+  "recommendation": "In Phase 2 give each section a full-width background and constrain only an inner container; the wrapper's overflow:hidden should not be carried over, since it currently masks any horizontal overflow from measurement (17.11).",
+  "severity": "LOW",
+  "priority": "P3",
+  "phase": "PHASE 2 — DESIGN SYSTEM",
+  "categories": [
+   "UX",
+   "ARCHITECTURE"
+  ],
+  "evidence": "wide-1920-fold.png (first screen only); measurements.md 1920 row; God Squad Website.html line 55; findings-verified.json TECHNICAL-8"
+ },
+ {
+  "id": "SEO-06",
+  "area": "SEO / crawl control",
+  "problem": "There is no robots meta, robots.txt or sitemap.xml in the project.",
+  "impact": "Nothing tells crawlers what to index or lists URLs; immaterial for a one-file prototype but a required foundation for the store.",
+  "recommendation": "Phase 13 will rely on Shopify's native /robots.txt and /sitemap.xml and add robots.txt.liquid only if custom rules are needed.",
+  "severity": "LOW",
+  "priority": "P3",
+  "phase": "PHASE 13 — SEO",
+  "categories": [
+   "SEO"
+  ],
+  "evidence": "inventory.tsv (44 site files, none named robots.txt or sitemap.xml); css-html-stats.txt (robots meta: ABSENT)"
+ },
+ {
+  "id": "SEO-08",
+  "area": "SEO / image alt text",
+  "problem": "Alt text is present on all 12 images, but the Our Story alt (\"God Squad community\") describes a subject the file does not show and product alts are bare names with no brand or product-type context.",
+  "impact": "Image search and assistive descriptions misrepresent the story image and add nothing for the products.",
+  "recommendation": "Phase 13 will define alt-text rules (brand, product and colour for product media; accurate scene description for editorial images) and the copy will be entered in Shopify image.alt fields (BUSINESS INFORMATION REQUIRED).",
+  "severity": "LOW",
+  "priority": "P3",
+  "phase": "PHASE 13 — SEO",
+  "categories": [
+   "SEO",
+   "ACCESSIBILITY",
+   "CONTENT"
+  ],
+  "evidence": "God Squad Website.html lines 110, 126; css-html-stats.txt images list; findings-verified.json C1; tablet-768.png"
+ },
+ {
+  "id": "SEO-11",
+  "area": "SEO / content depth",
+  "problem": "The homepage carries roughly 120 words of indexable copy, one 25-word paragraph that is the only mention of the brand name and category in running text, and no product descriptions.",
+  "impact": "There is almost no textual signal for the brand, its category (\"Philippine streetwear\", faith) or its products beyond three names and prices.",
+  "recommendation": "Phase 13 will define the copy the index, collection and product templates need (product descriptions, an about paragraph, footer text); the copy is BUSINESS INFORMATION REQUIRED.",
+  "severity": "LOW",
+  "priority": "P3",
+  "phase": "PHASE 13 — SEO",
+  "categories": [
+   "SEO",
+   "CONTENT"
+  ],
+  "evidence": "God Squad Website.html lines 58-166 (all visible text); line 131 (paragraph)"
+ },
+ {
+  "id": "STORY-03",
+  "area": "Our Story — CTA",
+  "problem": "The gold CTA repeats the eyebrow word-for-word (\"Our Story\" → \"Our Story\"), points to \"#\", and no About/Our Story page or long-form story copy has been seen in the project.",
+  "impact": "The section's only action has no destination and no promise, so the secondary conversion path is undefined.",
+  "recommendation": "Confirm whether an Our Story page exists and its copy (BUSINESS INFORMATION REQUIRED), then set the CTA label and url as section settings; the placeholder href is in the NAV register.",
+  "severity": "LOW",
+  "priority": "P3",
+  "phase": "PHASE 7 — OUR STORY",
+  "categories": [
+   "CONTENT",
+   "UX"
+  ],
+  "evidence": "God Squad Website.html lines 129, 132; findings-verified.json TECHNICAL-4"
+ },
+ {
+  "id": "STORY-04",
+  "area": "Our Story — side caption on small screens",
+  "problem": "Below 900px the \"Faith Lives Different Here.\" caption and its rule stack as a 145px orphan block after the CTA instead of overlaying the photo.",
+  "impact": "An unrelated four-line tagline follows the button on tablets and phones and lengthens the section with no purpose.",
+  "recommendation": "Phase 7 should decide the caption's mobile behaviour (hide, or fold into the copy above the CTA) and expose it as a show/hide setting; the layout outcome is in the RESP register.",
+  "severity": "LOW",
+  "priority": "P3",
+  "phase": "PHASE 7 — OUR STORY",
+  "categories": [
+   "MOBILE",
+   "CONTENT"
+  ],
+  "evidence": "findings-verified.json FIDELITY-7, RESPONSIVE-3; scratchpad/crops/m375-story-values.png; tablet-768.png"
+ },
+ {
+  "id": "STORY-05",
+  "area": "Our Story — heading container",
+  "problem": "\"Real People. Bigger Purpose.\" wraps to three lines at 1440 and four at 1024 (mockup: two) because the copy column is .9fr minus 96px padding, about 350px at 1440 and 220px at 1024.",
+  "impact": "The heading loses its two-line rhythm and pushes the paragraph and CTA down beside the photo on laptops.",
+  "recommendation": "Give the copy column a minimum width tied to the heading clamp and keep the explicit break after \"Real People.\" as the only break.",
+  "severity": "LOW",
+  "priority": "P3",
+  "phase": "PHASE 7 — OUR STORY",
+  "categories": [
+   "BRAND",
+   "UX"
+  ],
+  "evidence": "findings-verified.json FIDELITY-5; God Squad Website.html lines 125, 130; laptop-1024.png; scratchpad/crops/l-storyhead.png; desktop-1440.png"
+ },
+ {
+  "id": "UI-03",
+  "area": "UI — header utility controls",
+  "problem": "Search, account, cart and the hamburger are 22-24px raster icons with no hover, focus or active state, and the cart badge is 9px text in a 14px circle.",
+  "impact": "The header's controls give no feedback and the badge is the least legible text on the site; keyboard reachability and inertness are separate issues in the A11Y and NAV registers.",
+  "recommendation": "Define an icon-button component with a 44px hit area, gold hover, focus ring and pressed state, and a badge spec of at least 16px diameter and 10px text.",
+  "severity": "LOW",
+  "priority": "P3",
+  "phase": "PHASE 4 — HEADER & NAVIGATION",
+  "categories": [
+   "UX",
+   "MOBILE"
+  ],
+  "evidence": "God Squad Website.html lines 75-78; findings-verified.json C15, C16; evidence-render.md Hover"
+ },
+ {
+  "id": "UI-04",
+  "area": "UI — footer social icons",
+  "problem": "The footer shows two circled Facebook and Instagram icons where the mockup shows four plain glyphs (Instagram, Facebook, TikTok, YouTube); the reduction to two was a deliberate user edit but the circled style is not.",
+  "impact": "The footer icon style disagrees with the rest of the icon set and the channel list is undecided.",
+  "recommendation": "Decide the social channel set (BUSINESS INFORMATION REQUIRED) and render them with the single SVG icon system in the mockup's plain-glyph style unless the circled style is explicitly approved.",
+  "severity": "LOW",
+  "priority": "P3",
+  "phase": "PHASE 2 — DESIGN SYSTEM",
+  "categories": [
+   "BRAND",
+   "CONTENT"
+  ],
+  "evidence": "findings-verified.json C14, FIDELITY-8; pasted-1789874476205-0.png; God Squad Website.html lines 160-161"
+ },
+ {
+  "id": "UI-05",
+  "area": "UI — rules and dividers",
+  "problem": "The short horizontal rule is drawn five times with four widths (36px gold, 80px cream, 40px ink, 40px cream) and four margin pairs, and hairlines use three alphas (.08, .1, .2).",
+  "impact": "A single decorative device looks accidental across sections and cannot be built once.",
+  "recommendation": "Specify one rule component with two widths (40px, 80px), colour from the current scheme, fixed margins, plus one hairline token for borders and dividers.",
+  "severity": "LOW",
+  "priority": "P3",
+  "phase": "PHASE 2 — DESIGN SYSTEM",
+  "categories": [
+   "BRAND"
+  ],
+  "evidence": "God Squad Website.html lines 58, 86, 92, 102, 137, 142, 163"
+ },
+ {
+  "id": "UX-04",
+  "area": "Homepage flow / Social",
+  "problem": "There is no Social / Community section; the only social presence is two footer icons linking to #.",
+  "impact": "The Community value tile is unsupported by any community content and no social proof exists on the page.",
+  "recommendation": "Add a social-gallery section with image blocks and a handle setting once profile URLs and image sources are confirmed; feed apps are a later decision.",
+  "severity": "LOW",
+  "priority": "P3",
+  "phase": "PHASE 16 — FINAL POLISH",
+  "categories": [
+   "UX",
+   "CONTENT"
+  ],
+  "evidence": "God Squad Website.html lines 160-161, 181; 00-full-mockup-reference.webp"
+ },
+ {
+  "id": "UX-05",
+  "area": "Announcement bar",
+  "problem": "The announcement bar is a static, unlinked div whose Worldwide Shipping label is a commercial promise with no policy, destinations or rates behind it.",
+  "impact": "Visitors receive a shipping claim they cannot verify and have no path to shipping information.",
+  "recommendation": "Convert to an announcement-bar section with text and link blocks, and link the shipping message to the shipping policy once it exists; confirm the claim with the business first.",
+  "severity": "LOW",
+  "priority": "P3",
+  "phase": "PHASE 4 — HEADER & NAVIGATION",
+  "categories": [
+   "UX",
+   "CONTENT"
+  ],
+  "evidence": "God Squad Website.html lines 58-61"
+ },
+ {
+  "id": "UX-06",
+  "area": "Brand Values",
+  "problem": "The four value tiles link nowhere, Worldwide / Shipping Available duplicates the announcement claim, and Community is asserted without community content.",
+  "impact": "Reassurance claims cannot be checked and the strip is a dead end rather than a route to policies or content.",
+  "recommendation": "Rebuild as section blocks with optional links (shipping policy, quality/size guide, community page) and keep the four current values as defaults.",
+  "severity": "LOW",
+  "priority": "P3",
+  "phase": "PHASE 11 — THEME EDITOR",
+  "categories": [
+   "UX",
+   "CONTENT"
+  ],
+  "evidence": "God Squad Website.html lines 142-150, 180-183"
+ },
+ {
+  "id": "VAL-02",
+  "area": "Brand Values — divider logic",
+  "problem": "Every tile carries border-right including the last, a border-bottom is added under 900px and the right border is removed only under 520px, so the divider logic lives on tiles rather than on the grid.",
+  "impact": "At 521-900px the second column paints a 1px rule on the viewport edge and the last row's border doubles with the section's own bottom border.",
+  "recommendation": "Specify grid-level dividers (gap with :nth-child rules or a hairline background) in the value-tile component so dividers are correct at any column count; the per-width outcome is in the RESP register.",
+  "severity": "LOW",
+  "priority": "P3",
+  "phase": "PHASE 2 — DESIGN SYSTEM",
+  "categories": [
+   "UX",
+   "MOBILE"
+  ],
+  "evidence": "God Squad Website.html lines 41, 49, 142-144; findings-verified.json RESPONSIVE-5; measurements.md 768"
+ },
+ {
+  "id": "VAL-03",
+  "area": "Brand Values — icon optical size",
+  "problem": "The four value icons share a 44px height but render at 44, 60, 52 and 52 px wide (globe, community, crown, diamond), and their gold is baked into 33-40 KB PNGs.",
+  "impact": "The row does not sit on one optical size and the icons cannot follow a colour scheme, hover or light-background variant.",
+  "recommendation": "Redraw the four as SVGs on a common 48px optical box with one stroke weight, using currentColor, as part of the icon system (BRAND-07); format and weight are in the ASSET register.",
+  "severity": "LOW",
+  "priority": "P3",
+  "phase": "PHASE 2 — DESIGN SYSTEM",
+  "categories": [
+   "BRAND",
+   "ASSET"
+  ],
+  "evidence": "findings-verified.json TECHNICAL-6; inventory.tsv icon-crown/community/globe/diamond; scratchpad/crops/d1440-story-values-footer.png"
+ }
+]

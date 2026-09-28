@@ -1,0 +1,55 @@
+{%- comment -%}
+  GOD SQUAD — Cart totals
+  Phase 8. The subtotal, any cart-level discounts, and the estimated total.
+
+  Accepts:
+  - nothing. It reads the cart object.
+
+  Usage:
+  {% render 'cart-totals' %}
+
+  Two consumers — the drawer and the cart page — which is why it is a snippet.
+  They were two byte-identical copies under different class names until the
+  Phase 8 review pointed out that a correction to one would not reach the
+  other.
+
+  THREE LINES, NOT ONE.
+  items_subtotal_price is after line-level discounts and before cart-level
+  ones, so showing it alone as "the price" silently overstates what the
+  customer will pay the moment a cart-level discount is active. Any such
+  discount is listed between the two, from Shopify's own applications.
+
+  THE TAX AND SHIPPING LINE IS DERIVED, NOT ASSERTED.
+  Whether tax is already in the price is a fact about the store, and Shopify
+  knows it: cart.taxes_included. Printing "Taxes and shipping are calculated at
+  checkout" unconditionally would be a claim about this merchant's tax
+  configuration that nobody supplied, and would be wrong for any tax-inclusive
+  market — which the Philippines is.
+{%- endcomment -%}
+
+<dl class="cart-totals">
+  <div class="cart-totals__row">
+    <dt>{{ 'cart.subtotal' | t }}</dt>
+    <dd>{{ cart.items_subtotal_price | money }}</dd>
+  </div>
+
+  {%- for discount in cart.cart_level_discount_applications -%}
+    <div class="cart-totals__row cart-totals__row--discount">
+      <dt>{{ discount.title }}</dt>
+      <dd>&minus;{{ discount.total_allocated_amount | money }}</dd>
+    </div>
+  {%- endfor -%}
+
+  <div class="cart-totals__row cart-totals__row--final">
+    <dt>{{ 'cart.estimated_total' | t }}</dt>
+    <dd data-cart-total>{{ cart.total_price | money }}</dd>
+  </div>
+</dl>
+
+<p class="cart-totals__note">
+  {%- if cart.taxes_included -%}
+    {{ 'cart.shipping_at_checkout' | t }}
+  {%- else -%}
+    {{ 'cart.taxes_at_checkout' | t }}
+  {%- endif -%}
+</p>

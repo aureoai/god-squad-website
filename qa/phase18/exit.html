@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>DONE</title></head><body style="margin:0">
+<pre id="o" style="display:none">&lt;&lt;&lt;[{"name":"open adds .is-open","got":"true","want":"true","pass":true},{"name":"open leaves no .is-closing","got":"false","want":"false","pass":true},{"name":"open is visible","got":"visible","want":"visible","pass":true},{"name":"close drops .is-open","got":"false","want":"false","pass":true},{"name":"close adds .is-closing","got":"true","want":"true","pass":true},{"name":"panel still visible during the slide","got":"visible","want":"visible","pass":true},{"name":"reopen mid-slide clears .is-closing","got":"false","want":"false","pass":true},{"name":"reopen mid-slide is open","got":"true","want":"true","pass":true},{"name":".is-closing is released after the slide","got":"false","want":"false","pass":true},{"name":"panel is hidden once settled","got":"hidden","want":"hidden","pass":true},{"name":"no .is-open left","got":"false","want":"false","pass":true},{"name":"page scroll lock released","got":"false","want":"false","pass":true}]&gt;&gt;&gt;</pre>
+<script>
+var out = [], f = document.createElement('iframe');
+/* Phone width: every drawer rule lives inside @media (max-width: 767px). */
+f.style.cssText = 'border:0;width:375px;height:812px';
+f.src = 's-collection-filters.html';
+document.body.appendChild(f);
+function rec(name, got, want) {
+  out.push({name: name, got: String(got), want: String(want), pass: String(got) === String(want)});
+}
+f.onload = function () {
+  var d = f.contentDocument, w = f.contentWindow;
+  var panel = d.querySelector('.facets');
+  var toggle = d.querySelector('[data-facets-toggle]');
+  if (!panel || !toggle) {
+    out.push({name: 'drawer present on the page', got: 'missing', want: 'present', pass: false});
+    document.title = 'DONE';
+    document.getElementById('o').textContent = '<<<' + JSON.stringify(out) + '>>>';
+    return;
+  }
+  function cls() { return panel.className; }
+  function vis() { return w.getComputedStyle(panel).visibility; }
+
+  /* 1. Opening puts it on screen. */
+  toggle.click();
+  rec('open adds .is-open', /\bis-open\b/.test(cls()), 'true');
+  rec('open leaves no .is-closing', /\bis-closing\b/.test(cls()), 'false');
+  rec('open is visible', vis(), 'visible');
+
+  /* 2. Closing holds it visible for the slide. */
+  toggle.click();
+  rec('close drops .is-open', /\bis-open\b/.test(cls()), 'false');
+  rec('close adds .is-closing', /\bis-closing\b/.test(cls()), 'true');
+  rec('panel still visible during the slide', vis(), 'visible');
+
+  /* 3. Reopening mid-slide must not leave the stale class behind. */
+  toggle.click();
+  rec('reopen mid-slide clears .is-closing', /\bis-closing\b/.test(cls()), 'false');
+  rec('reopen mid-slide is open', /\bis-open\b/.test(cls()), 'true');
+  toggle.click();   /* close again, leaving .is-closing set for the wait below */
+
+  /* 4. The class must come off by itself. transitionend should do it at 250ms;
+        the 500ms fallback is the guarantee. Wait past both. */
+  w.setTimeout(function () {
+    rec('.is-closing is released after the slide', /\bis-closing\b/.test(cls()), 'false');
+    rec('panel is hidden once settled', vis(), 'hidden');
+    rec('no .is-open left', /\bis-open\b/.test(cls()), 'false');
+    rec('page scroll lock released',
+        d.documentElement.classList.contains('facets-open'), 'false');
+    document.title = 'DONE';
+    document.getElementById('o').textContent = '<<<' + JSON.stringify(out) + '>>>';
+  }, 900);
+};
+</script><iframe src="s-collection-filters.html" style="border: 0px; width: 375px; height: 812px;"></iframe>
+</body></html>

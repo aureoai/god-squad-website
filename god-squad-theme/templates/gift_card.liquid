@@ -1,0 +1,210 @@
+{% layout none %}
+{%- comment -%}
+  GOD SQUAD — Gift card
+  Shopify requires templates/gift_card.liquid on every theme. This is the page
+  a customer lands on when they open the gift-card URL emailed to them: the
+  code, the balance, the QR, and a way to print or add to Apple Wallet.
+
+  It is not a sectioned template because Shopify serves it outside the normal
+  storefront layout when printed, and every value here is either a Shopify
+  object or a locale string.
+
+  ONE script, and it is Shopify's own: vendor/qrcode.js, loaded through
+  shopify_asset_url, because Shopify generates the gift-card QR client side and
+  ships the generator. Nothing else here needs script, and the redemption code
+  is plain text outside the QR block, so a blocked script costs the customer the
+  convenience of scanning and never the ability to redeem.
+{%- endcomment -%}
+<!doctype html>
+<html lang="{{ request.locale.iso_code }}" class="no-js gift-card-page">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex,nofollow">
+    <link rel="canonical" href="{{ canonical_url }}">
+
+    <title>{{ 'gift_cards.issued.title' | t }} — {{ shop.name }}</title>
+
+    {%- if settings.favicon != blank -%}
+      <link rel="icon" type="image/png" href="{{ settings.favicon | image_url: width: 32, height: 32 }}">
+    {%- endif -%}
+
+    {{ 'design-tokens.css' | asset_url | stylesheet_tag }}
+    {{ 'base.css' | asset_url | stylesheet_tag }}
+    {{ 'component-button.css' | asset_url | stylesheet_tag }}
+
+    {%- comment -%}
+      defer, not the script_tag filter. That filter emits a parser-blocking
+      <script src> and Theme Check reports ParserBlockingScript for it. The URL
+      still comes from shopify_asset_url, so this is Shopify's own copy of the
+      generator rather than a third-party CDN.
+    {%- endcomment -%}
+    <script src="{{ 'vendor/qrcode.js' | shopify_asset_url }}" defer="defer"></script>
+
+    {{ content_for_header }}
+
+    {% style %}
+      .gift-card__subtext {
+        margin: var(--space-3) 0 0;
+        font-family: var(--font-body);
+        font-size: var(--type-body-sm-size);
+        line-height: var(--type-body-sm-lh);
+        color: var(--color-text-current-muted);
+      }
+
+      .gift-card {
+        min-height: 100svh;
+        display: grid;
+        place-items: center;
+        padding: var(--section-pad-block) var(--gutter-mobile);
+        background: var(--color-surface);
+        color: var(--color-text);
+      }
+      .gift-card__card {
+        width: 100%;
+        max-width: 34rem;
+        padding: var(--space-7);
+        background: var(--color-surface-alt, var(--color-surface));
+        border: 1px solid var(--color-text-muted);
+        border-radius: var(--radius-md, 4px);
+        text-align: center;
+      }
+      .gift-card__eyebrow {
+        margin: 0 0 var(--space-3);
+        font-family: var(--font-body);
+        font-size: var(--type-body-sm-size);
+        letter-spacing: var(--type-eyebrow-ls);
+        text-transform: uppercase;
+        color: var(--color-text-muted);
+      }
+      .gift-card__title {
+        margin: 0;
+        font-family: var(--font-display);
+        font-size: var(--type-display-m-size);
+        font-weight: var(--weight-black);
+        line-height: var(--type-display-m-lh);
+        letter-spacing: var(--type-display-m-ls);
+        text-transform: uppercase;
+      }
+      .gift-card__balance {
+        margin: var(--space-6) 0;
+        font-family: var(--font-display);
+        font-size: var(--type-display-m-size);
+        font-weight: var(--weight-black);
+      }
+      .gift-card__balance--depleted { color: var(--color-text-muted); }
+      .gift-card__code {
+        display: block;
+        margin: var(--space-5) auto;
+        padding: var(--space-3) var(--space-4);
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: var(--type-body-lg-size);
+        letter-spacing: 0.12em;
+        background: transparent;
+        border: 1px dashed var(--color-text-muted);
+        border-radius: var(--radius-sm);
+        word-break: break-all;
+      }
+      .gift-card__qr {
+        margin: var(--space-5) auto;
+        display: block;
+      }
+      .gift-card__actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-3);
+        justify-content: center;
+        margin-block-start: var(--space-6);
+      }
+      .gift-card__note {
+        margin-block-start: var(--space-5);
+        color: var(--color-text-muted);
+        font-family: var(--font-body);
+        font-size: var(--type-body-sm-size);
+        line-height: var(--type-body-sm-lh);
+      }
+      @media print {
+        body { background: #fff; color: #000; }
+        .gift-card__actions { display: none; }
+      }
+    {% endstyle %}
+  </head>
+  <body>
+    <main class="gift-card">
+      <div class="gift-card__card">
+        <p class="gift-card__eyebrow">{{ shop.name }}</p>
+        <h1 class="gift-card__title">{{ 'gift_cards.issued.title' | t }}</h1>
+
+        {%- if gift_card.enabled and gift_card.expired == false -%}
+          <p class="gift-card__subtext">{{ 'gift_cards.issued.subtext' | t }}</p>
+        {%- endif -%}
+
+        {%- if gift_card.enabled and gift_card.expired == false -%}
+          <p class="gift-card__balance">
+            {{ gift_card.balance | money }}
+          </p>
+        {%- else -%}
+          <p class="gift-card__balance gift-card__balance--depleted">
+            {%- if gift_card.expired -%}
+              {{ 'gift_cards.issued.expired' | t }}
+            {%- else -%}
+              {{ 'gift_cards.issued.redeemed' | t }}
+            {%- endif -%}
+          </p>
+        {%- endif -%}
+
+        {%- comment -%}
+          The QR the cashier scans in store.
+
+          This line used to pipe a "qr_identifier_url" property through a
+          "qr_code_svg" filter. Neither exists: the gift_card object carries
+          qr_identifier and Liquid has no such filter, so Theme Check reported
+          UnknownFilter and the element rendered nothing at all -- on the one
+          page a paying customer reaches from an email.
+
+          Shopify generates it client side and ships the generator itself, so
+          the script below is Shopify's own asset rather than a third party.
+          That is the single exception to this file's no-JavaScript rule, and it
+          is noted at the top of the file for that reason: without script the
+          code beneath is still readable and still redeemable, which is why the
+          <code> element is not inside this block.
+        {%- endcomment -%}
+        <div class="gift-card__qr" id="GiftCardQr" aria-hidden="true"></div>
+
+        <code class="gift-card__code">{{ gift_card.code | format_code }}</code>
+
+        <div class="gift-card__actions">
+          <a href="{{ shop.url }}" class="button button--accent">
+            {{ 'gift_cards.issued.shop_link' | t }}
+          </a>
+          <button type="button" class="button" onclick="window.print()">
+            {{ 'gift_cards.issued.print' | t }}
+          </button>
+        </div>
+
+        {%- if gift_card.pass_url -%}
+          <p class="gift-card__note">
+            <a href="{{ gift_card.pass_url }}">{{ 'gift_cards.issued.add_to_apple_wallet' | t }}</a>
+          </p>
+        {%- endif -%}
+
+        <p class="gift-card__note">
+          {{ 'gift_cards.issued.disabled_gift_card' | t }}
+        </p>
+      </div>
+    </main>
+    <script>
+      // gift_card.qr_identifier is the string Shopify documents for this.
+      document.addEventListener('DOMContentLoaded', function () {
+        var el = document.getElementById('GiftCardQr');
+        if (!el || typeof QRCode === 'undefined') return;
+        new QRCode(el, {
+          text: {{ gift_card.qr_identifier | json }},
+          width: 140,
+          height: 140
+        });
+      });
+    </script>
+  </body>
+</html>

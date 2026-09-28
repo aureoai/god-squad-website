@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en" class="js cart-js"><head><meta charset="utf-8">
+<script>
+(function () {
+  window.__req = [];
+  window.__mode = 'ok';
+
+  function pageHtml() {
+    return '<div id="shopify-section-main" class="shopify-section">' +
+      '<div class="main-cart" data-cart-page><div data-cart-page-inner>' +
+      '<form data-cart-form>' +
+      '<ul><li class="cart-line" data-cart-line data-line-key="k2:bbb">' +
+      '<div class="quantity" data-quantity data-line-key="k2:bbb">' +
+      '<button type="button" data-quantity-step="-1" aria-disabled="true"></button>' +
+      '<input class="quantity__input" data-quantity-input type="number" value="1" min="1">' +
+      '<button type="button" data-quantity-step="1"></button></div></li></ul>' +
+      '<details class="cart-note" open><textarea data-cart-note name="note" id="CartPageNote">SERVER NOTE</textarea></details>' +
+      '<p class="main-cart__error" data-cart-error hidden></p>' +
+      '</form></div></div></div>';
+  }
+  function drawerHtml() {
+    return '<div id="shopify-section-cart-drawer" class="shopify-section">' +
+      '<div class="cart-drawer"><div class="cart-drawer__inner" data-cart-drawer-inner>' +
+      'DRAWER REFRESHED</div></div></div>';
+  }
+  function bubbleHtml(n) {
+    return '<div id="shopify-section-cart-icon-bubble" class="shopify-section">' +
+      '<span data-cart-count>' + n + '</span></div>';
+  }
+
+  window.fetch = function (input, init) {
+    var url = typeof input === 'string' ? input : String(input);
+    var body = init && init.body;
+    var rec = { url: url };
+    if (body instanceof FormData) {
+      rec.form = {}; body.forEach(function (v, k) { rec.form[k] = String(v); });
+    } else if (typeof body === 'string') {
+      try { rec.json = JSON.parse(body); } catch (e) { rec.raw = body; }
+    }
+    window.__req.push(rec);
+    if (window.__mode === 'network') return Promise.reject(new TypeError('Failed to fetch'));
+    if (window.__mode === 'error422') {
+      return Promise.resolve({ ok: false, status: 422, json: function () {
+        return Promise.resolve({ status: 422, message: 'Cart Error',
+          description: 'You can only add 3 of this to the cart.' }); } });
+    }
+    return Promise.resolve({ ok: true, status: 200, json: function () {
+      return Promise.resolve({ items: [{ id: 9102, quantity: 1, key: 'k1:aaa' }],
+        sections: { 'main': pageHtml(), 'cart-drawer': drawerHtml(),
+                    'cart-icon-bubble': bubbleHtml(3) } }); } });
+  };
+})();
+</script>
+
+<script>
+(function () {
+  window.__results = [];
+  window.t = function (name, r) {
+    window.__results.push({ name: name, pass: r === true, detail: r === true ? '' : String(r) });
+  };
+  window.q = function (s) { return document.querySelector(s); };
+  window.wait = function (ms) { return new Promise(function (r) { setTimeout(r, ms); }); };
+  window.updates = function () {
+    return window.__req.filter(function (r) { return /cart\/update\.js$/.test(r.url); });
+  };
+  window.finish = function () {
+    document.title = 'DONE';
+    document.getElementById('o').textContent = '<<<' + JSON.stringify(window.__results) + '>>>';
+  };
+})();
+</script>
+
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DONE</title>
+<link rel="stylesheet" href="assets/design-tokens.css">
+<link rel="stylesheet" href="assets/base.css">
+<link rel="stylesheet" href="assets/header.css">
+<link rel="stylesheet" href="assets/component-container.css">
+<link rel="stylesheet" href="assets/component-button.css">
+<link rel="stylesheet" href="assets/component-pagination.css">
+<link rel="stylesheet" href="assets/component-quantity.css">
+<link rel="stylesheet" href="assets/component-cart-line.css">
+<script>document.documentElement.classList.replace('no-js','js');</script>
+<script>window.Shopify = window.Shopify || {routes: {root: '/'}};</script>
+<script src="assets/header.js" defer=""></script>
+<script src="assets/cart.js" defer=""></script>
+</head><body class="template-cart">
+<a class="skip-link" href="#MainContent">Skip to content</a>
+<div id="shopify-section-header" class="shopify-section"><header class="header surface-dark" data-header=""><div class="header__inner container"><div class="header__cluster header__cluster--start">
+      <button type="button" class="header__control header__menu-toggle" aria-expanded="false" aria-controls="MobileMenu" data-menu-toggle="">
+        <svg class="icon icon--menu " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3.75 6.5h16.5"></path><path d="M3.75 12h16.5"></path><path d="M3.75 17.5h16.5"></path></svg>
+
+        <span class="visually-hidden">Menu</span>
+      </button>
+    </div><div class="header__branding"><a class="header__logo-link" href="/"><img class="header__logo" src="img/logo.png" srcset="img/logo.png 120w, img/logo.png 180w, img/logo.png 240w, img/logo.png 360w, img/logo.png 480w, img/logo.png 600w" sizes="(min-width: 1024px) 240px, 160px" width="500" height="500" style="--logo-height-desktop: 78px; --logo-height-mobile: 56px;" alt="God Squad">
+        </a></div><nav class="header__nav" aria-label="Primary">
+      <ul class="header__nav-list" role="list"><li class="header__nav-item">
+              <a class="header__nav-link" href="/">Home</a>
+            </li><li class="header__nav-item">
+              <a class="header__nav-link" href="/collections/all">Shop</a>
+            </li><li class="header__nav-item">
+              <a class="header__nav-link" href="/#story">Our Story</a>
+            </li><li class="header__nav-item">
+              <a class="header__nav-link" href="/#verse">Verse</a>
+            </li></ul>
+    </nav><div class="header__cluster header__cluster--end"><a class="header__control" href="/search" data-search-trigger="" aria-haspopup="dialog" aria-expanded="false" aria-controls="HeaderSearch">
+          <svg class="icon icon--search " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="6.25"></circle><path d="M15.6 15.6 20.5 20.5"></path></svg>
+
+          <span class="visually-hidden">Search</span>
+        </a><shopify-account class="header__control header__account" menu="customer-account-main-menu">
+          <span class="header__account-avatar" slot="signed-out-avatar">
+            <svg class="icon icon--account " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="8.25" r="3.75"></circle><path d="M4.75 19.75a7.25 7.25 0 0 1 14.5 0"></path></svg>
+
+            <span class="visually-hidden">Account</span>
+          </span>
+        </shopify-account><a class="header__control header__cart" href="/cart" data-cart-bubble=""><span data-cart-count="">3</span></a></div>
+  </div><div class="header__search" id="HeaderSearch" data-search-panel="" hidden="">
+    <form class="header__search-form" action="/search" method="get" role="search">
+      <label class="visually-hidden" for="HeaderSearchInput">
+        Search the store
+      </label>
+      <input class="header__search-input" id="HeaderSearchInput" type="search" name="q" placeholder="Search the store…" data-search-input=""><input type="hidden" name="type" value="product">
+      <button type="submit" class="button button--primary header__search-submit">
+        Search
+      </button>
+      <button type="button" class="header__control" data-search-close="">
+        <svg class="icon icon--close " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.4 6.4 17.6 17.6"></path><path d="M17.6 6.4 6.4 17.6"></path></svg>
+
+        <span class="visually-hidden">Close search</span>
+      </button>
+    </form>
+  </div><div class="header__panel" id="MobileMenu" data-menu-panel="" hidden="">
+    <div class="header__panel-header">
+      <span class="header__panel-title">Menu</span>
+      <button type="button" class="header__control" data-menu-close="">
+        <svg class="icon icon--close " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.4 6.4 17.6 17.6"></path><path d="M17.6 6.4 6.4 17.6"></path></svg>
+
+        <span class="visually-hidden">Close menu</span>
+      </button>
+    </div>
+
+    <nav class="header__panel-nav" aria-label="Main">
+      <ul class="header__panel-list" role="list"><li>
+              <a class="header__panel-link" href="/">Home</a>
+            </li><li>
+              <a class="header__panel-link" href="/collections/all">Shop</a>
+            </li><li>
+              <a class="header__panel-link" href="/#story">Our Story</a>
+            </li><li>
+              <a class="header__panel-link" href="/#verse">Verse</a>
+            </li></ul>
+    </nav></div>
+
+  <div class="header__overlay" data-menu-overlay="" hidden=""></div>
+</header>
+
+
+</div>
+<main id="MainContent" tabindex="-1">
+<div id="shopify-section-main" class="shopify-section"><link rel="stylesheet" href="assets/section-main-cart.css">
+
+<div class="main-cart surface-dark" data-cart-page="" data-cart-page-section="main">
+  <div class="main-cart__inner container">
+    <h1 class="main-cart__title" tabindex="-1" id="CartPageTitle">Your cart</h1><p class="main-cart__error" data-cart-error="" role="alert">You can only add 3 of this to the cart.</p>
+
+    <div data-cart-page-inner=""><form data-cart-form=""><ul><li class="cart-line" data-cart-line="" data-line-key="k2:bbb"><div class="quantity" data-quantity="" data-line-key="k2:bbb"><button type="button" data-quantity-step="-1" aria-disabled="true"></button><input class="quantity__input" data-quantity-input="" type="number" value="1" min="1"><button type="button" data-quantity-step="1"></button></div></li></ul><details class="cart-note" open=""><textarea data-cart-note="" name="note" id="CartPageNote">SERVER NOTE</textarea></details><p class="main-cart__error" data-cart-error="">You can only add 3 of this to the cart.</p></form></div>
+  </div>
+</div>
+
+
+</div>
+</main>
+
+<div id="CartStatus" class="visually-hidden" role="status" aria-live="polite" data-cart-no-inert="">Cart updated.</div>
+<div hidden="" data-cart-no-inert="" data-cart-strings="" data-added="Added to your cart." data-updated="Cart updated." data-removed="Removed from your cart." data-note-saved="Order note saved." data-quantity-announce="Quantity: [count]" data-error-generic="Unable to update your cart. Please try again." data-error-network="We could not reach the store. Check your connection and try again."></div>
+
+<script>
+(function () {
+  function run() {
+    var field = q('[data-cart-note]');
+    if (!field) { t('the note field is on the page', 'absent'); finish(); return; }
+    return Promise.resolve()
+      /* Typing must not talk to the server. `input` sets the dirty flag and
+         nothing else; `change` is what saves, and it fires once, on blur. */
+      .then(function () {
+        window.__req.length = 0;
+        field.value = 'Leave with the guard';
+        field.dispatchEvent(new Event('input', { bubbles: true }));
+        field.dispatchEvent(new Event('input', { bubbles: true }));
+        return wait(120);
+      })
+      .then(function () {
+        t('typing sends no request', updates().length === 0
+          || 'sent ' + updates().length + ' request(s) while typing');
+        field.dispatchEvent(new Event('change', { bubbles: true }));
+        return wait(200);
+      })
+      .then(function () {
+        var u = updates();
+        t('leaving the field saves the note once', u.length === 1 || 'sent ' + u.length);
+        t('it goes to Shopify\'s own cart/update.js',
+          u.length && /\/cart\/update\.js$/.test(u[0].url) || 'url=' + (u.length && u[0].url));
+        t('the body is Shopify\'s own note field',
+          u.length && u[0].json && u[0].json.note === 'Leave with the guard'
+            || 'body=' + JSON.stringify(u.length && u[0].json));
+        t('and asks for no sections, because nothing on the page shows the note',
+          u.length && u[0].json && !('sections' in u[0].json)
+            || 'sections requested: ' + (u.length && u[0].json && u[0].json.sections));
+        t('the save is announced', (q('#CartStatus').textContent || '').indexOf('note') !== -1
+          || 'announced: "' + q('#CartStatus').textContent + '"');
+        return null;
+      })
+      /* An UNSAVED note must survive a re-render it did not cause. The stub
+         renders the server's copy back, so a clobbered note reads SERVER NOTE. */
+      .then(function () {
+        window.__req.length = 0;
+        field.value = 'Typed but not yet saved';
+        field.dispatchEvent(new Event('input', { bubbles: true }));
+        field.focus();
+        // A quantity change elsewhere re-renders the whole cart page node.
+        q('[data-quantity-step="1"]').click();
+        return wait(700);
+      })
+      .then(function () {
+        var fresh = q('[data-cart-note]');
+        t('the cart node really was re-rendered', !!q('[data-cart-line]') && fresh !== field
+          || 'the node was not replaced, so this proves nothing');
+        t('an unsaved note survives the re-render',
+          fresh && fresh.value === 'Typed but not yet saved'
+            || 'field now reads "' + (fresh && fresh.value) + '"');
+        t('and focus comes back to it, not to the heading',
+          document.activeElement === fresh
+            || 'focus on ' + (document.activeElement && (document.activeElement.id || document.activeElement.tagName)));
+        return null;
+      })
+      /* A refused save is reported, and reported on the cart. */
+      .then(function () {
+        window.__mode = 'error422';
+        var f = q('[data-cart-note]');
+        f.value = 'x';
+        f.dispatchEvent(new Event('input', { bubbles: true }));
+        f.dispatchEvent(new Event('change', { bubbles: true }));
+        return wait(250);
+      })
+      .then(function () {
+        var box = q('[data-cart-error]');
+        t('a refused note save is visible, in Shopify\'s own words',
+          box && box.hidden === false && box.textContent.indexOf('only add 3') !== -1
+            || 'box hidden=' + (box && box.hidden) + ' text=' + (box && box.textContent));
+        t('and no raw status code is shown',
+          box && box.textContent.indexOf('422') === -1 || 'text=' + (box && box.textContent));
+        finish();
+      })
+      .catch(function (e) {
+        t('RUNNER', 'threw: ' + e.message + ' ' + e.stack); finish();
+      });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { setTimeout(run, 150); });
+  else setTimeout(run, 150);
+})();
+</script>
+<pre id="o" style="display:none">&lt;&lt;&lt;[{"name":"typing sends no request","pass":true,"detail":""},{"name":"leaving the field saves the note once","pass":true,"detail":""},{"name":"it goes to Shopify's own cart/update.js","pass":true,"detail":""},{"name":"the body is Shopify's own note field","pass":true,"detail":""},{"name":"and asks for no sections, because nothing on the page shows the note","pass":true,"detail":""},{"name":"the save is announced","pass":true,"detail":""},{"name":"the cart node really was re-rendered","pass":true,"detail":""},{"name":"an unsaved note survives the re-render","pass":true,"detail":""},{"name":"and focus comes back to it, not to the heading","pass":true,"detail":""},{"name":"a refused note save is visible, in Shopify's own words","pass":true,"detail":""},{"name":"and no raw status code is shown","pass":true,"detail":""}]&gt;&gt;&gt;</pre>
+
+</body></html>

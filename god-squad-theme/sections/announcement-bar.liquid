@@ -1,0 +1,176 @@
+{%- comment -%}
+  GOD SQUAD — Announcement bar
+  Phase 4. Lives in the header section group, above the header.
+
+  Design source: PHASE-2-DESIGN-SYSTEM.md section 20 and PHASE-2-DESIGN-TOKENS.css.
+  Height --announcement-height 40px, stacking to --announcement-height-stacked
+  64px below --bp-sm, where the prototype's bar also stacks to two centred lines
+  (God Squad Website.html line 50).
+
+  Messages are blocks so they can be added, removed and reordered in the Theme
+  Editor. Phase 2 section 29 reserves blocks for repeatable content, which this is.
+
+  No promotional copy is invented here. The defaults are the two messages the
+  approved prototype carries; anything else is the merchant's to write.
+{%- endcomment -%}
+
+{%- liquid
+  assign surface = section.settings.surface
+  comment
+    Phase 11. The desktop distribution was hardcoded: one message centred, two
+    or more pushed to the outer edges. Both states already existed in
+    assets/header.css; neither was reachable from the editor. The spec names
+    alignment as one of the announcement bar's four merchant controls.
+
+    Below --bp-md the bar always stacks and centres, because a phone has no
+    width to distribute across — so this setting is honestly labelled as a
+    desktop one rather than pretending to apply everywhere.
+  endcomment
+  assign bar_class = 'announcement-bar surface-dark'
+  if surface == 'light'
+    assign bar_class = 'announcement-bar surface-light'
+  endif
+-%}
+
+{%- if section.blocks.size > 0 -%}
+  {%- liquid
+    assign align = section.settings.alignment | default: 'edges'
+    assign bar_class = bar_class | append: ' announcement-bar--align-' | append: align
+  -%}
+  <div class="{{ bar_class }}" data-announcement-bar>
+    <div class="announcement-bar__inner">
+      {%- for block in section.blocks -%}
+        {%- liquid
+          assign text = block.settings.text | strip
+          if text == blank
+            continue
+          endif
+        -%}
+        {%- if block.settings.link != blank -%}
+          <a
+            class="announcement-bar__item announcement-bar__item--link"
+            href="{{ block.settings.link }}"
+            {{ block.shopify_attributes }}
+          >
+            {%- if block.settings.icon != blank -%}
+              {{ block.settings.icon | image_url: width: 48 | image_tag:
+                 loading: 'lazy',
+                 width: 16,
+                 height: 16,
+                 alt: '',
+                 class: 'announcement-bar__icon' }}
+            {%- endif -%}
+            <span class="announcement-bar__text">{{ text }}</span>
+          </a>
+        {%- else -%}
+          <span class="announcement-bar__item" {{ block.shopify_attributes }}>
+            {%- if block.settings.icon != blank -%}
+              {{ block.settings.icon | image_url: width: 48 | image_tag:
+                 loading: 'lazy',
+                 width: 16,
+                 height: 16,
+                 alt: '',
+                 class: 'announcement-bar__icon' }}
+            {%- endif -%}
+            <span class="announcement-bar__text">{{ text }}</span>
+          </span>
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+  </div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Announcement bar",
+  "tag": "aside",
+  "class": "announcement-bar-section",
+  "settings": [
+    {
+      "type": "select",
+      "id": "surface",
+      "label": "Colour scheme",
+      "info": "Dark is the approved default. On a light surface the accent becomes the darker gold automatically, because muted gold measures 1.55:1 on cream and cannot carry text there.",
+      "options": [
+        {
+          "value": "dark",
+          "label": "Ink"
+        },
+        {
+          "value": "light",
+          "label": "Cream"
+        }
+      ],
+      "default": "dark"
+    },
+    {
+      "type": "select",
+      "id": "alignment",
+      "label": "Alignment on desktop",
+      "options": [
+        {
+          "value": "edges",
+          "label": "Spread to the edges"
+        },
+        {
+          "value": "centre",
+          "label": "Centred together"
+        }
+      ],
+      "default": "edges",
+      "info": "On a phone the messages always stack and centre — there is no width to spread across."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "message",
+      "name": "Message",
+      "limit": 3,
+      "settings": [
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Text",
+          "default": "Good People. Higher Purpose."
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link",
+          "info": "Optional. Leave empty for a plain statement."
+        },
+        {
+          "type": "image_picker",
+          "id": "icon",
+          "label": "Icon",
+          "info": "Optional, shown at 16px. A small icon sits beside the message — a globe suits a shipping announcement."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Announcement bar",
+      "blocks": [
+        {
+          "type": "message",
+          "settings": {
+            "text": "Good People. Higher Purpose."
+          }
+        },
+        {
+          "type": "message",
+          "settings": {
+            "text": "Worldwide Shipping"
+          }
+        }
+      ]
+    }
+  ],
+  "enabled_on": {
+    "groups": [
+      "header"
+    ]
+  }
+}
+{% endschema %}

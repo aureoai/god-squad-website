@@ -1,0 +1,574 @@
+{%- comment -%}
+  GOD SQUAD — Footer
+  Phase 10. Lives in the footer section group, so it is on every page.
+
+  Sources of truth:
+  - PHASE-1-WEBSITE-AUDIT.md §16 (the footer audit) for what is missing and why
+    it matters; §29.1 (recommended tree) places sections/footer.liquid and
+    sections/footer-group.json; §29.2 binds both group sections with enabled_on;
+    §29.7 gives this section's recommended settings and its two block types.
+  - PHASE-2-DESIGN-SYSTEM.md §29.1 (footer belongs to the group, not to a
+    template, and therefore carries no presets), §29.6 (this section's setting
+    list and the one-colour-setting rule), §29.7 (link_list block, max 4),
+    §18.1 (the icon set and the social rule), §18.2 (--icon-lg is the footer
+    social size and nothing else).
+
+  WHAT PHASE 1 FOUND, AND WHAT THIS ANSWERS.
+  §16: "two taglines, one logo, two dead links. No copyright, no policy links,
+  no contact, no newsletter, no navigation, no payment icons." The <footer>
+  element itself was a correct landmark and is kept as one. FOOT-01 asks for
+  navigation and a legal row, and records the wayfinding reason: below 900px the
+  prototype's header scrolled away with nothing to bring it back on a 4,382px
+  phone page, and the footer is where the menu reappears. FOOT-02 records the
+  two social links as href="#" with no accounts confirmed.
+
+  THE COPY IS THE PROTOTYPE'S OWN COPY, NOT NEW COPY.
+  The tagline and strapline defaults below are "Different People. Same Purpose."
+  (prototype line 156) and "A Brighter Tomorrow" (line 164), which Phase 1 §16
+  asks to preserve as the footer's brand band and Phase 2 §29.6 names as this
+  section's two content settings. Both are Theme Editor fields. BRAND-08 is open
+  — the project has four competing taglines and no canonical set — so nothing
+  here adds a fifth, and nothing invents a claim, a statistic or a promise.
+
+  SHOPIFY IS THE SOURCE OF TRUTH FOR EVERY DESTINATION.
+  Menu items come from a link list the merchant builds in Navigation. Policy
+  links come from shop.policies, so a merchant never retypes a URL the platform
+  already owns and a policy that is unpublished simply does not appear. The
+  copyright year comes from 'now'. Not one href in this file is written by hand,
+  which is the point of NAV-03 (six href="#" anchors in the prototype).
+
+  THE SOCIAL URLS ARE THEME SETTINGS, NOT SECTION SETTINGS.
+  Phase 2 §29.6 specifies show_social as the section's switch and says it
+  "renders the theme-level URLs, never its own", and §28.4's level test agrees:
+  a brand's Instagram address is one store-wide fact, and two different values
+  on two pages would be a bug rather than a choice. They are read from
+  settings.* below. Until config/settings_schema.json carries them the values
+  are blank, the row does not render, and the Theme Editor says why.
+
+  THE SOCIAL MARKS ARE WORDS, NOT ICONS, AND THAT IS DELIBERATE.
+  Phase 1 §29.1 lists snippets/icon-facebook.liquid and icon-instagram.liquid as
+  recommended; neither has been drawn, and this phase does not draw them. The
+  raster files the prototype used (images/icon-facebook.png, icon-instagram.png,
+  130x130 RGBA) are not in assets/ and Phase 1 classifies both as "replace with
+  SVG snippet" — colour is baked into their pixels, so they cannot follow
+  --accent-current, a hover or a light surface. A word is a real accessible name
+  at every surface and needs no asset. When the marks are drawn, --icon-lg 28px
+  is the size Phase 2 §18.2 reserves for exactly this row.
+
+  WHAT IS DELIBERATELY NOT HERE.
+  - A newsletter block. Out of scope for Phase 10; Phase 1 §29.7 marks it ADD
+    LATER and Phase 2 §29.1 reserves a second group section for it.
+  - (RESOLVED IN PHASE 11.) The footer wordmark was blocked because the only
+    logo in the theme was sections/header.liquid's own image_picker, and a
+    section cannot read another section's settings — so shipping it would have
+    meant a second upload of one asset. Phase 11 promoted the logo to
+    settings.logo, and the show_logo setting above now feeds on it.
+    Phase 3 still records VECTOR LOGO REQUIRED: the current wordmark renders at
+    about half its intended size because of its transparent padding.
+    (The earlier note cited INV-04 for the duplication. That was wrong: INV-04
+    is the asset's raster quality and URL-unsafe name; the duplicate-file id is
+    DUP-04, and neither actually described a second upload field.)
+  - Payment icons, and a country/currency selector. Both are real gaps in §16
+    and neither needs any business information — shop.enabled_payment_types and
+    a localization form would do it — but both are new surfaces rather than the
+    missing footer, and Phase 10 is completing what exists.
+  - copyright_text, which Phase 1 §29.7 offers as a free-text field marked
+    BUSINESS INFORMATION REQUIRED. A typed year goes stale the moment it is
+    typed; this derives it. There is no show_copyright either: a contentinfo
+    landmark without a copyright line is the defect being fixed.
+  - spacing_top / spacing_bottom / anchor_id. This is page chrome bound to a
+    group, not a band in the section rhythm, so it takes the page padding
+    directly the way sections/main-cart.liquid does. Phase 2 §29.6 allows the
+    footer six settings; this uses five.
+
+  ZERO JavaScript.
+{%- endcomment -%}
+
+{%- liquid
+  assign tagline = section.settings.tagline | strip
+  assign description = section.settings.description | strip
+  assign strapline = section.settings.strapline | strip
+
+  assign surface_class = 'surface-dark'
+  if section.settings.surface == 'light'
+    assign surface_class = 'surface-light'
+  endif
+
+  comment
+    A policy object is blank until the merchant publishes it, which is what
+    Shopify's own footer pattern tests. The loop stops at the first published
+    one, because all this decides is whether the row exists at all.
+  endcomment
+  assign has_policies = false
+  for policy in shop.policies
+    if policy != blank
+      assign has_policies = true
+      break
+    endif
+  endfor
+  assign show_policies = false
+  if section.settings.show_policies and has_policies
+    assign show_policies = true
+  endif
+
+  assign facebook_url = settings.social_facebook_url
+  assign instagram_url = settings.social_instagram_url
+  assign tiktok_url = settings.social_tiktok_url
+  assign youtube_url = settings.social_youtube_url
+  assign show_social = false
+  if section.settings.show_social
+    if facebook_url != blank or instagram_url != blank or tiktok_url != blank or youtube_url != blank
+      assign show_social = true
+    endif
+  endif
+
+  comment
+    The utility row is the policy links and nothing else now. The social marks
+    moved up into the brand row, so counting them here would render an empty
+    .footer__utility on a store that has social addresses but no published
+    policies.
+  endcomment
+  assign show_utility = show_policies
+
+  comment
+    'now' is Liquid's own input to the date filter and is evaluated when the
+    page renders. The alternative Phase 1 §29.7 offers — copyright_text, a free
+    text field — is stale the moment it is typed, and nobody edits a footer in
+    January.
+  endcomment
+  assign year = 'now' | date: '%Y'
+
+  assign classes = 'footer '
+  assign classes = classes | append: surface_class
+-%}
+
+{%- comment -%}
+  No render guard. Every other content section in this theme renders nothing
+  until it is configured; this one always renders, because the thing Phase 1 §16
+  records as missing is the contentinfo landmark and the copyright line, and
+  both exist the moment the section does. The stylesheet link therefore sits at
+  the top of the file, unwrapped, the way sections/main-cart.liquid's does.
+{%- endcomment -%}
+{{ 'section-footer.css' | asset_url | stylesheet_tag }}
+
+{%- comment -%}
+  The landmark is written here rather than delegated to the schema's tag, and
+  the schema's tag is "div" for a reason that is not cosmetic: <footer> maps to
+  the contentinfo role only while it is not a descendant of article, aside,
+  main, nav or section. Setting the tag to "section" would wrap this element in
+  sectioning content and silently demote the only contentinfo on the site to a
+  generic group. A div wrapper does not, so the role survives; it is written out
+  as well so the file states its own contract. This is the same choice
+  sections/header.liquid makes for the banner landmark.
+{%- endcomment -%}
+<footer class="{{ classes }}" role="contentinfo">
+  <div class="footer__inner container">
+    {%- comment -%}
+      Phase 11. The footer wordmark, which Phase 10 recorded as blocked: "a
+      section cannot read another section's settings, so shipping this would
+      mean a second upload of one asset... Promoting the logo to a theme setting
+      is the fix." Phase 11 promoted it, so one upload now serves both, and
+      --logo-height-footer has existed in the token file since Phase 2.
+
+      Rendered only when the merchant asks for it AND a logo exists: a checkbox
+      that produces an empty gap is worse than no checkbox. The link goes home,
+      matching the header's, and the alt text is empty because the adjacent
+      tagline already names the brand — an image whose only job is decorative
+      repetition should not be announced twice.
+
+      PHASE 16: THE IMAGE IS DECORATIVE, THE LINK STILL HAS TO BE NAMED.
+      alt="" on the only content of an anchor leaves the anchor with no
+      accessible name at all — a screen reader announces "link" and nothing
+      else, which is SC 2.4.4 and SC 4.1.2 at Level A. The tagline that names
+      the brand is a sibling of this anchor, not inside it, so it never named
+      the link. The hidden span below is the name; the image stays decorative,
+      which is what the paragraph above is actually asking for.
+    {%- endcomment -%}
+    {%- comment -%}
+      THE BRAND ROW. Logo, tagline, social marks and closing line on one line,
+      which is the arrangement the approved footer design shows. They used to sit
+      in three separate rows -- logo and tagline here, social inside
+      .footer__utility beside the policy links, the closing line down in
+      .footer__bottom beside the copyright -- and no amount of CSS could pull
+      them together, because they were in different parents. The policy links and
+      the copyright stay where they were.
+    {%- endcomment -%}
+    <div class="footer__brand">
+    {%- if section.settings.show_logo -%}
+      <a class="footer__logo-link" href="{{ routes.root_url }}">
+        {%- if settings.logo != blank -%}
+          {{
+            settings.logo
+            | image_url: width: 336
+            | image_tag:
+              class: 'footer__logo',
+              alt: '',
+              widths: '112, 168, 224, 336',
+              sizes: '112px',
+              loading: 'lazy'
+          }}
+        {%- else -%}
+          {% render 'image-fallback',
+            file: 'logo.png',
+            class: 'footer__logo',
+            sizes: '112px',
+            width: 500,
+            height: 500
+          %}
+        {%- endif -%}
+        <span class="visually-hidden">{{ shop.name }}</span>
+      </a>
+    {%- endif -%}
+
+    {%- if tagline != blank or description != blank -%}
+      <div class="footer__lockup-text">
+    {%- endif -%}
+
+    {%- if tagline != blank -%}
+      {%- comment -%}
+        The break is the merchant's. The design sets this on two lines and the
+        setting is one string, so where it wraps was whatever the column width
+        happened to allow -- three lines at 1440. newline_to_br puts it back
+        under their control, the same way the hero and the verse quote work.
+        escape runs FIRST: reversed, it would eat the <br> it just made. The
+        escape is not optional either -- Liquid does not auto-escape, so a
+        merchant setting printed raw is a stored-XSS hole.
+      {%- endcomment -%}
+      <p class="footer__tagline">{{ tagline | escape | newline_to_br }}</p>
+    {%- endif -%}
+
+    {%- if description != blank -%}
+      {%- comment -%}
+        A short line under the tagline. The tagline is a slogan; this is the
+        sentence that says what the brand is, for a reader who has just arrived
+        at the bottom of a page. It ships EMPTY: brand copy is the owner's, and
+        a description invented here would be a claim the theme made up.
+      {%- endcomment -%}
+      <p class="footer__description">{{ description | escape }}</p>
+    {%- endif -%}
+
+    {%- if tagline != blank or description != blank -%}
+      </div>
+    {%- endif -%}
+
+      {%- if show_social -%}
+          {%- comment -%}
+            No target="_blank". Opening a new window is a change of context a
+            link gives no warning of, and it is not the theme's decision to make
+            on the customer's behalf; with the link left alone, a person who
+            wants a new tab still gets one from their own modifier click.
+          {%- endcomment -%}
+          <nav class="footer__social" aria-label="{{ 'footer.social_label' | t }}">
+            {%- comment -%}
+              THE MARKS ARE NOW DRAWN, AND THE NAME DID NOT GO WITH THE WORD.
+
+              This row used to render the platform's name as visible text, on
+              the reasoning recorded above: a word is a real accessible name at
+              every surface and needs no asset, and the SVGs had not been drawn.
+              They have been now, so the visible word becomes a mark — but the
+              word itself stays, in .visually-hidden, because that is where the
+              link's accessible name was coming from. Deleting it would leave
+              four links named nothing, which is the usual way an icon row
+              regresses. Same construction as the header's icon-only controls.
+            {%- endcomment -%}
+            <ul class="footer__social-list" role="list">
+              {%- if instagram_url != blank -%}
+                <li>
+                  <a class="footer__link footer__social-link" href="{{ instagram_url }}">
+                    {% render 'icon-instagram' %}
+                    <span class="visually-hidden">{{ 'footer.social.instagram' | t }}</span>
+                  </a>
+                </li>
+              {%- endif -%}
+              {%- if facebook_url != blank -%}
+                <li>
+                  <a class="footer__link footer__social-link" href="{{ facebook_url }}">
+                    {% render 'icon-facebook' %}
+                    <span class="visually-hidden">{{ 'footer.social.facebook' | t }}</span>
+                  </a>
+                </li>
+              {%- endif -%}
+              {%- if tiktok_url != blank -%}
+                <li>
+                  <a class="footer__link footer__social-link" href="{{ tiktok_url }}">
+                    {% render 'icon-tiktok' %}
+                    <span class="visually-hidden">{{ 'footer.social.tiktok' | t }}</span>
+                  </a>
+                </li>
+              {%- endif -%}
+              {%- if youtube_url != blank -%}
+                <li>
+                  <a class="footer__link footer__social-link" href="{{ youtube_url }}">
+                    {% render 'icon-youtube' %}
+                    <span class="visually-hidden">{{ 'footer.social.youtube' | t }}</span>
+                  </a>
+                </li>
+              {%- endif -%}
+            </ul>
+          </nav>
+      {%- endif -%}
+
+      {%- if strapline != blank -%}
+        <p class="footer__strapline">{{ strapline }}</p>
+      {%- endif -%}
+    </div>
+
+    {%- if section.blocks.size > 0 -%}
+      <div class="footer__blocks">
+        {%- for block in section.blocks -%}
+          {%- case block.type -%}
+            {%- when 'link_list' -%}
+              {%- liquid
+                assign menu_object = linklists[block.settings.menu]
+                assign column_heading = block.settings.heading | strip
+                comment
+                  A column with no heading is a list of links with nothing
+                  naming it, and its nav landmark would be unlabelled. Rather
+                  than invent a word for it, the fall-back is the merchant's own
+                  name for the menu, set in Navigation — which is the only place
+                  in the store that already knows what these links have in
+                  common.
+                endcomment
+                if column_heading == blank
+                  assign column_heading = menu_object.title
+                endif
+              -%}
+              {%- comment -%}
+                The test is the rendered outcome, not the setting: a merchant
+                can pick a menu here and later empty it in Navigation, and a
+                heading standing over no links is the same defect Phase 6
+                avoids by testing has_products rather than "is a collection
+                chosen".
+              {%- endcomment -%}
+              {%- if menu_object != blank and menu_object.links.size > 0 -%}
+                <nav
+                  class="footer__column"
+                  aria-labelledby="FooterMenu-{{ block.id }}"
+                  {{ block.shopify_attributes }}
+                >
+                  {%- comment -%}
+                    An h2. The page's h1 belongs to the hero on the home page and
+                    to the main-* section on a template, and nothing in the
+                    footer sits under a clearable heading, so unlike the Phase 6
+                    and Phase 7 bands this level is fixed rather than derived.
+                  {%- endcomment -%}
+                  <h2 class="footer__heading" id="FooterMenu-{{ block.id }}">{{ column_heading }}</h2>
+                  <ul class="footer__menu" role="list">
+                    {%- for link in menu_object.links -%}
+                      <li>
+                        <a
+                          class="footer__link{% if link.active %} is-active{% endif %}"
+                          href="{{ link.url }}"
+                          {% if link.active %}aria-current="page"{% endif %}
+                        >{{ link.title }}</a>
+                      </li>
+                    {%- endfor -%}
+                  </ul>
+                </nav>
+              {%- elsif request.design_mode -%}
+                <p class="footer__notice" {{ block.shopify_attributes }}>
+                  {{ 'sections.footer.no_menu' | t }}
+                </p>
+              {%- endif -%}
+
+            {%- when 'text' -%}
+              {%- if block.settings.heading != blank or block.settings.body != blank -%}
+                <div class="footer__column" {{ block.shopify_attributes }}>
+                  {%- if block.settings.heading != blank -%}
+                    <h2 class="footer__heading">{{ block.settings.heading }}</h2>
+                  {%- endif -%}
+                  {%- if block.settings.body != blank -%}
+                    <div class="footer__text">{{ block.settings.body }}</div>
+                  {%- endif -%}
+                </div>
+              {%- endif -%}
+          {%- endcase -%}
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+
+    {%- if show_utility -%}
+      <div class="footer__utility">
+        {%- if show_policies -%}
+          {%- comment -%}
+            The titles and the URLs are Shopify's, in the store's own language.
+            A merchant who has not published a policy gets no link to it rather
+            than a link to an empty page, which is why the test is per policy
+            and not "does this shop have policies".
+          {%- endcomment -%}
+          <nav class="footer__policies" aria-label="{{ 'footer.policies_label' | t }}">
+            <ul class="footer__policy-list" role="list">
+              {%- for policy in shop.policies -%}
+                {%- if policy != blank -%}
+                  <li>
+                    <a class="footer__link" href="{{ policy.url }}">{{ policy.title }}</a>
+                  </li>
+                {%- endif -%}
+              {%- endfor -%}
+            </ul>
+          </nav>
+        {%- endif -%}
+
+      </div>
+    {%- endif -%}
+
+    <div class="footer__bottom">
+      <p class="footer__copyright">
+        {{ 'footer.copyright' | t: year: year, name: shop.name }}
+      </p>
+    </div>
+
+    {%- if request.design_mode -%}
+      {%- liquid
+        assign notices = ''
+        if section.settings.show_policies and has_policies == false
+          assign notices = notices | append: 'no_policies|'
+        endif
+        if section.settings.show_social and show_social == false
+          assign notices = notices | append: 'no_social|'
+        endif
+      -%}
+      {%- if notices != blank -%}
+        <div class="footer__notices">
+          {%- if notices contains 'no_policies' -%}
+            <p class="footer__notice">{{ 'sections.footer.no_policies' | t }}</p>
+          {%- endif -%}
+          {%- if notices contains 'no_social' -%}
+            <p class="footer__notice">{{ 'sections.footer.no_social' | t }}</p>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+    {%- endif -%}
+  </div>
+</footer>
+
+{% schema %}
+{
+  "name": "Footer",
+  "tag": "div",
+  "class": "footer-section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Brand band"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_logo",
+      "label": "Show the logo",
+      "default": false,
+      "info": "Uses the logo from Theme settings > Brand. Nothing is shown until one is uploaded."
+    },
+    {
+      "type": "textarea",
+      "id": "tagline",
+      "label": "Tagline",
+      "default": "Different People. Same Purpose.",
+      "info": "A short line above the footer columns. It is not a heading and nothing else depends on it, so clearing it simply removes the line."
+    },
+    {
+      "type": "text",
+      "id": "description",
+      "label": "Short description",
+      "info": "Optional. One line under the tagline. Left empty it is not rendered."
+    },
+    {
+      "type": "text",
+      "id": "strapline",
+      "label": "Closing line",
+      "default": "A Brighter Tomorrow",
+      "info": "Sits beside the copyright on the bottom row."
+    },
+    {
+      "type": "header",
+      "content": "Store policies"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_policies",
+      "label": "Show links to your store policies",
+      "default": true,
+      "info": "Refund, privacy, terms, shipping and contact information come straight from Settings > Policies in Shopify admin. Nothing is retyped here, and a policy you have not published is not linked."
+    },
+    {
+      "type": "header",
+      "content": "Social"
+    },
+    {
+      "type": "paragraph",
+      "content": "The addresses live in Theme settings, because they are the same on every page. Add only the accounts you actually operate — each icon appears once its address is filled in, and none is shown otherwise."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_social",
+      "label": "Show the social links",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "surface",
+      "label": "Colour scheme",
+      "info": "Ink is the approved treatment. The footer carries a hairline along its top edge so it still reads as its own band when the section above it is ink as well.",
+      "options": [
+        {
+          "value": "dark",
+          "label": "Ink"
+        },
+        {
+          "value": "light",
+          "label": "Cream"
+        }
+      ],
+      "default": "dark"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "link_list",
+      "name": "Menu",
+      "limit": 4,
+      "settings": [
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading",
+          "info": "Leave this empty and the menu's own name from Navigation is used, so the column is never unlabelled."
+        },
+        {
+          "type": "link_list",
+          "id": "menu",
+          "label": "Menu",
+          "info": "Build the menu in Navigation, then choose it here. The theme ships no footer menu of its own, and a column with no links does not render on the live store."
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "name": "Text",
+      "limit": 2,
+      "settings": [
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading"
+        },
+        {
+          "type": "richtext",
+          "id": "body",
+          "label": "Text",
+          "info": "Contact details belong here. The theme supplies none and guesses nothing — add the address, email or phone number you want customers to use."
+        }
+      ]
+    }
+  ],
+  "enabled_on": {
+    "groups": [
+      "footer"
+    ]
+  }
+}
+{% endschema %}

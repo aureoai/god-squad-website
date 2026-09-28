@@ -1,0 +1,18 @@
+Handle,Title,Body (HTML),Vendor,Type,Tags,Published,Option1 Name,Option1 Value,Variant SKU,Variant Grams,Variant Inventory Tracker,Variant Inventory Qty,Variant Inventory Policy,Variant Fulfillment Service,Variant Price,Variant Compare At Price,Variant Requires Shipping,Variant Taxable,Gift Card,Status
+signature-oversized-tee,Signature Oversized Tee,"<p>Heavyweight cotton with a relaxed drop shoulder. The Signature tee carries the wordmark across the chest and scripture at the hem. Built to be worn, washed and worn again.</p>",God Squad,Tee,"new-drop,best-sellers",TRUE,Size,S,GS-TEE-S,220,shopify,25,deny,manual,1290,1590,TRUE,TRUE,FALSE,active
+signature-oversized-tee,,,,,,,,M,GS-TEE-M,230,shopify,40,deny,manual,1290,1590,TRUE,TRUE,FALSE,active
+signature-oversized-tee,,,,,,,,L,GS-TEE-L,240,shopify,35,deny,manual,1290,1590,TRUE,TRUE,FALSE,active
+signature-oversized-tee,,,,,,,,XL,GS-TEE-XL,250,shopify,18,deny,manual,1290,1590,TRUE,TRUE,FALSE,active
+walk-by-faith-hoodie,Walk By Faith Hoodie,"<p>Brushed fleece interior, boxy fit, ribbed cuffs. Walk By Faith runs across the back in the display cut. The piece the community reaches for first.</p>",God Squad,Hoodie,"new-drop,best-sellers",TRUE,Size,S,GS-HOOD-S,620,shopify,12,deny,manual,2490,2990,TRUE,TRUE,FALSE,active
+walk-by-faith-hoodie,,,,,,,,M,GS-HOOD-M,640,shopify,20,deny,manual,2490,2990,TRUE,TRUE,FALSE,active
+walk-by-faith-hoodie,,,,,,,,L,GS-HOOD-L,660,shopify,22,deny,manual,2490,2990,TRUE,TRUE,FALSE,active
+walk-by-faith-hoodie,,,,,,,,XL,GS-HOOD-XL,680,shopify,9,deny,manual,2490,2990,TRUE,TRUE,FALSE,active
+purpose-cap,Purpose Cap,"<p>Six-panel structured cap with a curved brim and an embroidered crown mark. Adjustable strap at the back. One size, worn every way.</p>",God Squad,Cap,"new-drop,best-sellers",TRUE,Size,One Size,GS-CAP-OS,140,shopify,45,deny,manual,890,,TRUE,TRUE,FALSE,active
+built-different-tee,Built Different Tee,"<p>The same heavyweight body as the Signature, cut with a wider shoulder and printed with Built Different across the front. Runs true to size.</p>",God Squad,Tee,best-sellers,TRUE,Size,S,GS-BDT-S,220,shopify,14,deny,manual,1290,,TRUE,TRUE,FALSE,active
+built-different-tee,,,,,,,,M,GS-BDT-M,230,shopify,26,deny,manual,1290,,TRUE,TRUE,FALSE,active
+built-different-tee,,,,,,,,L,GS-BDT-L,240,shopify,19,deny,manual,1290,,TRUE,TRUE,FALSE,active
+built-different-tee,,,,,,,,XL,GS-BDT-XL,250,shopify,0,deny,manual,1290,,TRUE,TRUE,FALSE,active
+let-your-light-shine-tee,Let Your Light Shine Tee,"<p>Matthew 5:16 set in the display cut across the back, wordmark at the chest. Cream on ink, the way the palette intends it.</p>",God Squad,Tee,new-drop,TRUE,Size,S,GS-LYLS-S,220,shopify,16,deny,manual,1390,,TRUE,TRUE,FALSE,active
+let-your-light-shine-tee,,,,,,,,M,GS-LYLS-M,230,shopify,24,deny,manual,1390,,TRUE,TRUE,FALSE,active
+let-your-light-shine-tee,,,,,,,,L,GS-LYLS-L,240,shopify,21,deny,manual,1390,,TRUE,TRUE,FALSE,active
+let-your-light-shine-tee,,,,,,,,XL,GS-LYLS-XL,250,shopify,11,deny,manual,1390,,TRUE,TRUE,FALSE,active

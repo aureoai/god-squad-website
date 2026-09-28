@@ -1,0 +1,6 @@
+Handle,Title,Body (HTML),Vendor,Type,Tags,Published,Option1 Name,Option1 Value,Variant SKU,Variant Grams,Variant Inventory Tracker,Variant Inventory Qty,Variant Inventory Policy,Variant Fulfillment Service,Variant Price,Variant Compare At Price,Variant Requires Shipping,Variant Taxable,Image Src,Image Position,Image Alt Text,Status
+your-product-handle,YOUR PRODUCT TITLE,"<p>Your product description. Plain sentences are fine; the theme styles them.</p>",God Squad,Apparel,,TRUE,Size,XS,,,shopify,,deny,manual,,,TRUE,TRUE,,1,Describe the photo for screen readers,active
+your-product-handle,,,,,,,,S,,,shopify,,deny,manual,,,TRUE,TRUE,,,,
+your-product-handle,,,,,,,,M,,,shopify,,deny,manual,,,TRUE,TRUE,,,,
+your-product-handle,,,,,,,,L,,,shopify,,deny,manual,,,TRUE,TRUE,,,,
+your-product-handle,,,,,,,,XL,,,shopify,,deny,manual,,,TRUE,TRUE,,,,

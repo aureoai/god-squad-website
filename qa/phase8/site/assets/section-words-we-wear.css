@@ -1,0 +1,205 @@
+/* ============================================================================
+   GOD SQUAD — section-words-we-wear.css
+
+   BAND 4: the display heading with its paragraph, and the row of phrase tiles.
+
+   Breakpoints are literal pixels; a media query cannot read a custom property.
+   768, 1024 and 1440 match --bp-md, --bp-lg and --bp-2xl in design-tokens.css.
+   ========================================================================== */
+
+.words-we-wear {
+  --ww-space-top: 0px;
+  --ww-space-bottom: var(--section-pad-block);
+
+  padding-block-start: var(--ww-space-top);
+  padding-block-end: var(--ww-space-bottom);
+}
+
+.words-we-wear--pt-standard { --ww-space-top: var(--section-pad-block); }
+.words-we-wear--pt-tight    { --ww-space-top: var(--section-pad-block-tight); }
+.words-we-wear--pt-none     { --ww-space-top: 0px; }
+.words-we-wear--pb-standard { --ww-space-bottom: var(--section-pad-block); }
+.words-we-wear--pb-tight    { --ww-space-bottom: var(--section-pad-block-tight); }
+.words-we-wear--pb-none     { --ww-space-bottom: 0px; }
+
+/* ----------------------------------------------------------------- layout */
+
+.words-we-wear__inner {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-7);
+  align-items: center;
+}
+
+/* The copy sits BESIDE the tiles only at 1440. The design shows a very large
+   two-line display heading plus a paragraph next to four tiles; below that
+   width the heading alone eats the column and the tiles are squeezed to strips.
+   Stacked, both keep their proportions. */
+@media (min-width: 1440px) {
+  .words-we-wear__inner {
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 2fr);
+    gap: var(--space-8);
+  }
+}
+
+.words-we-wear__intro {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-5);
+  align-items: start;
+}
+
+/* Below 1440 the heading and the paragraph sit side by side, which is what the
+   design shows and what keeps a 56px heading from pushing the tiles down a full
+   screen. Above it the intro is its own column, so it stacks again. */
+@media (min-width: 768px) and (max-width: 1439px) {
+  .words-we-wear__intro {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--space-7);
+    align-items: center;
+  }
+}
+
+.words-we-wear__heading {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--type-display-l-size);
+  font-weight: var(--weight-black);
+  line-height: var(--type-display-l-lh);
+  letter-spacing: var(--type-display-l-ls);
+  text-transform: uppercase;
+}
+
+.words-we-wear__body {
+  font-family: var(--font-body);
+  font-size: var(--type-body-size);
+  line-height: var(--type-body-lh);
+  color: var(--color-text-current-muted);
+  max-width: 42ch;
+}
+
+.words-we-wear__body > :first-child { margin-block-start: 0; }
+.words-we-wear__body > :last-child  { margin-block-end: 0; }
+
+/* ------------------------------------------------------------------ tiles */
+
+.words-we-wear__tiles {
+  display: grid;
+  /* Two up on a phone, not one: these are short phrases on square-ish tiles and
+     a single column would make each one a full screen of scrolling. */
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 1024px) {
+  .words-we-wear__tiles { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+.words-we-wear__tile {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  aspect-ratio: 3 / 4;
+  background-color: var(--color-bg-primary);
+  color: var(--gs-cream);
+}
+
+.words-we-wear__tile-inner {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-5);
+  color: inherit;
+  text-decoration: none;
+}
+
+.words-we-wear__image {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+
+/* The phrase is centred over the whole tile rather than bottom-anchored, so the
+   scrim has to carry contrast everywhere, not just at the foot. A flat 0.72 is
+   the figure derived in section-verse-index.css: composited over a white
+   photograph it puts cream at 7.02:1, where 0.65 is the 4.5:1 floor. Flat, not
+   a ramp, because the copy is in the middle. */
+.words-we-wear__scrim {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(13, 12, 10, 0.72);
+}
+
+.words-we-wear__phrase {
+  position: relative;
+  font-family: var(--font-display);
+  /* --type-h3, not --type-h2. Four tiles across a 1440 viewport are about
+     240px wide, and "DIFFERENT." at the h2 ceiling of 36px measures wider than
+     that — the word ran outside its own tile. h3 tops out at 24px and fits.
+     balance keeps a three-word phrase from dropping one word alone. */
+  font-size: var(--type-h3-size);
+  font-weight: var(--weight-regular);
+  line-height: var(--type-h3-lh);
+  text-align: center;
+  text-transform: uppercase;
+  text-wrap: balance;
+  /* A single word longer than the tile has nowhere to go; breaking it is
+     better than letting it overhang the photograph. */
+  overflow-wrap: break-word;
+}
+
+.words-we-wear__ordinal {
+  position: absolute;
+  inset-block-end: var(--space-4);
+  inset-inline-start: var(--space-4);
+  font-family: var(--font-body);
+  font-size: var(--type-caption-size);
+  letter-spacing: var(--type-caption-ls);
+  /* 0.78 alpha cream on the 0.72 scrim stays above 4.5:1; it is dimmer than the
+     phrase without becoming decoration. */
+  color: rgba(243, 239, 230, 0.78);
+}
+
+/* THE FOCUS RING CANNOT USE THE DEFAULT OFFSET HERE.
+
+   The tile carries surface-dark, so --focus-ring resolves to gold; base.css
+   draws the ring with --focus-offset 2px, which paints it OUTSIDE the tile — on
+   the band, which is cream by default. Gold on cream is 1.55:1, the exact
+   pairing Phase 2 prohibits. Pulling the offset to zero keeps the whole ring on
+   the tile's own ink ground, where gold is 11.01:1. */
+.words-we-wear__tile-inner:focus-visible {
+  outline-color: var(--gs-gold);
+  outline-offset: calc(var(--focus-width) * -1);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .words-we-wear__tile-inner[href]:hover .words-we-wear__scrim {
+    background-color: rgba(13, 12, 10, 0.6);
+  }
+}
+
+.words-we-wear__tile--empty {
+  border: var(--border-width) dashed var(--color-border-interactive);
+}
+
+/* ------------------------------------------------------- the editor notice */
+
+.words-we-wear__notice {
+  margin-block-start: var(--space-5);
+  padding: var(--space-4);
+  border: var(--border-width) dashed var(--color-border-current-interactive);
+  font-family: var(--font-body);
+  font-size: var(--type-body-sm-size);
+  line-height: var(--type-body-sm-lh);
+  color: var(--color-text-current-muted);
+}
+
+.words-we-wear__notice p { margin: 0 0 var(--space-2); }
+.words-we-wear__notice p:last-child { margin-block-end: 0; }

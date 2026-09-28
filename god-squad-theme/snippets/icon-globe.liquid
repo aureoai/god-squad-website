@@ -1,0 +1,19 @@
+{%- comment -%}
+  Renders the globe glyph used on the brand values strip.
+
+  Drawn to the Phase 2 contract - 24x24 canvas, stroke 1.5,
+  currentColor, round caps and joins. Traced from the prototype's own raster
+  at brand-assets/images/icon-globe.png, which PHASE-2:1417 lists as one of
+  the four value glyphs the prototype supplied as PNG. Raster cannot follow
+  currentColor, a hover or a surface, which is why it is redrawn here.
+
+  Accepts:
+  - class: {String} optional extra class names
+
+  Usage:
+  {% render 'icon-globe', class: 'icon--xl' %}
+
+  Decorative: the tile's title and subtitle carry the meaning, so the mark is
+  aria-hidden and the tile needs no alternative text.
+{%- endcomment -%}
+<svg class="icon icon--globe {{ class }}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 3v18"/><path d="M3 12h18"/><path d="M4.2 7.5h15.6"/><path d="M4.2 16.5h15.6"/><path d="M12 3a5 9 0 0 1 0 18"/><path d="M12 3a5 9 0 0 0 0 18"/></svg>

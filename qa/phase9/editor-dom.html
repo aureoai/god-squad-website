@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>DONE</title></head><body style="margin:0">
+<pre id="o" style="display:none">&lt;&lt;&lt;{"baseline":{"scroll":0,"keydown":0,"mq":1},"lockedAtStart":false,"lockedWhenOpen":true,"lockedAfterRerenderWhileOpen":false,"afterOneRerender":{"scroll":0,"keydown":0,"mq":1},"afterFiveRerenders":{"scroll":0,"keydown":0,"mq":1},"lockedBeforeRemoval":true,"lockedAfterRemoval":false,"afterRemoval":{"scroll":0,"keydown":0,"mq":0}}&gt;&gt;&gt;</pre>
+<script>
+var res = {}, f = document.createElement('iframe');
+f.style.cssText = 'width:390px;height:844px;border:0;position:absolute;left:-9999px;top:0';
+f.src = '_editor-target.html';
+f.onload = function () {
+  var d = f.contentDocument, w = f.contentWindow;
+  var st = d.createElement('style');
+  st.textContent = '*,*::before,*::after{transition:none!important;animation:none!important}';
+  d.head.appendChild(st);
+
+  function section() { return d.getElementById('shopify-section-header'); }
+  function fire(name, target) {
+    var ev = new w.CustomEvent(name, { bubbles: true });
+    Object.defineProperty(ev, 'target', { value: target, enumerable: true });
+    d.dispatchEvent(ev);
+  }
+  function counts() {
+    return { scroll: (w.__counts['window:scroll'] || 0),
+             keydown: (w.__counts['document:keydown'] || 0),
+             mq: (w.__mq || 0) };
+  }
+  function locked() { return d.documentElement.classList.contains('menu-open'); }
+  function openMenu() {
+    var t = d.querySelector('[data-menu-toggle]');
+    if (t) t.click();
+  }
+
+  w.setTimeout(function () {
+    res.baseline = counts();
+    res.lockedAtStart = locked();
+
+    // 1. Open the menu, then re-render the section as the editor does.
+    openMenu();
+    res.lockedWhenOpen = locked();
+    var sec = section();
+    fire('shopify:section:unload', sec);
+    fire('shopify:section:load', sec);
+    res.lockedAfterRerenderWhileOpen = locked();
+    res.afterOneRerender = counts();
+
+    // 2. Re-render four more times and watch for listener growth.
+    for (var i = 0; i < 4; i++) {
+      fire('shopify:section:unload', section());
+      fire('shopify:section:load', section());
+    }
+    res.afterFiveRerenders = counts();
+
+    // 3. Open the menu, then REMOVE the section entirely.
+    openMenu();
+    res.lockedBeforeRemoval = locked();
+    var s2 = section();
+    fire('shopify:section:unload', s2);
+    if (s2 && s2.parentNode) s2.parentNode.removeChild(s2);
+    res.lockedAfterRemoval = locked();
+    res.afterRemoval = counts();
+
+    document.getElementById('o').textContent = '<<<' + JSON.stringify(res) + '>>>';
+    document.title = 'DONE';
+  }, 350);
+};
+document.body.appendChild(f);
+</script><iframe src="_editor-target.html" style="width: 390px; height: 844px; border: 0px; position: absolute; left: -9999px; top: 0px;"></iframe>
+</body></html>

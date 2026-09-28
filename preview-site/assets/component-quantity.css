@@ -1,0 +1,162 @@
+/* ============================================================================
+   GOD SQUAD — Quantity selector
+   Phase 8. Phase 2 §12.4 in full: a minus button, a number input, a plus
+   button; each button at --target-min 44px; the value at --type-body-size
+   16px, centred; minimum one.
+
+   Three consumers — the product form, the cart drawer line and the cart page
+   line — which is what makes this a component rather than section markup.
+
+   Surface-aware through the surface-context properties rather than through
+   modifier classes: the product page is a cream band and both cart surfaces
+   are ink, and the same markup has to be right on either.
+   ========================================================================== */
+
+/* WITHOUT THE CART SCRIPT THERE ARE NO STEPPERS.
+   The two buttons are type="button" and do nothing at all until assets/cart.js
+   binds them — so shipping them unconditionally put two 44px controls with a
+   hover state and a focus ring on the page that a customer with scripting off
+   could press forever. They are hidden until the script announces itself, and
+   the native spinners the script's presence justifies removing are left in
+   place until then, so the field is still steppable either way. */
+.quantity {
+  display: inline-grid;
+  grid-template-columns: 1fr;
+  align-items: stretch;
+  /* Phase 2 §12.2: fields cannot use --color-border-current, which composites
+     to 1.32:1 on ink and 1.35:1 on cream. SC 1.4.11 needs 3:1 for a control's
+     visual boundary, and the interactive border tokens are the ones measured
+     for it (3.02:1 on ink, 3.13:1 on cream). */
+  border: var(--border-width) solid var(--color-border-current-interactive);
+  border-radius: var(--radius-sm);
+  /* No fill. §12.3 gives every field state a transparent fill, so the control
+     sits on whichever band it is in. */
+  background-color: transparent;
+}
+
+.cart-js .quantity {
+  grid-template-columns: var(--target-min) 1fr var(--target-min);
+}
+
+.quantity__button {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  /* 44px, not 24px. SC 2.5.8's spacing exception cannot rescue two flush
+     steppers — their 24px circles necessarily intersect — and a thumb on a
+     phone wants the larger target anyway (SC 2.5.5). */
+  min-width: var(--target-min);
+  min-height: var(--target-min);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  /* §18.6 and §22.8 both give an icon-only control one hover row: colour, to
+     --accent-current, at --transition-fast. */
+  transition: color var(--transition-fast), opacity var(--transition-fast);
+}
+
+.cart-js .quantity__button {
+  display: flex;
+}
+
+.quantity__button .icon {
+  width: var(--icon-md);
+  height: var(--icon-md);
+}
+
+/* aria-disabled, not [disabled]: the control stays focusable so a keyboard
+   user can reach it and hear that it is unavailable (Phase 2 §10.3). The
+   reason is the value beside it, which is already the minimum. */
+/* 0.45, which is what §12.3's state matrix and §10.3's button matrix both set,
+   and what component-button.css already ships. */
+.quantity__button[aria-disabled='true'] {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.quantity__input {
+  min-width: 3ch;
+  padding: 0 var(--space-2);
+  border: 0;
+  background-color: transparent;
+  color: inherit;
+  font-family: var(--font-body);
+  /* 16px. Phase 2 §12.2 notes the second reason for the floor: below 16px
+     iOS zooms the viewport on focus, which reflows the whole page around a
+     two-character field. */
+  font-size: var(--type-body-size);
+  font-weight: var(--type-price-weight);
+  /* §27.6 rule 1: tracking stops at numerals. */
+  letter-spacing: 0;
+  text-align: center;
+}
+
+/* The native spinners duplicate the two buttons beside them and are far below
+   the 24px target minimum — but only once those buttons exist. Both rules are
+   therefore scoped to the script's own class, so a page without it keeps the
+   browser's own stepper. */
+.cart-js .quantity__input {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.cart-js .quantity__input::-webkit-outer-spin-button,
+.cart-js .quantity__input::-webkit-inner-spin-button {
+  margin: 0;
+  -webkit-appearance: none;
+}
+
+/* The input's ring is drawn around the whole control, because an outline on a
+   bare input inside a bordered box reads as a second, smaller control.
+
+   :has(), not :focus-within. :focus-within matches when ANY descendant holds
+   focus, so tabbing to the minus button painted two concentric rings — one on
+   the button from the token file's global :where() rule, one around the box.
+   Where :has() is unsupported the buttons and the input each simply keep their
+   own ring, which is a degradation and not a defect. */
+.quantity:has(.quantity__input:focus-visible) {
+  outline: var(--focus-width) solid var(--focus-ring);
+  outline-offset: var(--focus-offset);
+}
+
+.quantity:has(.quantity__input:focus-visible) .quantity__input:focus-visible {
+  outline: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .quantity__button:not([aria-disabled='true']):hover {
+    color: var(--accent-current);
+  }
+}
+
+/* ---------------------------------------------------------------- compact
+   The cart line. The buttons keep their 44px target — SC 2.5.8 is not
+   negotiable in a narrower column — and only the value track tightens. */
+
+.cart-js .quantity--compact {
+  grid-template-columns: var(--target-min) auto var(--target-min);
+}
+
+/* The value stays at 16px. §12.2 fixes it there for two reasons, and the
+   second one is not cosmetic: below 16px iOS zooms the viewport on focus and
+   reflows the whole page around a two-character field. Only the track
+   tightens. */
+.quantity--compact .quantity__input {
+  min-width: 2ch;
+}
+
+/* A line being updated stays visible and stays readable; it is dimmed only
+   enough to say "in flight", and its controls are made inert so a second
+   click cannot race the first. */
+.quantity[aria-busy='true'] {
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quantity__button {
+    transition: none;
+  }
+}

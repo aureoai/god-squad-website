@@ -1,0 +1,169 @@
+{%- comment -%}
+  GOD SQUAD — Cart page
+  Phase 8.
+
+  WHY A CART PAGE IS IN THIS PHASE AT ALL.
+  The Phase 8 scope is the product page, the shopping interaction, the cart
+  drawer and add-to-cart. A cart PAGE is not named — but it is the destination
+  of the very form this phase builds. With JavaScript off, the product form
+  posts natively to /cart/add and Shopify redirects to /cart, and Shopify
+  serves an error page for any storefront route whose template is missing
+  (Phase 1 SHOP-09). Without templates/cart.json the no-JavaScript path this
+  phase is required to keep working would end on an error page. The drawer's
+  own View cart link has the same problem.
+
+  So this is deliberately the lean version: the same cart lines, the same
+  totals, the same controls, no new components, and no design that a later
+  cart phase would have to undo. The remaining templates SHOP-09 lists —
+  collection, list-collections, search, page, 404, password, gift card and the
+  customer set — are still missing and still belong to their own phases.
+
+  IT IS A RENDER TARGET FOR ITS OWN AJAX.
+  [data-cart-page-inner] is the node assets/cart.js replaces after a quantity
+  change or a removal made on this page. Without it the script would intercept
+  both controls and then have nowhere to put the answer — the page would show a
+  cart that no longer existed, and, worse, its positional updates[] inputs
+  would no longer line up with the server's lines, so Checkout would apply each
+  surviving quantity to the wrong product. The heading and the error line sit
+  outside that node, for the same reason the drawer's do.
+
+  The cart drawer is NOT rendered on this template. Two views of one cart on
+  one page can disagree, and they gave every line a duplicate DOM id.
+{%- endcomment -%}
+
+{{ 'section-main-cart.css' | asset_url | stylesheet_tag }}
+
+<div
+  class="main-cart surface-dark"
+  data-cart-page
+  data-cart-page-section="{{ section.id }}"
+  {{ section.shopify_attributes }}
+>
+  <div class="main-cart__inner container">
+    <h1 class="main-cart__title" tabindex="-1" id="CartPageTitle">{{ 'cart.title' | t }}</h1>
+
+    {%- comment -%}
+      The visible failure line, outside the swapped node so a message survives
+      the re-render that follows the request which produced it.
+    {%- endcomment -%}
+    <p class="main-cart__error" data-cart-error role="alert" hidden></p>
+
+    <div data-cart-page-inner>
+      {%- if cart.item_count > 0 -%}
+        <form
+          action="{{ routes.cart_url }}"
+          method="post"
+          id="CartPageForm"
+          class="main-cart__form"
+          data-cart-form
+        >
+          <ul class="main-cart__lines" role="list">
+            {%- for item in cart.items -%}
+              {% render 'cart-line-item',
+                item: item,
+                index: forloop.index,
+                form_id: 'CartPageForm',
+                scope: 'CartPage',
+                eager: forloop.first
+              %}
+            {%- endfor -%}
+          </ul>
+
+          <div class="main-cart__summary">
+            {%- comment -%}
+              Phase 14. The same note the drawer renders, from the same
+              snippet, so a correction to one reaches the other.
+            {%- endcomment -%}
+            {%- if section.settings.show_note -%}
+              {% render 'cart-note', id: 'CartPageNote' %}
+            {%- endif -%}
+
+            {% render 'cart-totals' %}
+
+            {%- comment -%}
+              First submit in the form, so Enter in a quantity field applies the
+              change rather than jumping to checkout. It is removed once the
+              cart script is running, because there it does nothing: changes are
+              applied as they are made and this page re-renders itself.
+            {%- endcomment -%}
+            <button type="submit" name="update" class="button button--secondary main-cart__update">
+              {{ 'cart.update' | t }}
+            </button>
+
+            <button type="submit" name="checkout" class="button button--primary button--full">
+              {{ 'cart.checkout' | t }}
+            </button>
+
+            {%- comment -%}
+              Shopify's additional accelerated checkout buttons. Unlike the
+              product form's payment_button, the cart HAS a documented guard
+              object, so this renders only when the store actually has them.
+            {%- endcomment -%}
+            {%- if additional_checkout_buttons -%}
+              <div class="main-cart__accelerated">
+                {{ content_for_additional_checkout_buttons }}
+              </div>
+            {%- endif -%}
+
+            {%- comment -%}
+              Phase 14. Continue shopping, which this page had no route to at
+              all: its only controls were Update and Checkout, so a customer
+              who did not want to check out yet had nothing but the browser's
+              Back button — which the brief rules out by name.
+
+              A LINK, unlike the drawer's. The drawer is a layer over the page
+              the customer was shopping and closing it returns them there;
+              arriving on /cart is a navigation, and there is nothing to return
+              to. It goes wherever the merchant sends an empty cart, because
+              that is the same question asked twice, and it falls back to the
+              home page for the reason snippets/cart-empty-state.liquid
+              records.
+            {%- endcomment -%}
+            {%- assign shop_on_url = section.settings.empty_link | default: routes.root_url -%}
+            <a class="main-cart__continue" href="{{ shop_on_url }}">
+              {{ 'cart.continue_shopping' | t }}
+            </a>
+          </div>
+        </form>
+      {%- else -%}
+        {% render 'cart-empty-state',
+          url: section.settings.empty_link,
+          label: section.settings.empty_link_label
+        %}
+      {%- endif -%}
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Cart",
+  "tag": "section",
+  "class": "main-cart-section",
+  "settings": [
+    {
+      "type": "url",
+      "id": "empty_link",
+      "label": "Where the shopping buttons go",
+      "info": "Used by both the empty-cart button and the Continue shopping link. Leave empty to use the home page. The cart drawer has its own copy of this setting."
+    },
+    {
+      "type": "text",
+      "id": "empty_link_label",
+      "label": "Empty-cart button label",
+      "default": "Shop the collection",
+      "info": "The cart drawer has its own copy of this setting."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_note",
+      "label": "Let customers add an order note",
+      "default": false,
+      "info": "Adds Shopify's own cart note. Turn this on only if you act on what customers write there — a field nobody reads is worse than no field. The cart drawer has its own copy of this setting."
+    }
+  ],
+  "enabled_on": {
+    "templates": ["cart"]
+  }
+}
+{% endschema %}

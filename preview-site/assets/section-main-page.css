@@ -1,0 +1,399 @@
+/* ============================================================================
+   GOD SQUAD — Page
+   Phase 10. Every value is a token from design-tokens.css. No raw hex, no
+   magic numbers, no !important, and no JavaScript.
+
+   Most of this file styles HTML the theme did not write. page.content is
+   whatever the Shopify rich-text editor produced, so the rules below cover the
+   elements that editor can emit — headings, paragraphs, lists, links, quotes,
+   images, figures, rules and tables — and pull them onto the theme's own type
+   scale. A stylesheet can only receive that markup; it cannot add a class to
+   it, wrap it or change an element's level, which is why several decisions
+   below end in an editor note rather than in CSS.
+
+   The composition is one reading column at every width. There is no min-width
+   block in this file, and that is deliberate rather than missing: nothing about
+   a column of prose changes at a breakpoint except the gutter, and --gutter
+   already switches itself at 768 and 1024 in design-tokens.css.
+   ========================================================================== */
+
+.main-page {
+  width: 100%;
+}
+
+/* Spacing selects from three system values rather than accepting a free pixel
+   number, so a band cannot land off the Phase 2 §7.4 rhythm. The chosen value
+   lands in a private custom property rather than straight into padding, which
+   is the shape every other band in the theme uses. Nothing is added to it here
+   — the liquid file records why no header clearance applies to this template —
+   but a later offset would compose into it rather than replace it.
+
+   main-cart and main-product carry no spacing settings at all. This one does,
+   because templates/page.json is a template a merchant extends with sections of
+   their own: where the prose stops and the next band begins is their decision,
+   not a fixed page rhythm. The reasoning is in sections/main-page.liquid. */
+.main-page {
+  --mp-space-top: 0px;
+  --mp-space-bottom: 0px;
+  padding-block: var(--mp-space-top) var(--mp-space-bottom);
+}
+
+.main-page--pt-standard { --mp-space-top: var(--section-pad-block); }
+.main-page--pt-tight    { --mp-space-top: var(--section-pad-block-tight); }
+.main-page--pt-none     { --mp-space-top: 0px; }
+.main-page--pb-standard { --mp-space-bottom: var(--section-pad-block); }
+.main-page--pb-tight    { --mp-space-bottom: var(--section-pad-block-tight); }
+.main-page--pb-none     { --mp-space-bottom: 0px; }
+
+/* ------------------------------------------------------------------- frame
+   The root is full-bleed and its content is constrained — the Phase 2 §8
+   container model — so the surface colour reaches the viewport edge while the
+   words do not. */
+
+/* The reading frame, centred inside the standard container.
+
+   --container-narrow is the token design-tokens.css §6 labels "long-form
+   reading", and it is the outer cap. The line length that actually governs
+   readability is the character cap on the prose below; this one keeps the
+   title, the images and the tables in the same column as the words rather
+   than letting them run to 1440. */
+.main-page__column {
+  width: 100%;
+  max-width: var(--container-narrow);
+  margin-inline: auto;
+}
+
+/* ------------------------------------------------------------------- title
+   The page's h1. It is the same display lockup the cart page uses, because
+   both are a template's own title rather than a band's heading.
+
+   The gap below the title is not set here. With the title hidden, the
+   visually-hidden utility takes the h1 out of flow and a margin on it would do
+   nothing, so the gap is carried by the prose below instead — and removed there
+   by .main-page--no-heading, which is the only reason that modifier exists. */
+
+.main-page__title {
+  margin: 0;
+  color: inherit;
+  font-family: var(--font-display);
+  font-size: var(--type-display-m-size);
+  font-weight: var(--weight-black);
+  line-height: var(--type-display-m-lh);
+  letter-spacing: var(--type-display-m-ls);
+  text-transform: uppercase;
+  /* NOT overflow-wrap: anywhere, which collapses an element's min-content width
+     to a single character. `break-word` is the last resort for a page title
+     long enough to overrun a phone; it does not affect intrinsic sizing. */
+  overflow-wrap: break-word;
+}
+
+/* ================================================================ rich text
+   Everything below applies to merchant HTML. */
+
+/* overflow-wrap is set on the CONTENT ROOT so it inherits to every text-bearing
+   descendant. Set only on headings and table cells, a bare URL pasted into a
+   paragraph — which is what a contact, shipping or returns page is full of —
+   overflowed a 375px viewport: the content box there is about 327px and an
+   unbroken 55-character URL sets around 420-480px at --type-body-size. */
+.main-page__content {
+  overflow-wrap: break-word;
+  margin-block-start: var(--space-7);
+  /* Phase 2 §26.2 / §14.4: a reading measure, not a caption measure.
+     --measure-narrow is 40ch, which assets/section-our-story.css records as
+     "an editorial caption measure, not a reading measure — correct for a
+     three-sentence brand statement and wrong for anything longer". A shipping
+     policy is longer, so this takes --measure-body 68ch, inside §14.4's 60-75
+     target. ch resolves against this element's own font-size, so the cap
+     travels with the body size rather than being restated as pixels. */
+  max-width: var(--measure-body);
+  /* Full contrast, not --color-text-current-muted. Muted passes on both
+     surfaces (9.70:1 on ink, 5.97:1 on cream in design-tokens.css §2) and is
+     right for copy that supports something else — the story band's paragraph,
+     the product description under a price. Here the prose IS the page, so it
+     takes the 17.04:1 pairing the surface class already sets. */
+  color: inherit;
+  font-family: var(--font-body);
+  font-size: var(--type-body-size);
+  line-height: var(--type-body-lh);
+}
+
+/* With the title hidden the prose is the first thing in the band, and the gap
+   that separated them has nothing left to separate. */
+.main-page--no-heading .main-page__content {
+  margin-block-start: 0;
+}
+
+/* Merchant HTML always opens and closes with a block element, and every rule
+   below gives those a margin. Without these two the band's own padding would
+   be doubled at the top and the bottom. */
+.main-page__content > :first-child { margin-block-start: 0; }
+.main-page__content > :last-child  { margin-block-end: 0; }
+
+/* ------------------------------------------------------ rich text: headings
+   Six levels, because the editor can emit six.
+
+   h1 is styled alongside h2 rather than left to the user agent. A second h1
+   inside the content is an outline defect — the page title is already the
+   level-1 heading — but a stylesheet cannot change an element's level, and
+   silently leaving it at the browser's 2em serif would make the defect look
+   like the design. The lever is the editor note on "Show the page title",
+   which asks the merchant to start at Heading 2.
+
+   The family split is design-tokens.css §3's: Playfair for the first two
+   levels, Jost for the interface levels below them. */
+
+.main-page__content h1,
+.main-page__content h2 {
+  margin-block: var(--space-8) var(--space-4);
+  color: inherit;
+  font-family: var(--font-display);
+  font-size: var(--type-h2-size);
+  font-weight: var(--weight-black);
+  line-height: var(--type-h2-lh);
+  text-transform: uppercase;
+  overflow-wrap: break-word;
+}
+
+.main-page__content h3,
+.main-page__content h4 {
+  margin-block: var(--space-7) var(--space-3);
+  color: inherit;
+  font-family: var(--font-body);
+  font-weight: var(--weight-semibold);
+  overflow-wrap: break-word;
+}
+
+.main-page__content h3 {
+  font-size: var(--type-h3-size);
+  line-height: var(--type-h3-lh);
+}
+
+.main-page__content h4 {
+  font-size: var(--type-h4-size);
+  line-height: var(--type-h4-lh);
+}
+
+/* The fifth and sixth levels are below the body size, so they stop being a
+   size step and become the tracked uppercase label instead — the same device
+   the value tiles and the cart's own small headings use. Size and tracking
+   travel together, per design-tokens.css §4. */
+.main-page__content h5,
+.main-page__content h6 {
+  margin-block: var(--space-6) var(--space-3);
+  color: inherit;
+  font-family: var(--font-body);
+  font-size: var(--type-label-size);
+  font-weight: var(--type-label-weight);
+  letter-spacing: var(--type-label-ls);
+  line-height: var(--type-body-sm-lh);
+  text-transform: uppercase;
+}
+
+/* ---------------------------------------------------- rich text: paragraphs */
+
+.main-page__content p {
+  margin-block: var(--space-4) 0;
+}
+
+/* The editor emits <strong> and <em>, and layout/theme.liquid registers exactly
+   one face per family — {{ settings.type_body_font | font_face }} with no
+   font_modify for weight or style — so there is no real bold or italic to
+   reach. Both are currently synthesised by the browser. The weight is named
+   here anyway so that the day a bold face is registered these pick it up
+   instead; until then this rule changes nothing a merchant can see. */
+.main-page__content strong,
+.main-page__content b {
+  font-weight: var(--weight-semibold);
+}
+
+.main-page__content small {
+  font-size: var(--type-body-sm-size);
+}
+
+/* -------------------------------------------------------- rich text: links
+   Colour is never the only signal: the underline carries the link, which is
+   what lets the colour stay inherited at 17.04:1 on both surfaces instead of
+   dropping to an accent. The hover colour is --accent-current, so it resolves
+   to muted gold on ink (11.01:1) and to the strong gold on cream (4.66:1)
+   rather than putting 1.55:1 gold on a cream page. */
+
+.main-page__content a {
+  color: inherit;
+  text-underline-offset: var(--link-underline-offset);
+  text-decoration-thickness: var(--link-underline-thickness);
+}
+
+/* Pointer-scoped in Phase 18 (PHASE-2 22.1 rule 5). */
+@media (hover: hover) and (pointer: fine) {
+  .main-page__content a:hover {
+    color: var(--accent-current);
+  }
+}
+
+/* ---------------------------------------------------------- rich text: lists
+   No role="list" here and no list-style: none. That pairing exists elsewhere in
+   the theme because Safari drops list semantics from a list whose markers are
+   removed; these lists keep their markers, so they keep their semantics, and
+   the attribute is not the theme's to add to merchant markup anyway. */
+
+.main-page__content ul,
+.main-page__content ol {
+  margin-block: var(--space-4) 0;
+  /* Markers sit inside the reading column rather than hanging into the gutter,
+     where at --gutter 24px on a phone they would land on the viewport edge. */
+  padding-inline-start: var(--space-5);
+}
+
+.main-page__content li + li {
+  margin-block-start: var(--space-2);
+}
+
+.main-page__content li > ul,
+.main-page__content li > ol {
+  margin-block-start: var(--space-2);
+}
+
+/* ---------------------------------------------------------- rich text: quote
+   --accent-current, not --color-accent. The raw token is muted gold, which is
+   1.55:1 on cream: as a two-pixel rule against the page's own background it
+   would be all but invisible on the default surface. The surface-aware token
+   resolves to the strong gold there (4.66:1) and to muted gold on ink
+   (11.01:1), which is the whole point of the -current family. */
+
+.main-page__content blockquote {
+  margin-block: var(--space-6);
+  margin-inline: 0;
+  padding-inline-start: var(--space-5);
+  border-inline-start: var(--border-width-strong) solid var(--accent-current);
+  font-size: var(--type-body-lg-size);
+  line-height: var(--type-body-lg-lh);
+}
+
+.main-page__content blockquote > :first-child { margin-block-start: 0; }
+.main-page__content blockquote > :last-child  { margin-block-end: 0; }
+
+/* -------------------------------------------------- rich text: media
+   The editor writes width and height attributes onto an uploaded image, so
+   height: auto is not decoration: without it, capping the width at the column
+   distorts the picture rather than scaling it. */
+
+.main-page__content img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin-block: var(--space-6);
+}
+
+.main-page__content figure {
+  margin-block: var(--space-6);
+  margin-inline: 0;
+}
+
+.main-page__content figure img {
+  margin-block: 0;
+}
+
+.main-page__content figcaption {
+  margin-block-start: var(--space-3);
+  color: var(--color-text-current-muted);
+  font-size: var(--type-caption-size);
+  font-weight: var(--type-caption-weight);
+  letter-spacing: var(--type-caption-ls);
+  line-height: var(--type-body-sm-lh);
+  text-transform: uppercase;
+}
+
+/* An embed pasted through the editor's HTML view. Only the width is claimed:
+   a fixed aspect-ratio here would be right for a video and wrong for a map or
+   a form, and the theme cannot tell which one arrived. */
+.main-page__content iframe,
+.main-page__content video {
+  display: block;
+  max-width: 100%;
+  margin-block: var(--space-6);
+}
+
+/* A separator, not a border on something. The system is flat, so it is a
+   hairline in the surface's own border colour rather than a raised rule. */
+.main-page__content hr {
+  height: var(--border-width);
+  margin-block: var(--space-8);
+  border: 0;
+  background-color: var(--color-border-current);
+}
+
+/* --------------------------------------------------------- rich text: tables
+   A size guide is the table this page exists to carry, and the editor writes
+   it with no classes and no wrapper.
+
+   The cells wrap rather than the table scrolling. The usual answer —
+   display: block plus overflow-x: auto on the table itself — is rejected here:
+   it takes the element out of the table display family, and VoiceOver in Safari
+   then stops announcing it as a table, so the row and column relationships a
+   size guide depends on are lost on the device most likely to be reading it. A
+   scroll container is the correct fix, and it needs two things this file does
+   not have: an element to wrap the table in, and tabindex="0" on it so a
+   keyboard user can reach the scroll. Both belong to markup the theme does not
+   own, so the limit is recorded rather than traded for the semantics.
+
+   What is left is honest: every cell wraps, the table fills the reading column,
+   and a table with enough columns to overrun it still overruns it. */
+
+.main-page__content table {
+  width: 100%;
+  margin-block: var(--space-6);
+  border-collapse: collapse;
+  font-size: var(--type-body-sm-size);
+  line-height: var(--type-body-sm-lh);
+}
+
+.main-page__content caption {
+  margin-block-end: var(--space-3);
+  color: var(--color-text-current-muted);
+  font-size: var(--type-caption-size);
+  letter-spacing: var(--type-caption-ls);
+  text-align: start;
+  text-transform: uppercase;
+}
+
+.main-page__content th,
+.main-page__content td {
+  padding-block: var(--space-3);
+  padding-inline: 0 var(--space-4);
+  border-block-end: var(--border-width) solid var(--color-border-current);
+  text-align: start;
+  vertical-align: top;
+  /* A single long token in a cell — a SKU, a URL, a measurement string — would
+     otherwise set the column's minimum width and push the table past the
+     reading column on a phone. */
+  overflow-wrap: break-word;
+}
+
+.main-page__content th {
+  font-size: var(--type-label-size);
+  font-weight: var(--type-label-weight);
+  letter-spacing: var(--type-label-ls);
+  text-transform: uppercase;
+}
+
+.main-page__content thead th {
+  border-block-end: var(--border-width-strong) solid var(--color-border-current);
+}
+
+/* --------------------------------------------------------------- notice
+   Theme Editor only. Never rendered on the storefront. */
+
+.main-page__notice {
+  margin-block-start: var(--space-7);
+  padding: var(--space-5);
+  border: var(--border-width) dashed var(--color-border-current-interactive);
+  color: var(--color-text-current-muted);
+  font-family: var(--font-body);
+  font-size: var(--type-body-sm-size);
+  line-height: var(--type-body-sm-lh);
+}
+
+/* ---------------------------------------------------------- reduced motion
+   Nothing in this file transitions, moves, fades or scales at any viewport.
+   The only state change is a link's hover colour, which is instantaneous. This
+   block is here so that is explicit rather than assumed. */

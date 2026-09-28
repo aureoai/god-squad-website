@@ -1,0 +1,402 @@
+/* ============================================================================
+   GOD SQUAD — Footer
+   Phase 10. Every value is a token from design-tokens.css. No raw hex, no
+   magic numbers, no !important, and no JavaScript.
+
+   The band is full-bleed and its content is constrained — the Phase 2 section 8
+   container model, the same frame every other band in this theme uses.
+
+   Nothing here duplicates a component. The links are plain anchors rather than
+   the button system, because a footer full of buttons is a footer with no
+   hierarchy left; component-button.css is not loaded for this section and does
+   not need to be.
+   ========================================================================== */
+
+.footer {
+  width: 100%;
+  padding-block: var(--section-pad-block);
+  /* A group-bound chrome section, so the page rhythm is not a merchant choice
+     and there is no spacing_top / spacing_bottom pair to resolve. This is the
+     same treatment sections/main-cart.liquid takes for the same reason. */
+
+  /* The default footer surface is ink and so is the default Our Story band
+     directly above it on the home page. Two identical backgrounds meet with no
+     boundary at all, so the footer draws its own hairline. --color-border-
+     current-subtle rather than --color-border-current: this separates two
+     bands, it does not enclose a control. */
+  border-block-start: var(--border-width) solid var(--color-border-current-subtle);
+}
+
+/* ------------------------------------------------------------- brand band */
+
+/* --logo-height-footer has been in design-tokens.css since Phase 2, sized for
+   this exact placement; Phase 11 is simply the first phase with a logo to put
+   in it. width:auto with a fixed height is how the header sizes the same mark,
+   so the two stay in proportion. */
+.footer__logo-link {
+  display: inline-block;
+  margin-block-end: var(--space-6);
+}
+
+.footer__logo {
+  display: block;
+  width: auto;
+  height: var(--logo-height-footer);
+  object-fit: contain;
+}
+
+/* IN THE BRAND ROW THE MARK IS LARGER THAN THE TOKEN, AND THE ARTWORK IS WHY.
+
+   --logo-height-footer is 56px (PHASE-2 line 155) and that is the right figure
+   for a 56px MARK. This wordmark is not one: its ink occupies 432x326 inside a
+   500x500 transparent canvas, 56% of the area, so at height 56 the visible
+   letters draw about 42px tall and sit in 14px of empty space. Beside a
+   two-line text block that reads as a small logo pushed off its own baseline.
+
+   72px restores the optical size the token intends without touching the token,
+   which other surfaces use with other art. The real fix is trimming the
+   padding out of the source file and re-exporting; that changes the artwork's
+   aspect ratio from square to 4:3, which is the owner's call, not a bug fix. */
+.footer__brand .footer__logo {
+  height: 72px;
+}
+
+/* The link's own bottom margin belongs to the stacked layout, not to a row
+   where the mark is one of four things sharing a baseline. */
+.footer__brand .footer__logo-link {
+  margin-block-end: 0;
+  flex: none;
+}
+
+.footer__description {
+  margin: 0;
+  color: var(--color-text-current-muted);
+  font-family: var(--font-body);
+  font-size: var(--type-body-sm-size);
+  line-height: var(--type-body-sm-lh);
+  max-width: var(--measure-narrow);
+  text-transform: none;
+}
+
+/* THE BRAND ROW. The mark, the tagline, the social marks and the closing line
+   on one line, which is what the approved footer design shows.
+
+   Stacked at base and a row at --bp-lg, because four items on one line at 390px
+   would put the tagline and the closing line at three or four words per line
+   each. The hairlines between groups are inline-start borders on the items that
+   follow a gap, drawn only at the width where they sit side by side — a vertical
+   rule in a stacked column is a rule pointing nowhere. */
+.footer__brand {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-5);
+  margin-block-end: var(--space-8);
+}
+
+@media (min-width: 1024px) {
+  .footer__brand {
+    flex-direction: row;
+    align-items: stretch;
+    gap: var(--space-6);
+  }
+
+  /* The marks and the closing line still centre on the row's axis; only the
+     lockup stretches, because only the lockup carries a rule. */
+  .footer__brand .footer__social,
+  .footer__brand .footer__strapline {
+    align-self: center;
+  }
+
+  /* THE LOCKUP: mark, rule, words.
+
+     The rule is on the TEXT BLOCK and the block STRETCHES, so the rule runs the
+     full height of the lockup and reads as a divider. On the tagline alone it
+     was only as tall as two lines of 12px type — a 36px tick floating beside a
+     56px mark, which is what made this look unfinished.
+
+     align-items on the row is flex-start rather than center so the rule starts
+     at the top of the lockup; the two children then centre themselves inside
+     their own stretched boxes. */
+  .footer__brand .footer__lockup-text {
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: var(--space-2);
+    padding-inline-start: var(--space-6);
+    border-inline-start: var(--border-width) solid var(--color-border-current);
+  }
+
+  .footer__brand .footer__tagline {
+    /* No max-width and no balance: the line break is the merchant's, carried by
+       newline_to_br. Constraining the measure as well fought it and produced
+       three lines where the setting asks for two. */
+    white-space: normal;
+  }
+
+  /* The slack goes HERE, not into the tagline. Growing the tagline was the
+     first attempt and it does not work: .footer__tagline carries
+     max-width: var(--measure-narrow), so flex-grow had nothing to grow into and
+     the marks sat in the middle of the row instead of at its edge. An auto
+     inline-start margin takes all of it and needs no cooperation from the
+     element before it. */
+  .footer__brand .footer__social {
+    margin-inline-start: auto;
+  }
+
+  .footer__brand .footer__strapline {
+    padding-inline-start: var(--space-6);
+    border-inline-start: var(--border-width) solid var(--color-border-current);
+  }
+}
+
+/* Inside the brand row the tagline's own bottom margin is the row's job. */
+.footer__brand .footer__tagline {
+  margin-block-end: 0;
+}
+
+.footer__tagline {
+  margin: 0 0 var(--space-8);
+  max-width: var(--measure-narrow);
+  color: inherit;
+  font-family: var(--font-body);
+  font-size: var(--type-caption-size);
+  font-weight: var(--type-caption-weight);
+  letter-spacing: var(--type-caption-ls);
+  line-height: var(--type-tagline-lh);
+  text-transform: uppercase;
+}
+
+/* ---------------------------------------------------------------- columns */
+
+.footer__blocks {
+  display: grid;
+  gap: var(--space-7);
+}
+
+/* A grid item's automatic minimum is its min-content width, not zero, so a
+   long menu item pushes its track past the minmax(0, 1fr) declared below and
+   takes the row wider than the container with it. */
+.footer__column {
+  min-width: 0;
+}
+
+.footer__heading {
+  margin: 0 0 var(--space-5);
+  color: inherit;
+  font-family: var(--font-body);
+  font-size: var(--type-label-size);
+  font-weight: var(--type-label-weight);
+  letter-spacing: var(--type-label-ls);
+  text-transform: uppercase;
+}
+
+.footer__menu,
+.footer__policy-list,
+.footer__social-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.footer__menu {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.footer__link {
+  display: inline-flex;
+  align-items: center;
+  /* --target-min-aa, not --target-min. Phase 2 reserves the 44px target for
+     primary controls; these are secondary navigation, and 24px is the SC 2.5.8
+     floor they have to clear. The announcement bar's links already resolve the
+     same question the same way. */
+  min-height: var(--target-min-aa);
+  color: inherit;
+  font-family: var(--font-body);
+  font-size: var(--type-body-sm-size);
+  line-height: var(--type-body-sm-lh);
+  text-decoration: none;
+}
+
+/* Pointer-scoped in Phase 18 (PHASE-2 22.1 rule 5). */
+@media (hover: hover) and (pointer: fine) {
+  .footer__link:hover {
+    color: var(--accent-current);
+    text-decoration: underline;
+    text-underline-offset: var(--link-underline-offset);
+    text-decoration-thickness: var(--link-underline-thickness);
+  }
+}
+
+/* The current page is marked by a persistent underline as well as by
+   aria-current, so the state is not carried by colour alone. */
+.footer__link.is-active {
+  color: var(--accent-current);
+  text-decoration: underline;
+  text-underline-offset: var(--link-underline-offset);
+  text-decoration-thickness: var(--link-underline-thickness);
+}
+
+/* A richtext setting emits bare <p> and <a> with no classes on them, so this
+   is the one place in this file that styles elements rather than a class.
+   There is nothing else to hook. */
+.footer__text {
+  max-width: var(--measure-narrow);
+  color: inherit;
+  font-family: var(--font-body);
+  font-size: var(--type-body-sm-size);
+  line-height: var(--type-body-lh);
+}
+
+.footer__text p {
+  margin: 0 0 var(--space-4);
+}
+
+.footer__text p:last-child {
+  margin-block-end: 0;
+}
+
+.footer__text a {
+  color: inherit;
+  text-underline-offset: var(--link-underline-offset);
+  text-decoration-thickness: var(--link-underline-thickness);
+}
+
+/* Pointer-scoped in Phase 18 (PHASE-2 22.1 rule 5). */
+@media (hover: hover) and (pointer: fine) {
+  .footer__text a:hover {
+    color: var(--accent-current);
+  }
+}
+
+/* ------------------------------------------------------- policies, social */
+
+.footer__utility {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  margin-block-start: var(--space-8);
+}
+
+.footer__policy-list,
+.footer__social-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-5);
+}
+
+/* PHASE-2-DESIGN-SYSTEM.md line 2126 sizes this row explicitly — "social
+   marks --icon-lg 28px inside --target-min 44px boxes, --space-5 apart" — so
+   the general rule about secondary navigation does not cover it. The menu and
+   policy links stay at --target-min-aa; this row does not. */
+/* The mark is --icon-lg 28px, the size Phase 2 18.2 reserves for this row, and
+   the link stays a full 44px target around it. The selector is (0,2,0) so it
+   beats header.css's own `.icon { width: var(--icon-md) }` on specificity
+   rather than on which stylesheet happens to load later. */
+.footer__social-link .icon {
+  inline-size: var(--icon-lg);
+  block-size: var(--icon-lg);
+}
+
+.footer__social-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--target-min);
+  min-width: var(--target-min);
+  font-size: var(--type-caption-size);
+  letter-spacing: var(--type-caption-ls);
+  text-transform: uppercase;
+}
+
+/* ------------------------------------------------------------- bottom bar */
+
+.footer__bottom {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-block-start: var(--space-7);
+  padding-block-start: var(--space-5);
+  border-block-start: var(--border-width) solid var(--color-border-current-subtle);
+}
+
+.footer__copyright,
+.footer__strapline {
+  margin: 0;
+  color: var(--color-text-current-muted);
+  font-family: var(--font-body);
+  font-size: var(--type-caption-size);
+  font-weight: var(--type-caption-weight);
+  letter-spacing: var(--type-caption-ls);
+  text-transform: uppercase;
+}
+
+/* ---------------------------------------------------------- editor notices */
+
+.footer__notices {
+  display: grid;
+  gap: var(--space-4);
+  margin-block-start: var(--space-6);
+}
+
+.footer__notice {
+  margin: 0;
+  padding: var(--space-5);
+  border: var(--border-width) dashed var(--color-border-current-interactive);
+  color: var(--color-text-current-muted);
+  font-family: var(--font-body);
+  font-size: var(--type-body-sm-size);
+  line-height: var(--type-body-sm-lh);
+}
+
+/* ------------------------------------------------------------- breakpoints
+   Phase 1 RESP-06 measured the prototype's footer being forced into a 164px
+   column at every width below 900, although at 768 its two groups came to
+   230px and 271px inside a 705px content box — they fitted in one row with
+   room for the 32px gap. The rows therefore go horizontal at --bp-md 768,
+   which is the nearest rung of the Phase 2 ladder to the ~560px Phase 1
+   recommends and the only one the audit actually measured. */
+
+@media (min-width: 768px) {
+  .footer__blocks {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .footer__utility,
+  .footer__bottom {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-5);
+  }
+}
+
+@media (min-width: 1024px) {
+  /* grid-auto-flow rather than repeat(): the column count is the block count,
+     which is a merchant decision CSS cannot see. Auto-flow derives it without
+     the section having to publish the number as a custom property, and the
+     block is capped at four, so the widest case is four equal tracks.
+     grid-template-columns has to be cleared explicitly, because the two-column
+     rule above still applies at this width. */
+  /* Wrapping tracks, not one track per block.
+
+     The ceiling here is SIX, not four: the section declares two block types —
+     link_list at limit 4 and text at limit 2 — so a merchant can place six.
+     With one track per block that is (1024 - 96 - 160) / 6 = 128px per column
+     at the breakpoint, narrow enough to wrap every menu item to its own line.
+
+     auto-fit with a floor degrades to more ROWS instead of thinner columns, so
+     the row stays readable at any block count the schema actually permits.
+     minmax(0, 1fr) is kept inside it for the original reason: a track's
+     automatic floor is its content's min-content width, so one long menu item
+     would otherwise push the row wider than its container. */
+  .footer__blocks {
+    grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+    grid-auto-flow: row;
+    grid-auto-columns: minmax(0, 1fr);
+    gap: var(--grid-gap-large);
+  }
+}

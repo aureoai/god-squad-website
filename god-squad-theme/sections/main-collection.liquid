@@ -1,0 +1,666 @@
+{%- comment -%}
+  GOD SQUAD — Collection page
+  Phase 10. The catalogue browse surface. Every View all button on the home
+  page, every collection link in the merchant's menu and every
+  /collections/<handle> URL lands here.
+
+  Sources of truth:
+  - PHASE-1-WEBSITE-AUDIT.md SHOP-09, which lists templates/collection.json
+    among the storefront routes that have no template and therefore serve
+    Shopify's error page. Phase 8 recorded the same gap from the other end:
+    snippets/cart-empty-state.liquid points its one button at the home page
+    rather than at routes.all_products_collection_url precisely because no
+    collection template existed. This file is what closes it.
+  - PHASE-2-DESIGN-SYSTEM.md section 8 (the container model), 9.3 (the grid),
+    12 (form controls), 13 (the card), 10 (buttons).
+  - sections/featured-collection.liquid, whose grid, sizes arithmetic and card
+    call this file reuses rather than reinvents.
+
+  SHOPIFY IS THE SOURCE OF TRUTH.
+  The title, the description, the banner image, the product set, the sort
+  order and the number of results are all read from the collection object.
+  There is no product data, no price string, no ranking and no copy about the
+  collection anywhere in this file.
+
+  IT IS THE SAME GRID, NOT A SECOND ONE.
+  The tiles are {% render 'product-card' %} inside .product-grid, which is the
+  markup featured-collection emits and the CSS component-product-card.css
+  already styles — including the mobile gap and track floor that Phase 6
+  measured. The sizes arithmetic below is the same calculation Phase 9
+  corrected there, with the copy-column branches removed: this band has no copy
+  rail, so the grid is the full content row at every tier.
+
+  THE SORT CONTROL DELIBERATELY DROPS THE PAGE NUMBER.
+  A GET form does not append to its action's query string. The browser
+  discards whatever query the action URL carries and rebuilds it from the
+  form's own fields, so submitting this form sends sort_by and nothing else,
+  the page parameter included. That is not a side effect being tolerated, it is
+  the behaviour this surface wants, and it is why there is no hidden page
+  input here. Page 7 of "Price, low to high" holds different products from
+  page 7 of "Newest", so carrying the number across drops the customer into
+  the middle of a set they never scrolled; and where one order has seven pages
+  and another six, it drops them on a page that does not exist. A new sort
+  starts the result set again.
+
+  Nothing else on this URL needs carrying. Faceted filtering is out of Phase 10
+  scope and this section renders no filter control, so sort_by is the only
+  parameter the surface owns. A later phase that adds filters must put their
+  values in this form as hidden inputs, or the same discard that drops the page
+  number will drop the filters.
+
+  ONE SMALL SCRIPT, AND EVERYTHING WORKS WITHOUT IT.
+  The rest of this section is static markup. The script below does two things
+  and only two: it submits the form when the select changes, and it then hides
+  the submit button that made the form usable without it. The order matters —
+  the button is hidden by the script that replaced it, not by a CSS rule keyed
+  off the document's js class, because that class is set in the head and would
+  hide the button even on a page where this script never ran.
+
+  WHAT IS DELIBERATELY NOT HERE.
+  No faceted filtering, which the Phase 10 brief excludes. No infinite scroll
+  or load-more, both of which need script to work at all and leave a customer
+  with no way to link to what they are looking at. No collection subheading,
+  promotional band, badge, count-down or "X people are viewing this" — those
+  are business facts nobody has supplied. No sub-collection navigation: the
+  menu is the merchant's, and this section does not invent a second one.
+{%- endcomment -%}
+
+{%- liquid
+  assign cols_d = section.settings.columns_desktop
+  assign cols_t = section.settings.columns_tablet
+  assign cols_m = section.settings.columns_mobile
+
+  assign surface_class = 'surface-light'
+  assign cta_variant = 'button--primary'
+  if section.settings.surface == 'dark'
+    assign surface_class = 'surface-dark'
+    comment
+      Gold is 11.01:1 on ink and 1.55:1 on cream, so the accent variant exists
+      on the dark surface only — Phase 2 section 10.1. The empty state's single
+      call to action takes it there and falls back to the primary variant on
+      cream, which is the same derivation our-story.liquid makes.
+    endcomment
+    assign cta_variant = 'button--accent'
+  endif
+
+  comment
+    The banner image is the collection's own, set in Shopify admin. There is no
+    image_picker here on purpose: an image chosen in this section would be the
+    same picture on every collection that uses this template, which is every
+    collection in the shop.
+  endcomment
+  assign banner_image = collection.image
+  assign show_banner = false
+  if section.settings.show_image and banner_image != blank
+    assign show_banner = true
+  endif
+
+  assign show_description = false
+  if section.settings.show_description and collection.description != blank
+    assign show_description = true
+  endif
+
+  comment
+    Sorting renders only where Shopify offers options for this collection. A
+    manually ordered collection still returns the full list, but the guard
+    keeps the toolbar from rendering an empty select if it ever does not.
+  endcomment
+  assign show_sorting = false
+  if section.settings.show_sorting and collection.sort_options.size > 0
+    assign show_sorting = true
+  endif
+  assign current_sort = collection.sort_by | default: collection.default_sort_by
+
+  comment
+    Filters exist only once a merchant has created them in Shopify admin, under
+    Apps > Search & Discovery > Filters. Until then collection.filters is empty
+    and nothing below renders — no empty Filter button, no empty drawer.
+
+    A group with a single value is dropped by snippets/facets.liquid, so a
+    collection that happens to hold one vendor does not get a control whose only
+    effect is to filter nothing out. has_filters therefore counts the groups
+    that snippet would actually render, not the ones Shopify returned.
+  endcomment
+  assign has_filters = false
+  if section.settings.show_filters
+    for f in collection.filters
+      if f.type == 'price_range'
+        assign has_filters = true
+      elsif f.values.size > 1
+        assign has_filters = true
+      endif
+    endfor
+  endif
+
+  assign active_filter_count = 0
+  for f in collection.filters
+    assign active_filter_count = active_filter_count | plus: f.active_values.size
+    if f.type == 'price_range'
+      if f.min_value.value != blank or f.max_value.value != blank
+        assign active_filter_count = active_filter_count | plus: 1
+      endif
+    endif
+  endfor
+
+  assign sort_form_id = 'CollectionSort-' | append: section.id
+  assign sort_id = 'CollectionSortBy-' | append: section.id
+
+  comment
+    The form posts back to the path the customer is already on, not to
+    collection.url. collection.url is the collection's canonical address and
+    drops the tag segment of a legacy tag URL — /collections/all/faith comes
+    back as /collections/all — so sorting from a tag view would silently throw
+    the tag away along with the page number. The layout's own title block
+    handles current_tags, so tag views are a state this theme already expects
+    to be in. request.path carries the segment and carries no query string,
+    which is exactly the pair of properties this form wants.
+  endcomment
+  assign sort_action = request.path
+  if sort_action == blank
+    assign sort_action = collection.url
+  endif
+
+  assign empty_url = section.settings.empty_link
+  if empty_url == blank
+    comment
+      The home page, not routes.all_products_collection_url. This template now
+      makes /collections/all servable, so that route is no longer a dead end —
+      but an empty collection reached FROM /collections/all would send the
+      customer back to the page they are standing on. The merchant can point
+      the button at a collection once there is one worth pointing at.
+    endcomment
+    assign empty_url = routes.root_url
+  endif
+
+  comment
+    The sizes attribute.
+
+    The section knows the grid, so the section computes it and the card takes
+    it as a parameter. This is Phase 6's calculation as Phase 9 corrected it,
+    with the copy-column branches dropped, because two things still make it
+    more than a division.
+
+    First, the column count is a CEILING. .product-grid floors every track at
+    --product-col-min 272px, so where a viewport cannot carry the requested
+    count the grid drops a column and the survivors stretch. Dividing by the
+    requested count would declare a slot narrower than the tile actually
+    painted and the browser would fetch a candidate it has to upscale. Phase 6
+    measured that: at 1024 the three-column grid painted two 292px tracks
+    against a declared 196px. Between a tier's minimum width and the width at
+    which the requested count first fits, the rendered count is exactly one
+    lower, and that threshold is computable here — so each tier emits two
+    clauses and both are exact across their range.
+
+    Second, the row available to the grid is the viewport less the gutters:
+    24, 32 and 48 per side on the Phase 2 ladder. This band has no copy rail,
+    so there is nothing else to subtract.
+  endcomment
+
+  comment
+    The sizes attribute is derived by snippets/grid-sizes.liquid, shared with
+    the other grid that uses this exact arithmetic.
+
+    It used to be ninety duplicated lines here. Phase 10 found that the desktop
+    clause fired below its own breakpoint, booked it as a blocker, and fixed it
+    in ONE of the copies; the other carried the bug for two more phases. Fixing
+    an instance is not fixing a rule.
+  endcomment
+  assign chrome_d = 96
+  capture sizes_attr
+    render 'grid-sizes', cols_d: cols_d, cols_t: cols_t, cols_m: cols_m, chrome_d: chrome_d
+  endcapture
+
+  assign classes = 'main-collection '
+  assign classes = classes | append: surface_class
+  if show_banner
+    assign classes = classes | append: ' main-collection--has-banner'
+  endif
+-%}
+
+{%- comment -%}
+  A main-* section is bound to templates/collection.json and cannot be added
+  anywhere else, so it always renders and the stylesheet link sits at the top
+  of the file rather than inside a configuration guard.
+
+  component-product-card.css is linked here and not from the layout, the same
+  way featured-collection links it: the shipped templates render one of the two
+  sections or the other, never both, so no page gets two link tags for the one
+  URL. A merchant who drops a collection row onto this template in the editor
+  would; if that turns out to be a configuration anyone actually ships, the
+  file moves to layout/theme.liquid under the same rule that promoted the
+  button system in Phase 6 and the cart line in Phase 8.
+{%- endcomment -%}
+{{ 'component-product-card.css' | asset_url | stylesheet_tag }}
+{{ 'section-main-collection.css' | asset_url | stylesheet_tag }}
+{%- comment -%}
+  Loaded with the section rather than from the layout, and only when there is
+  something to filter: a store that has configured no filters pays nothing for
+  the feature. facets.js is deferred like every other script here — the panel
+  works without it.
+{%- endcomment -%}
+{%- if has_filters -%}
+  {{ 'component-facets.css' | asset_url | stylesheet_tag }}
+  <script src="{{ 'facets.js' | asset_url }}" defer="defer"></script>
+{%- endif -%}
+
+{%- comment -%}
+  The column counts are merchant settings, so they arrive as scoped custom
+  properties rather than as inline style on the grid: an inline declaration
+  would outrank every media query and pin the mobile count to all three tiers.
+{%- endcomment -%}
+{% style %}
+  #shopify-section-{{ section.id }} .product-grid { --product-cols: {{ cols_m }}; }
+  @media (min-width: 768px) {
+    #shopify-section-{{ section.id }} .product-grid { --product-cols: {{ cols_t }}; }
+  }
+  @media (min-width: 1024px) {
+    #shopify-section-{{ section.id }} .product-grid { --product-cols: {{ cols_d }}; }
+  }
+{% endstyle %}
+
+<div
+  class="{{ classes }}"
+  data-collection-page
+  data-collection-section="{{ section.id }}"
+  {{ section.shopify_attributes }}
+>
+  {%- if show_banner -%}
+    {%- comment -%}
+      Full-bleed, so it is a child of the root rather than of __inner — the
+      Phase 2 section 8 container model, the same place our-story puts its
+      photograph.
+
+      No aspect ratio is imposed. The token file has no banner ratio, and
+      cropping a merchant's collection image to one invented here would hide
+      part of a picture nobody on this project has seen. The image keeps its
+      own proportions and the stylesheet caps its height instead, so a tall
+      upload cannot push the whole grid below the fold.
+
+      Alt text is the collection image's own, set in Shopify admin. Where it is
+      empty the image is announced as decorative, which is the correct default
+      for a mood photograph above a heading that already names the collection.
+    {%- endcomment -%}
+    <div class="main-collection__banner">
+      {{
+        banner_image
+        | image_url: width: 2400
+        | image_tag:
+          class: 'main-collection__banner-image',
+          widths: '480, 640, 900, 1200, 1500, 1800, 2100, 2400',
+          sizes: '100vw',
+          loading: 'eager',
+          decoding: 'async',
+          alt: banner_image.alt
+      }}
+    </div>
+  {%- endif -%}
+
+  <div class="main-collection__inner container">
+    <div class="main-collection__header">
+      {%- comment -%}
+        The page's only level-1 heading, and it is the collection's own title.
+        Unlike a content section's heading this is not a clearable setting, so
+        the card titles below are a fixed level 2 rather than a derived level.
+      {%- endcomment -%}
+      <h1 class="main-collection__title">{{ collection.title }}</h1>
+
+      {%- if show_description -%}
+        {%- comment -%}
+          Shopify stores a collection description as HTML, so it is output
+          unfiltered and the stylesheet handles the elements it may contain.
+        {%- endcomment -%}
+        <div class="main-collection__description rte">{{ collection.description }}</div>
+      {%- endif -%}
+    </div>
+
+    {%- paginate collection.products by section.settings.products_per_page -%}
+      {%- comment -%}
+        paginate.items, not collection.products.size.
+
+        Inside a paginate block collection.products is the PAGE SLICE, so an
+        out-of-range ?page= — which Shopify answers with a 200 and an empty
+        slice, not a 404 — made a collection with products announce "This
+        collection is empty." The same reasoning is already written out above
+        for the product count, which correctly reads paginate.items: it is the
+        size of the set actually being paginated.
+      {%- endcomment -%}
+      {%- if paginate.items > 0 -%}
+        {%- if has_filters -%}
+          {% render 'facets', results: collection, form_id: sort_form_id, id_prefix: sort_id %}
+        {%- elsif section.settings.show_filters and request.design_mode -%}
+          {%- comment -%}
+            Editor only. Filters are an admin setup step, not a theme one, and a
+            merchant who switched this on and saw nothing would reasonably file
+            it as a bug. Says nothing on the live storefront.
+          {%- endcomment -%}
+          <p class="main-collection__notice">
+            {{ 'sections.main_collection.no_filters' | t }}
+          </p>
+        {%- endif -%}
+
+        {%- if show_sorting or section.settings.show_product_count or has_filters -%}
+          <div class="main-collection__toolbar">
+            {%- if has_filters -%}
+              {%- comment -%}
+                Server-rendered hidden, and unhidden only by assets/facets.js.
+                Not keyed off the layout's `js` class: that class is set in the
+                head before any script has run, so it would hide the panel on a
+                page where facets.js never executed — the same reasoning the
+                sort control records. With no script the panel is simply in
+                flow above the grid and this button never appears.
+              {%- endcomment -%}
+              <button
+                type="button"
+                class="button button--secondary main-collection__filter-toggle"
+                data-facets-toggle
+                aria-expanded="false"
+                hidden
+              >
+                {{ 'collection.filters.open' | t }}
+                {%- if active_filter_count > 0 -%}
+                  <span class="main-collection__filter-count">{{ active_filter_count }}</span>
+                {%- endif -%}
+              </button>
+            {%- endif -%}
+            {%- if section.settings.show_product_count -%}
+              {%- comment -%}
+                paginate.items rather than collection.products_count: it is the
+                size of the set actually being paginated, so it stays correct
+                if a later phase narrows that set.
+              {%- endcomment -%}
+              <p class="main-collection__count">
+                {{ 'collection.product_count' | t: count: paginate.items }}
+              </p>
+            {%- endif -%}
+
+            {%- comment -%}
+              ONE form for the whole surface. It is rendered whenever there is a
+              sort control OR a filter control, because every facet checkbox
+              binds to it by the HTML form attribute rather than by sitting
+              inside it — so submitting from the toolbar or from the drawer's
+              Apply carries the sort and every checked filter together.
+
+              Before Phase 13 this form existed only for sorting, and its own
+              comment above recorded that it "sends sort_by and nothing else".
+              That was correct while nothing else was in the URL. The moment
+              filters arrived it would have discarded every one of them.
+
+              No page parameter is rendered, so any submission returns to page 1
+              — which is also what Shopify's own url_to_add does.
+            {%- endcomment -%}
+            {%- if show_sorting or has_filters -%}
+              <form
+                method="get"
+                action="{{ sort_action }}"
+                id="{{ sort_form_id }}"
+                class="main-collection__sort"
+                data-collection-sort
+              >
+                {%- if show_sorting -%}
+                <label class="main-collection__sort-label" for="{{ sort_id }}">
+                  {{ 'collection.sort_label' | t }}
+                </label>
+                <select
+                  class="main-collection__sort-select"
+                  id="{{ sort_id }}"
+                  name="sort_by"
+                  data-collection-sort-select
+                >
+                  {%- for option in collection.sort_options -%}
+                    <option
+                      value="{{ option.value }}"
+                      {% if option.value == current_sort %}selected{% endif %}
+                    >
+                      {{ option.name }}
+                    </option>
+                  {%- endfor -%}
+                </select>
+
+                {%- endif -%}
+
+                {%- comment -%}
+                  The control that makes the form work with no script at all.
+                  It carries no name attribute, so it contributes nothing to the
+                  query string when it is the thing that submitted the form, and
+                  nothing named "submit" shadows the form's own submit method.
+                {%- endcomment -%}
+                <button
+                  type="submit"
+                  class="button button--secondary main-collection__sort-submit"
+                  data-collection-sort-submit
+                >
+                  {{ 'collection.sort_submit' | t }}
+                </button>
+              </form>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+
+        <ul class="product-grid" role="list">
+          {%- for product in collection.products -%}
+            {%- liquid
+              comment
+                The first image on the page is the one worth fetching eagerly.
+                Where a banner renders it is that image, and every card stays
+                lazy; where none does, the first card is the topmost image on
+                the page and takes the eager load instead.
+              endcomment
+              assign card_eager = false
+              if forloop.first and show_banner == false
+                assign card_eager = true
+              endif
+            -%}
+            <li class="product-grid__item">
+              {% render 'product-card',
+                product: product,
+                heading_level: 2,
+                sizes: sizes_attr,
+                eager: card_eager
+              %}
+            </li>
+          {%- endfor -%}
+        </ul>
+
+        {%- if paginate.pages > 1 -%}
+          {%- comment -%}
+            A real navigation landmark with a name, because a page can carry
+            more than one nav and "Pagination" is what tells them apart.
+          {%- endcomment -%}
+          {% render 'pagination', paginate: paginate %}
+        {%- endif -%}
+      {%- else -%}
+        {%- comment -%}
+          A collection with nothing in it is a real state a customer can reach
+          from the menu, so it gets a real answer and a way out — the pattern
+          snippets/cart-empty-state.liquid established for the other empty
+          surface in this theme. That snippet is not rendered here: its three
+          strings are about a cart, and a shared empty-state component with a
+          strings parameter is worth building only once a third surface needs
+          one.
+        {%- endcomment -%}
+        {%- comment -%}
+          Two different nothings. A collection with no products at all is a
+          merchandising state the customer cannot act on; a collection whose
+          ACTIVE FILTERS match nothing is one they can fix in a click, and
+          telling them the collection is empty would be false. The filtered case
+          therefore gets its own words and a Clear all rather than a link away.
+        {%- endcomment -%}
+        {%- if active_filter_count > 0 -%}
+        <div class="main-collection__empty">
+          <p class="main-collection__empty-title">{{ 'collection.filters.none_match.title' | t }}</p>
+          <p class="main-collection__empty-body">{{ 'collection.filters.none_match.body' | t }}</p>
+          <a class="button {{ cta_variant }}" href="{{ collection.url }}">
+            {{ 'collection.filters.clear_all' | t }}
+            {% render 'icon-arrow' %}
+          </a>
+        </div>
+        {%- else -%}
+        <div class="main-collection__empty">
+          <p class="main-collection__empty-title">{{ 'collection.empty.title' | t }}</p>
+          <p class="main-collection__empty-body">{{ 'collection.empty.body' | t }}</p>
+          <a class="button {{ cta_variant }}" href="{{ empty_url }}">
+            {{ 'collection.empty.link' | t }}
+            {% render 'icon-arrow' %}
+          </a>
+        </div>
+        {%- endif -%}
+      {%- endif -%}
+    {%- endpaginate -%}
+  </div>
+</div>
+
+{%- comment -%}
+  THE SORT CONTROL SUBMITS ON A BUTTON, NOT ON CHANGE.
+
+  An earlier version of this section submitted the form from the select's
+  change event and then hid the submit button. That is the pattern most themes
+  ship, and it is a WCAG 2.2 SC 3.2.2 On Input failure at Level A: changing the
+  setting of a control automatically caused a change of context — a full page
+  navigation — with no advance warning. It is worst for the users least able to
+  absorb it, because a keyboard user arrowing through the options triggers a
+  navigation on every option they pass.
+
+  Keeping the button is the whole fix. The form is a plain GET form, so it now
+  behaves identically with and without JavaScript, and this section carries no
+  script at all — which also means it no longer emits a second root-level
+  element beside its own wrapper.
+
+  ZERO JavaScript.
+{%- endcomment -%}
+
+{% schema %}
+{
+  "name": "Collection page",
+  "tag": "section",
+  "class": "main-collection-section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Banner"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_image",
+      "label": "Show the collection image",
+      "default": true,
+      "info": "The image comes from the collection itself, set in Shopify admin, so every collection keeps its own. Collections with no image simply start at the title."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_description",
+      "label": "Show the collection description",
+      "default": true,
+      "info": "Also written on the collection in Shopify admin. Nothing is written in the theme."
+    },
+    {
+      "type": "header",
+      "content": "Browsing"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_product_count",
+      "label": "Show how many products are in the collection",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_filters",
+      "label": "Show filters",
+      "default": true,
+      "info": "Filters are created in Shopify admin under Apps › Search & Discovery › Filters. Until at least one exists, nothing is shown here whatever this is set to."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_sorting",
+      "label": "Show the sort control",
+      "default": true,
+      "info": "The orders offered are Shopify's own and follow what the collection allows. Changing the sort starts again at the first page, because the same page number holds different products in a different order."
+    },
+    {
+      "type": "range",
+      "id": "products_per_page",
+      "label": "Products per page",
+      "min": 8,
+      "max": 48,
+      "step": 4,
+      "default": 24,
+      "info": "Anything beyond this count moves to a second page with numbered links. There is no load-more button: it needs JavaScript to work at all, and it leaves a customer with no way to link to what they are looking at."
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "surface",
+      "label": "Colour scheme",
+      "info": "Cream is the approved treatment for browsing, and is what the home page's product rows use.",
+      "options": [
+        {
+          "value": "light",
+          "label": "Cream"
+        },
+        {
+          "value": "dark",
+          "label": "Ink"
+        }
+      ],
+      "default": "light"
+    },
+    {
+      "type": "header",
+      "content": "Grid"
+    },
+    {
+      "type": "paragraph",
+      "content": "These are maximums. A tile never drops below a readable width, so if a viewport cannot carry the count you choose, the grid drops a column rather than squeezing one."
+    },
+    {
+      "type": "range",
+      "id": "columns_desktop",
+      "label": "Columns, desktop",
+      "min": 2,
+      "max": 4,
+      "step": 1,
+      "default": 4
+    },
+    {
+      "type": "range",
+      "id": "columns_tablet",
+      "label": "Columns, tablet",
+      "min": 1,
+      "max": 3,
+      "step": 1,
+      "default": 2
+    },
+    {
+      "type": "range",
+      "id": "columns_mobile",
+      "label": "Columns, mobile",
+      "min": 1,
+      "max": 3,
+      "step": 1,
+      "default": 2
+    },
+    {
+      "type": "paragraph",
+      "content": "What a tile shows — price, original price, colourway swatches — is set once for the whole catalogue and is not a per-page choice. A shop that prices its products in one place and not another is a bug rather than a decision."
+    },
+    {
+      "type": "header",
+      "content": "Empty collection"
+    },
+    {
+      "type": "url",
+      "id": "empty_link",
+      "label": "Where the empty-collection button goes",
+      "info": "Leave empty to use the home page. Point it at a collection that has products in it once there is one."
+    }
+  ],
+  "enabled_on": {
+    "templates": [
+      "collection"
+    ]
+  }
+}
+{% endschema %}

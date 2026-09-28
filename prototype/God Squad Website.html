@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&amp;family=Jost:wght@400;500;600&amp;family=Kaushan+Script&amp;display=swap" rel="stylesheet">
+<style>
+html,body{margin:0;padding:0;background:#0d0c0a;color:#f3efe6;font-family:'Jost',Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+*{box-sizing:border-box}
+a{color:inherit;text-decoration:none}a:hover{color:#d8c08a}
+[data-r=nav-menu]{display:none}
+@media (max-width:900px){
+  [data-r=pad]{padding-left:24px!important;padding-right:24px!important}
+  [data-r=hero]{grid-template-columns:minmax(0,1fr)!important;min-height:0!important}
+  [data-r=hero-img]{position:relative!important;left:0!important;width:100%!important;height:62vw!important;min-height:320px!important;order:-1}
+  [data-r=hero-fade]{inset:auto 0 auto 0!important;top:0!important;height:max(62vw,320px)!important;background:linear-gradient(180deg,rgba(13,12,10,0) 55%,#0d0c0a 100%)!important}
+  [data-r=hero-img]{object-position:center 30%!important}
+  [data-r=hero-copy]{padding:24px 24px 32px!important}
+  [data-r=hero-side]{padding:0 24px 40px!important;flex-direction:row!important;align-items:center!important;gap:24px}
+  [data-r=hero-side] [data-r=rule]{display:none}
+  [data-r=hero-side] [data-r=script]{margin-left:0!important;transform:rotate(-6deg)!important}
+  [data-r=spacer]{display:none}
+  [data-r=nav]{position:relative!important;padding:16px 24px!important;order:-2}
+  [data-r=nav-links]{display:none!important}
+  [data-r=nav-menu]{display:flex;flex-direction:column;gap:5px}
+  [data-r=logo]{height:56px!important}
+  [data-r=drop]{grid-template-columns:minmax(0,1fr)!important;gap:32px!important;padding:40px 24px!important}
+  [data-r=products]{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:20px!important}
+  [data-r=story]{grid-template-columns:minmax(0,1fr)!important;min-height:0!important}
+  [data-r=story-img]{position:relative!important;left:0!important;width:100%!important;height:60vw!important;min-height:280px!important;order:-1}
+  [data-r=story-fade]{inset:auto 0 auto 0!important;top:0!important;height:max(60vw,280px)!important;background:linear-gradient(180deg,rgba(13,12,10,0) 55%,#0d0c0a 100%)!important}
+  [data-r=story-copy]{padding:8px 24px 40px!important}
+  [data-r=story-side]{padding:0 24px 40px!important}
+  [data-r=values]{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  [data-r=value]{padding:32px 16px!important;border-bottom:1px solid rgba(255,255,255,.1)}
+  [data-r=footer]{flex-direction:column!important;align-items:flex-start!important;padding:28px 24px!important;gap:24px!important}
+  [data-r=footer-right]{flex-wrap:wrap;gap:18px!important}
+  [data-r=vdiv]{display:none}
+}
+@media (max-width:520px){
+  [data-r=products]{grid-template-columns:minmax(0,1fr)!important}
+  [data-r=values]{grid-template-columns:minmax(0,1fr)!important}
+  [data-r=value]{border-right:none!important}
+  [data-r=announce]{flex-direction:column;gap:6px;text-align:center;padding:10px 16px!important}
+  [data-r=hero-side]{flex-direction:column!important;align-items:flex-start!important}
+}
+</style>
+</helmet>
+<div style="width:100%;max-width:1440px;margin:0 auto;background:#0d0c0a;overflow:hidden">
+
+<!-- announcement -->
+<div data-r="announce" style="display:flex;justify-content:space-between;align-items:center;padding:12px 48px;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:#d8c08a;border-bottom:1px solid rgba(255,255,255,.08)">
+  <span>Good People. Higher Purpose.</span>
+  <span style="display:flex;align-items:center;gap:8px;color:#f3efe6"><img src="images/icon-globe.png" alt="" style="height:16px;width:auto">Worldwide Shipping</span>
+</div>
+
+<!-- hero -->
+<section data-screen-label="Hero" data-r="hero" style="position:relative;min-height:620px;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1.1fr) minmax(0,.7fr);background:#0d0c0a">
+  <img data-r="hero-img" src="images/hero-group.png" alt="God Squad crew" style="position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover;object-position:center 30%">
+  <div data-r="hero-fade" style="position:absolute;inset:0;background:linear-gradient(90deg,rgba(13,12,10,.92) 0%,rgba(13,12,10,.75) 26%,rgba(13,12,10,.15) 48%,rgba(13,12,10,.1) 68%,rgba(13,12,10,.8) 100%),linear-gradient(180deg,rgba(13,12,10,.55) 0%,rgba(13,12,10,0) 30%,rgba(13,12,10,0) 70%,#0d0c0a 100%);pointer-events:none"></div>
+
+  <nav data-r="nav" style="position:absolute;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:22px 48px;z-index:2">
+    <div style="background:#0230;padding:0 6px;display:flex"><img data-r="logo" src="images/WHITE FONT LOGO.png" alt="God Squad" style="height:78px;width:auto"></div>
+    <div data-r="nav-links" style="display:flex;gap:44px;font-size:12px;letter-spacing:.2em;text-transform:uppercase;font-weight:500">
+      <a href="#" style="color:#d8c08a;border-bottom:1px solid #d8c08a;padding-bottom:4px">Home</a>
+      <a href="#shop">Shop</a><a href="#shop">Collections</a><a href="#story">Our Story</a><a href="#">Verse</a>
+    </div>
+    <div style="display:flex;gap:26px;align-items:center">
+      <span data-r="nav-menu" aria-label="Menu"><span style="width:22px;height:2px;background:#f3efe6;display:block"></span><span style="width:22px;height:2px;background:#f3efe6;display:block"></span><span style="width:22px;height:2px;background:#f3efe6;display:block"></span></span>
+      <img src="images/icon-search.png" alt="Search" style="height:24px;width:auto">
+      <img src="images/icon-account.png" alt="Account" style="height:24px;width:auto">
+      <span style="position:relative;display:inline-flex"><img src="images/icon-cart.png" alt="Cart" style="height:24px;width:auto"><span style="position:absolute;top:-8px;right:-10px;background:#d8c08a;color:#0d0c0a;font-size:9px;font-weight:600;width:14px;height:14px;border-radius:50%;display:flex;align-items:center;justify-content:center">0</span></span>
+    </div>
+  </nav>
+
+  <div data-r="hero-copy" style="position:relative;z-index:1;padding:170px 48px 56px;display:flex;flex-direction:column;justify-content:flex-start">
+    <div style="font-size:13px;letter-spacing:.3em;text-transform:uppercase;color:#d8c08a;margin-bottom:14px">Streetwear with a Purpose</div>
+    <h1 style="margin:0;font-family:'Playfair Display',Georgia,serif;font-weight:900;font-size:clamp(56px,8.5vw,112px);line-height:.88;letter-spacing:-.01em;text-transform:uppercase;text-wrap:balance">Walk By <span style="color:#d8c08a">Faith.</span></h1>
+    <div style="font-size:14px;letter-spacing:.3em;text-transform:uppercase;margin-top:10px">2 Corinthians 5:7</div>
+    <div style="width:36px;height:1px;background:#d8c08a;margin:38px 0 26px"></div>
+    <div style="font-size:14px;letter-spacing:.3em;text-transform:uppercase;line-height:1.65">Different<br>People<br>Same Purpose</div>
+  </div>
+  <div data-r="spacer"></div>
+  <div data-r="hero-side" style="position:relative;z-index:1;padding:190px 48px 56px 0;display:flex;flex-direction:column;align-items:flex-start">
+    <div data-r="script" style="font-family:'Kaushan Script',cursive;font-size:clamp(30px,3vw,44px);line-height:1.1;transform:rotate(-8deg);margin-left:20px">More<br>Than<br>Clothing.</div>
+    <div data-r="rule" style="width:80px;height:1px;background:#f3efe6;margin:36px 0 30px"></div>
+    <div style="font-size:14px;letter-spacing:.3em;text-transform:uppercase;line-height:1.7">A Higher<br>Purpose.</div>
+  </div>
+</section>
+
+<!-- new drop -->
+<section id="shop" data-screen-label="New Drop" data-r="drop" style="background:#f3efe6;color:#0d0c0a;display:grid;grid-template-columns:minmax(240px,.9fr) minmax(0,2.4fr);gap:40px;padding:48px 48px 44px;flex-wrap:wrap">
+  <div style="display:flex;flex-direction:column;align-items:flex-start">
+    <div style="font-size:13px;letter-spacing:.3em;text-transform:uppercase;font-weight:500">New Drop /</div>
+    <h2 style="margin:22px 0 0;font-family:'Playfair Display',Georgia,serif;font-weight:900;font-size:clamp(40px,4.6vw,64px);line-height:.9;text-transform:uppercase;letter-spacing:-.01em;overflow-wrap:anywhere">The<br>Faithful</h2>
+    <div style="width:40px;height:1px;background:#0d0c0a;margin:30px 0 22px"></div>
+    <div style="font-size:13px;letter-spacing:.24em;text-transform:uppercase;line-height:1.75">Premium Essentials<br>for a Higher Purpose.</div>
+    <a href="#" style="margin-top:36px;background:#0d0c0a;color:#f3efe6;padding:16px 26px;font-size:12px;letter-spacing:.22em;text-transform:uppercase;font-weight:500;display:inline-flex;gap:12px;align-items:center" style-hover="background:#2a2823;color:#f3efe6">View All Products <span>→</span></a>
+  </div>
+  <div data-r="products" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:36px">
+    <sc-for list="{{ products }}" as="p" hint-placeholder-count="0">
+      <div style="display:flex;flex-direction:column;align-items:center;text-align:center">
+        <div style="width:100%;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#ebe6dc">
+          <sc-if value="{{ p.img }}" hint-placeholder-val="{{ false }}"><img src="{{ p.img }}" alt="{{ p.name }}" style="width:100%;height:100%;object-fit:cover"></sc-if>
+        </div>
+        <div style="font-size:12px;letter-spacing:.2em;text-transform:uppercase;font-weight:600;margin-top:14px">{{ p.name }}</div>
+        <div style="font-size:14px;font-weight:600;margin-top:6px">{{ p.price }}</div>
+        <div style="display:flex;gap:10px;margin-top:14px">
+          <sc-for list="{{ p.swatches }}" as="s" hint-placeholder-count="3">
+            <span style="width:16px;height:16px;border-radius:50%;background:{{ s }};border:1px solid rgba(0,0,0,.25);display:inline-block"></span>
+          </sc-for>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+</section>
+
+<!-- our story -->
+<section id="story" data-screen-label="Our Story" data-r="story" style="position:relative;min-height:520px;display:grid;grid-template-columns:minmax(260px,.9fr) minmax(0,1.6fr) minmax(170px,.4fr);background:#0d0c0a">
+  <img data-r="story-img" src="./01-hero-model-mu98p88t-7jig.webp" alt="God Squad community" style="position:absolute;left:30%;top:0;width:70%;height:100%;object-fit:cover;object-position:center top">
+  <div data-r="story-fade" style="position:absolute;inset:0;background:linear-gradient(90deg,#0d0c0a 30%,rgba(13,12,10,.55) 42%,rgba(13,12,10,0) 56%);pointer-events:none"></div>
+  <div data-r="story-copy" style="position:relative;z-index:1;padding:56px 48px;display:flex;flex-direction:column;align-items:flex-start">
+    <div style="font-size:13px;letter-spacing:.3em;text-transform:uppercase;color:#d8c08a">Our Story</div>
+    <h2 style="margin:26px 0 0;font-family:'Playfair Display',Georgia,serif;font-weight:900;font-size:clamp(32px,4vw,40px);line-height:1.05;text-transform:uppercase">Real People.<br>Bigger Purpose.</h2>
+    <p style="margin:26px 0 0;font-size:15px;line-height:1.65;max-width:320px;color:#e9e4d8">God Squad is a Philippine streetwear brand built on faith, creativity, and community. We create pieces that inspire a generation to live different — with purpose.</p>
+    <a href="#" style="margin-top:36px;background:#d8c08a;color:#0d0c0a;padding:16px 26px;font-size:12px;letter-spacing:.22em;text-transform:uppercase;font-weight:600;display:inline-flex;gap:12px;align-items:center" style-hover="background:#e6d3a6;color:#0d0c0a">Our Story <span>→</span></a>
+  </div>
+  <div data-r="spacer"></div>
+  <div data-r="story-side" style="position:relative;z-index:1;padding:56px 48px 56px 0;display:flex;flex-direction:column;align-items:flex-start">
+    <div style="font-size:12px;letter-spacing:.22em;text-transform:uppercase;line-height:1.8">Faith<br>Lives<br>Different<br>Here.</div>
+    <div style="width:40px;height:1px;background:#f3efe6;margin-top:18px"></div>
+  </div>
+</section>
+
+<!-- value props -->
+<section data-screen-label="Values" data-r="values" style="background:#0d0c0a;border-top:1px solid rgba(255,255,255,.1);border-bottom:1px solid rgba(255,255,255,.1);display:grid;grid-template-columns:repeat(4,minmax(0,1fr))">
+  <sc-for list="{{ values }}" as="v" hint-placeholder-count="4">
+    <div data-r="value" style="padding:44px 24px;text-align:center;border-right:1px solid rgba(255,255,255,.1);display:flex;flex-direction:column;align-items:center;gap:10px">
+      <div style="height:44px;margin-bottom:10px;display:flex;align-items:center;justify-content:center"><sc-if value="{{ v.icon }}" hint-placeholder-val="{{ false }}"><img src="{{ v.icon }}" alt="" style="height:44px;width:auto"></sc-if></div>
+      <div style="font-size:13px;letter-spacing:.22em;text-transform:uppercase;font-weight:600">{{ v.title }}</div>
+      <div style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#bdb6a8">{{ v.sub }}</div>
+    </div>
+  </sc-for>
+</section>
+
+<!-- footer -->
+<footer data-r="footer" style="display:flex;align-items:center;justify-content:space-between;padding:26px 48px;gap:32px;flex-wrap:wrap">
+  <div style="display:flex;align-items:center;gap:28px">
+    <div style="background:#0230;display:flex"><img src="images/WHITE FONT LOGO.png" alt="God Squad" style="height:56px;width:auto"></div>
+    <div style="font-size:11px;letter-spacing:.26em;text-transform:uppercase;line-height:1.9;color:#bdb6a8">Different People.<br>Same Purpose.</div>
+  </div>
+  <div data-r="footer-right" style="display:flex;align-items:center;gap:32px">
+    <div style="display:flex;gap:18px">
+      <a href="#" aria-label="Facebook" style="display:inline-flex"><img src="images/icon-facebook.png" alt="Facebook" style="height:28px;width:28px"></a>
+      <a href="#" aria-label="Instagram" style="display:inline-flex"><img src="images/icon-instagram.png" alt="Instagram" style="height:28px;width:28px"></a>
+    </div>
+    <div data-r="vdiv" style="width:1px;height:28px;background:rgba(255,255,255,.2)"></div>
+    <div style="font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:#bdb6a8">A Brighter Tomorrow</div>
+  </div>
+</footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;currency&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;₱&quot;,&quot;options&quot;:[&quot;₱&quot;,&quot;$&quot;,&quot;€&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Shop&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const cur = this.props.currency ?? '₱';
+    return {
+      products: [
+        { name: 'Signature Oversized Tee', price: cur + '1,290', img: 'images/product-tee.webp', swatches: ['#0d0c0a', '#f3efe6', '#4b5443'] },
+        { name: 'Heavyweight Hoodie', price: cur + '2,490', img: 'images/product-hoodie.webp', swatches: ['#f3efe6', '#0d0c0a', '#4b5443'] },
+        { name: 'Utility Cap', price: cur + '890', img: 'images/product-cap.webp', swatches: ['#0d0c0a', '#f3efe6', '#4b5443'] },
+      ],
+      values: [
+        { title: 'Faith Driven', sub: 'More Than Clothing', icon: 'images/icon-crown.png' },
+        { title: 'Community', sub: 'People With Purpose', icon: 'images/icon-community.png' },
+        { title: 'Worldwide', sub: 'Shipping Available', icon: 'images/icon-globe.png' },
+        { title: 'Premium Quality', sub: 'Crafted To Inspire', icon: 'images/icon-diamond.png' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

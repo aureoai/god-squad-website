@@ -1,0 +1,134 @@
+{%- comment -%}
+  GOD SQUAD — Quantity selector
+  Phase 8. The three-part control Phase 2 §12.4 specifies: a minus button, a
+  number input, a plus button.
+
+  Three consumers, which is why it is a snippet rather than markup inside one
+  section: the product form, the cart drawer line, and the cart page line.
+
+  Accepts:
+  - id        {String}  required. The input's id. Must be unique on the page.
+  - name      {String}  optional, default 'quantity'. Cart lines pass
+                        'updates[]', which is the field Shopify's own no-JS
+                        cart form uses.
+  - value     {Number}  optional, default 1.
+  - min       {Number}  optional, default 1.
+  - max       {Number}  optional. Omitted unless the variant carries a rule.
+  - step      {Number}  optional, default 1.
+  - label     {String}  optional, default the 'products.quantity.label' string.
+  - describe  {String}  optional. The product or line name, appended to the
+                        buttons' accessible names so a screen reader hears
+                        which product it is stepping. Phase 2 §12.4 and the
+                        Phase 8 brief both ask for this.
+  - form      {String}  optional. The id of a form elsewhere in the document,
+                        for an input that is not a descendant of it.
+  - line_key  {String}  optional. A cart line item key, carried for the cart
+                        JavaScript. Never rendered as text.
+  - compact   {Boolean} optional, default false. The cart-line size.
+  - disabled  {Boolean} optional, default false.
+
+  Usage:
+  {% render 'quantity-selector', id: 'Quantity-123', describe: product.title %}
+
+  MINIMUM ONE, ALWAYS.
+  The minus button disables itself at the minimum rather than silently
+  clamping, so the control never looks live while doing nothing. The input
+  still carries min, so a typed 0 or -3 is rejected by the browser and by the
+  JavaScript. The Phase 8 brief makes this explicit twice.
+
+  THE UPPER BOUND IS SHOPIFY'S, NOT THE THEME'S.
+  max comes from the variant's own quantity rule when the caller passes one.
+  Nothing here invents a stock ceiling, and no inventory number is rendered:
+  variant.inventory_quantity is public on the storefront and publishing it
+  leaks either stock levels or lifetime sales. Phase 1 recorded the inventory
+  display question as BUSINESS INFORMATION REQUIRED.
+{%- endcomment -%}
+
+{%- liquid
+  assign q_name = name | default: 'quantity'
+  assign q_value = value | default: 1
+  assign q_min = min | default: 1
+  assign q_step = step | default: 1
+  assign q_label = label | default: 'products.quantity.label' | t
+
+  assign classes = 'quantity'
+  if compact
+    assign classes = classes | append: ' quantity--compact'
+  endif
+
+  comment
+    The decrement is offered only when there is somewhere to go. aria-disabled
+    rather than the disabled attribute, per Phase 2 §10.3: the control stays
+    focusable so its reason can be reached, and the reason here is the value
+    beside it, which already reads as the minimum.
+  endcomment
+  assign at_min = false
+  if q_value <= q_min
+    assign at_min = true
+  endif
+  assign at_max = false
+  if max != blank and q_value >= max
+    assign at_max = true
+  endif
+-%}
+
+<div
+  class="{{ classes }}"
+  data-quantity
+  {% if line_key != blank %}data-line-key="{{ line_key | escape }}"{% endif %}
+>
+  <button
+    type="button"
+    class="quantity__button"
+    data-quantity-step="-1"
+    {% if at_min or disabled %}aria-disabled="true"{% endif %}
+  >
+    {% render 'icon-minus' %}
+    <span class="visually-hidden">
+      {%- if describe != blank -%}
+        {{ 'products.quantity.decrease_for' | t: title: describe }}
+      {%- else -%}
+        {{ 'products.quantity.decrease' | t }}
+      {%- endif -%}
+    </span>
+  </button>
+
+  <label class="visually-hidden" for="{{ id }}">
+    {%- if describe != blank -%}
+      {{ 'products.quantity.label_for' | t: title: describe }}
+    {%- else -%}
+      {{ q_label }}
+    {%- endif -%}
+  </label>
+  <input
+    class="quantity__input"
+    id="{{ id }}"
+    type="number"
+    name="{{ q_name }}"
+    value="{{ q_value }}"
+    min="{{ q_min }}"
+    step="{{ q_step }}"
+    {% if max != blank %}max="{{ max }}"{% endif %}
+    inputmode="numeric"
+    autocomplete="off"
+    {% if form != blank %}form="{{ form }}"{% endif %}
+    {% if disabled %}disabled{% endif %}
+    data-quantity-input
+  >
+
+  <button
+    type="button"
+    class="quantity__button"
+    data-quantity-step="1"
+    {% if at_max or disabled %}aria-disabled="true"{% endif %}
+  >
+    {% render 'icon-plus' %}
+    <span class="visually-hidden">
+      {%- if describe != blank -%}
+        {{ 'products.quantity.increase_for' | t: title: describe }}
+      {%- else -%}
+        {{ 'products.quantity.increase' | t }}
+      {%- endif -%}
+    </span>
+  </button>
+</div>

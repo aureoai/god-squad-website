@@ -1,0 +1,16 @@
+{%- comment -%}
+  Renders the close icon.
+
+  Source: phase-3-assets/icons/icon-close.svg, drawn in Phase 3 to the Phase 2
+  contract — 24x24 canvas, stroke 1.5, currentColor, round caps and joins.
+  The same stroke length as the menu icon, rotated, so the two read as a pair.
+
+  Accepts:
+  - class: {String} optional extra class names
+
+  Usage:
+  {% render 'icon-close' %}
+
+  Decorative: the wrapping button carries the accessible name.
+{%- endcomment -%}
+<svg class="icon icon--close {{ class }}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.4 6.4 17.6 17.6"/><path d="M17.6 6.4 6.4 17.6"/></svg>

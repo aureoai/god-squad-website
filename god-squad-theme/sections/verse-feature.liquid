@@ -1,0 +1,399 @@
+{%- comment -%}
+  ============================================================================
+  GOD SQUAD — verse-feature.liquid
+
+  BAND 1 of the Verse feature: the "Today's Verse" strip. Three panels in one
+  row — a cream verse panel, a photograph, and an ink message panel — collapsing
+  to a single column on a phone.
+
+  Sources of truth: the owner's approved Verse mockup for the composition,
+  PHASE-2-DESIGN-SYSTEM.md for every colour, type role and spacing rung, and
+  sections/our-story.liquid for the house style this file follows.
+
+  THE PHOTOGRAPH IS A SETTING, NOT AN ASSET. The ten JPEGs in
+  brand-assets/verse images/ are crops of a flattened mockup screenshot — their
+  own README says any typography baked into the screenshot survives in the crop,
+  and it does: the card crops carry their own quote and link painted into the
+  pixels. None of them can ship. The merchant supplies the photograph.
+
+  NO DERIVED HEADING LEVEL. our-story.liquid and featured-collection.liquid both
+  compute a child heading level because they emit repeated headings beneath a
+  clearable h2. This band does not: the quote is a blockquote, the eyebrow and
+  the caption are labels, and nothing here heads a subsection. One h2, no h3.
+  ============================================================================
+{%- endcomment -%}
+
+{%- liquid
+  assign img = section.settings.image
+  assign img_mobile = section.settings.mobile_image
+
+  assign eyebrow = section.settings.eyebrow | strip
+  assign reference = section.settings.reference | strip
+  assign quote = section.settings.quote | strip
+  assign caption = section.settings.caption | strip
+  assign message_eyebrow = section.settings.message_eyebrow | strip
+  assign link_label = section.settings.link_label | strip
+  assign link_url = section.settings.link_url
+
+  assign surface_class = 'surface-light'
+  if section.settings.surface == 'dark'
+    assign surface_class = 'surface-dark'
+  endif
+
+  comment
+    The reflection link follows hero.liquid's rule exactly: a label alone is not
+    a control. No reflection page exists yet, so shipping the label with no
+    destination would put a dead link on the home page; it stays hidden until
+    the merchant gives it somewhere to go, and the editor notice says so.
+  endcomment
+  assign show_link = false
+  if link_label != blank and link_url != blank
+    assign show_link = true
+  endif
+
+  comment
+    The message panel earns its ink ground only when it has something in it.
+    An empty inverse panel is a black rectangle beside a photograph.
+  endcomment
+  assign show_message = false
+  if section.settings.message != blank or message_eyebrow != blank or show_link
+    assign show_message = true
+  endif
+
+  comment
+    Three panels at the widest, so the photograph is roughly a third of the
+    viewport; one column below that, where it is the full width.
+  endcomment
+  assign img_sizes = '(min-width: 1280px) 40vw, 100vw'
+
+  assign classes = 'verse-feature '
+  assign classes = classes | append: surface_class
+  assign classes = classes | append: ' verse-feature--pt-' | append: section.settings.spacing_top
+  assign classes = classes | append: ' verse-feature--pb-' | append: section.settings.spacing_bottom
+  if show_message
+    assign classes = classes | append: ' verse-feature--has-message'
+  endif
+  comment
+    The media modifier is unconditional now: the panel always has a photograph,
+    either the merchant's or the bundled stand-in, so the three-panel layout
+    this class selects is always the correct one.
+  endcomment
+  assign classes = classes | append: ' verse-feature--has-media'
+-%}
+
+{%- comment -%}
+  A band with no verse and no photograph has nothing to say, so on the live
+  storefront it renders nothing. In the Theme Editor it always renders, with a
+  note naming what is missing. Same guard as our-story.liquid:125.
+{%- endcomment -%}
+{%- if reference == blank and quote == blank and img == blank and request.design_mode == false -%}
+  {%- comment -%} Not configured yet: render nothing, and request nothing. {%- endcomment -%}
+{%- else -%}
+
+{{ 'section-verse-feature.css' | asset_url | stylesheet_tag }}
+
+<div class="{{ classes }}" {% if section.settings.anchor_id != blank %}id="{{ section.settings.anchor_id | handle }}"{% endif %}>
+  <div class="verse-feature__row">
+
+    {%- comment -%} ------------------------------------------ the verse panel {%- endcomment -%}
+    <div class="verse-feature__panel verse-feature__panel--verse">
+      {%- if eyebrow != blank -%}
+        <p class="verse-feature__eyebrow">{{ eyebrow | escape }}</p>
+      {%- endif -%}
+
+      {%- if reference != blank -%}
+        {%- comment -%}
+          An h2, never an h1 — the home page's single h1 belongs to the hero.
+          The reference is the heading because it is what the band is about.
+        {%- endcomment -%}
+        <h2 class="verse-feature__reference">{{ reference | escape | newline_to_br }}</h2>
+      {%- endif -%}
+
+      {%- if quote != blank -%}
+        {%- comment -%}
+          A blockquote, because it is a quotation, and cite on the element
+          carries the source for anything parsing the page. The line break is
+          the merchant's: newline_to_br, so the two-line setting in the mockup
+          breaks where they typed it rather than where the box happens to end.
+          escape runs BEFORE newline_to_br — reversed, the <br> would be eaten.
+        {%- endcomment -%}
+        <blockquote class="verse-feature__quote">
+          <p>{{ quote | escape | newline_to_br }}</p>
+        </blockquote>
+      {%- endif -%}
+
+      {%- if caption != blank -%}
+        <p class="verse-feature__caption">{{ caption | escape }}</p>
+      {%- endif -%}
+    </div>
+
+    {%- comment -%} ------------------------------------------------ the photo {%- endcomment -%}
+    <div class="verse-feature__media">
+      {%- if img != blank -%}
+        {%- comment -%}
+          Alt text is the merchant's, set on the image in Shopify admin, and is
+          never invented here — the theme cannot know what is in the photograph.
+          Empty alt announces it as decorative, which is correct for a mood
+          photograph beside a quote that already carries the message.
+        {%- endcomment -%}
+        {%- if img_mobile != blank -%}
+          <picture>
+            <source
+              media="(max-width: 1279px)"
+              srcset="
+                {{ img_mobile | image_url: width: 480 }} 480w,
+                {{ img_mobile | image_url: width: 640 }} 640w,
+                {{ img_mobile | image_url: width: 900 }} 900w,
+                {{ img_mobile | image_url: width: 1200 }} 1200w,
+                {{ img_mobile | image_url: width: 1500 }} 1500w,
+                {{ img_mobile | image_url: width: 2048 }} 2048w
+              "
+              sizes="100vw"
+              width="{{ img_mobile.width }}"
+              height="{{ img_mobile.height }}"
+            >
+            {{
+              img
+              | image_url: width: 2400
+              | image_tag:
+                class: 'verse-feature__image',
+                widths: '480, 640, 900, 1200, 1500, 1800, 2100, 2400',
+                sizes: img_sizes,
+                loading: 'lazy',
+                decoding: 'async',
+                alt: img.alt
+            }}
+          </picture>
+        {%- else -%}
+          {{
+            img
+            | image_url: width: 2400
+            | image_tag:
+              class: 'verse-feature__image',
+              widths: '480, 640, 900, 1200, 1500, 1800, 2100, 2400',
+              sizes: img_sizes,
+              loading: 'lazy',
+              decoding: 'async',
+              alt: img.alt
+          }}
+        {%- endif -%}
+      {%- else -%}
+        {% render 'image-fallback',
+          file: 'hero.webp',
+          class: 'verse-feature__image',
+          sizes: img_sizes,
+          width: 1672,
+          height: 941
+        %}
+      {%- endif -%}
+    </div>
+
+    {%- comment -%} ---------------------------------------- the message panel {%- endcomment -%}
+    {%- if show_message -%}
+      {%- comment -%}
+        surface-dark nested inside the band re-declares all five context
+        variables at this scope, which is Phase 2 operating rule 3: an inverse
+        block is a nested surface class, never an override of individual colour
+        properties. That is the path that produces gold on cream.
+      {%- endcomment -%}
+      <div class="verse-feature__panel verse-feature__panel--message surface-dark">
+        {%- if message_eyebrow != blank -%}
+          <p class="verse-feature__eyebrow">{{ message_eyebrow | escape }}</p>
+        {%- endif -%}
+
+        {%- if section.settings.message != blank -%}
+          <div class="verse-feature__message rte">{{ section.settings.message }}</div>
+        {%- endif -%}
+
+        {%- if show_link -%}
+          {%- comment -%}
+            The arrow is the theme's own snippet, not a literal → glyph. Phase 2
+            section 10.4 records why: Jost carries neither U+2192 nor U+20B1, so
+            the character falls back to a per-platform face and its weight and
+            baseline move between devices. It is aria-hidden inside the snippet,
+            because the label already says where the link goes.
+          {%- endcomment -%}
+          <a class="verse-feature__link" href="{{ link_url }}">
+            {{ link_label | escape }}
+            {% render 'icon-arrow', class: 'icon--sm' %}
+          </a>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+  </div>
+
+  {%- if request.design_mode -%}
+    {%- liquid
+      assign notices = ''
+      if img == blank
+        assign notices = notices | append: 'no_image|'
+      elsif img.alt == blank
+        assign notices = notices | append: 'no_alt|'
+      endif
+      if link_label != blank and link_url == blank
+        assign notices = notices | append: 'no_link_url|'
+      endif
+    -%}
+    {%- if notices != blank -%}
+      <div class="verse-feature__notice">
+        {%- if notices contains 'no_image' -%}
+          <p>{{ 'sections.verse_feature.no_image' | t }}</p>
+        {%- endif -%}
+        {%- if notices contains 'no_alt' -%}
+          <p>{{ 'sections.verse_feature.no_alt' | t }}</p>
+        {%- endif -%}
+        {%- if notices contains 'no_link_url' -%}
+          <p>{{ 'sections.verse_feature.no_link_url' | t }}</p>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+  {%- endif -%}
+</div>
+
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Today's Verse",
+  "tag": "section",
+  "class": "verse-feature-section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Verse"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "Today's Verse"
+    },
+    {
+      "type": "textarea",
+      "id": "reference",
+      "label": "Reference",
+      "info": "The book, chapter and verse. Shown as the band's heading.",
+      "default": "2 Corinthians 5:7"
+    },
+    {
+      "type": "textarea",
+      "id": "quote",
+      "label": "Verse",
+      "info": "Line breaks are kept, so the quote breaks where you type it.",
+      "default": "“For we walk by faith,\nnot by sight.”"
+    },
+    {
+      "type": "text",
+      "id": "caption",
+      "label": "Caption",
+      "default": "Walk By Faith."
+    },
+    {
+      "type": "header",
+      "content": "Photograph"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image",
+      "info": "Set alt text on the image itself in Content > Files, so screen readers describe it."
+    },
+    {
+      "type": "image_picker",
+      "id": "mobile_image",
+      "label": "Mobile image",
+      "info": "Optional. A taller crop for narrow screens. The main image is used when this is empty."
+    },
+    {
+      "type": "header",
+      "content": "The message"
+    },
+    {
+      "type": "text",
+      "id": "message_eyebrow",
+      "label": "Eyebrow",
+      "default": "The Message"
+    },
+    {
+      "type": "richtext",
+      "id": "message",
+      "label": "Message",
+      "default": "<p>Faith means moving forward even when the destination isn't completely visible.</p>"
+    },
+    {
+      "type": "text",
+      "id": "link_label",
+      "label": "Link label",
+      "default": "Read Full Reflection"
+    },
+    {
+      "type": "url",
+      "id": "link_url",
+      "label": "Link",
+      "info": "The link stays hidden until this is set, so the band never ships a link to nothing."
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "surface",
+      "label": "Surface",
+      "info": "Phase 2 allows a home page two surface changes. This band is the third if it differs from the one above it.",
+      "options": [
+        { "value": "light", "label": "Cream" },
+        { "value": "dark", "label": "Ink" }
+      ],
+      "default": "light"
+    },
+    {
+      "type": "select",
+      "id": "spacing_top",
+      "label": "Space above",
+      "options": [
+        { "value": "none", "label": "None" },
+        { "value": "tight", "label": "Tight" },
+        { "value": "standard", "label": "Standard" }
+      ],
+      "default": "standard"
+    },
+    {
+      "type": "select",
+      "id": "spacing_bottom",
+      "label": "Space below",
+      "options": [
+        { "value": "none", "label": "None" },
+        { "value": "tight", "label": "Tight" },
+        { "value": "standard", "label": "Standard" }
+      ],
+      "default": "none"
+    },
+    {
+      "type": "text",
+      "id": "anchor_id",
+      "label": "Anchor",
+      "info": "Lets a menu item link to this band with #verse.",
+      "default": "verse"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Today's Verse",
+      "settings": {
+        "eyebrow": "Today's Verse",
+        "reference": "2 Corinthians 5:7",
+        "quote": "“For we walk by faith,\nnot by sight.”",
+        "caption": "Walk By Faith.",
+        "message_eyebrow": "The Message",
+        "message": "<p>Faith means moving forward even when the destination isn't completely visible.</p>",
+        "link_label": "Read Full Reflection",
+        "surface": "light",
+        "spacing_top": "standard",
+        "spacing_bottom": "none",
+        "anchor_id": "verse"
+      }
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,307 @@
+{%- comment -%}
+  GOD SQUAD — theme layout
+  Phase 4, extended by Phase 8 and Phase 10. It carries the head, the header
+  group, the content slot, the footer group, and — added in Phase 8 — the cart:
+  its script, the drawer, the announcement region and the strings the script is
+  allowed to say.
+
+  Phase 10 made four changes here and nothing else:
+    1. font_face is wrapped in {% style %}. Unwrapped it emitted raw CSS text
+       into the head, which registered no font and rendered visibly on the page.
+    2. The colour/type/layout :root block moved to snippets/css-variables.liquid,
+       which Phase 1 section 29.2 specifies by name.
+    3. base.css joins the stylesheet order as the global element layer.
+    4. The footer group is rendered.
+
+  An earlier version of this comment said the footer belonged to "Phase 16".
+  That was wrong — the roadmap's Phase 16 is FINAL POLISH, and Phase 1 section
+  29.1 places footer.liquid and footer-group.json in Phase 10's tree.
+
+  Three Phase 1 findings are answered here because they live in the layout and
+  because the header cannot be correct without them:
+
+  HTML-02  The prototype's <html> had no lang attribute.
+  SEO-01   document.title was empty.
+  A11Y-02  There was no skip link and no <main> landmark, so a keyboard user had
+           no way past the navigation.
+{%- endcomment -%}
+<!doctype html>
+<html lang="{{ request.locale.iso_code }}" class="no-js">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    {%- comment -%}
+      Both of the colour scheme's head outputs come from one snippet so the
+      scheme is resolved in exactly one place. This is the early half; the
+      style half is emitted after the stylesheets below.
+    {%- endcomment -%}
+    {% render 'css-variables', part: 'meta' %}
+    <link rel="canonical" href="{{ canonical_url }}">
+
+    {%- comment -%}
+      The favicon, at the three sizes that are actually asked for. Phase 16
+      added the second and third: iOS ignores rel="icon" entirely and looks for
+      apple-touch-icon at 180x180, and without it a customer who adds the store
+      to their home screen gets a screenshot of the page instead of the mark.
+
+      All three come from one Shopify setting, resized by Shopify, so there is
+      one file to upload and no second asset to keep in step.
+    {%- endcomment -%}
+    {%- if settings.favicon != blank -%}
+      <link rel="icon" type="image/png" href="{{ settings.favicon | image_url: width: 32, height: 32 }}">
+      <link rel="icon" type="image/png" sizes="192x192" href="{{ settings.favicon | image_url: width: 192, height: 192 }}">
+      <link rel="apple-touch-icon" sizes="180x180" href="{{ settings.favicon | image_url: width: 180, height: 180 }}">
+    {%- endif -%}
+
+    <title>
+      {{ page_title }}
+      {%- if current_tags %} &ndash; {{ 'general.tagged' | t }}: {{ current_tags | join: ', ' }}{% endif -%}
+      {%- if current_page != 1 %} &ndash; {{ 'general.page' | t }} {{ current_page }}{% endif -%}
+      {%- unless page_title contains shop.name %} &ndash; {{ shop.name }}{% endunless -%}
+    </title>
+
+    {%- if page_description -%}
+      <meta name="description" content="{{ page_description | escape }}">
+    {%- endif -%}
+
+    {%- comment -%}
+      Phase 16. Open Graph and Twitter card tags. Rendered from a snippet rather
+      than written here because the image chain is four branches deep and the
+      head should stay readable. Every value is a Shopify object; nothing in it
+      is written copy. See snippets/meta-social.liquid.
+    {%- endcomment -%}
+    {% render 'meta-social' %}
+
+    {%- comment -%}
+      Fonts. Phase 2 records the three approved families. Which of them Shopify
+      can serve, and whether any must be self-hosted, is still open, so this
+      loads only what the theme settings provide.
+
+      font_face returns a bare @font-face RULE, not a style element — so these
+      two calls have to sit inside one. Emitted unwrapped they did two things,
+      both on every page: the faces were never registered, so Playfair Display
+      and Jost never loaded and every heading and every line of body copy fell
+      to a generic fallback; and because a non-whitespace character token ends
+      the "in head" insertion mode, the CSS text itself rendered as visible
+      content above the logo and everything after it in source order — the
+      Shopify head, all five stylesheets, the :root block and both scripts —
+      was parsed in body context.
+
+      {% style %} is the form Dawn uses for exactly this filter.
+    {%- endcomment -%}
+    {%- comment -%}
+      PHASE 16: THE WEIGHTS THE TYPE SYSTEM USES, NOT JUST THE ONES IT PICKS.
+
+      These two calls emit a face for the ONE variant in each setting — jost_n4
+      and playfair_display_n9. But design-tokens.css spends three weights on the
+      body family: --type-eyebrow-weight is 500, and --type-label-weight and
+      --type-price-weight are 600, between them covering every label, price and
+      eyebrow in the theme. Neither had a face, so the browser synthesised them
+      from Jost 400. Faux bold is thicker and wider than a real cut and tracks
+      differently, which on a type system built out of tracked caps is visible
+      on every surface.
+
+      font_modify returns nil when the family has no such variant, so each is
+      guarded: a merchant who picks a single-weight font gets exactly what they
+      got before rather than a broken rule.
+
+      Still inside one {% style %} — font_face returns a bare @font-face RULE,
+      and the Phase 10 note below is the reason that matters.
+    {%- endcomment -%}
+    {%- liquid
+      assign body_medium = settings.type_body_font | font_modify: 'weight', '500'
+      assign body_semibold = settings.type_body_font | font_modify: 'weight', '600'
+      assign display_italic = settings.type_display_font | font_modify: 'style', 'italic'
+    -%}
+    {% style %}
+      {{ settings.type_display_font | font_face: font_display: 'swap' }}
+      {{ settings.type_body_font | font_face: font_display: 'swap' }}
+      {%- if body_medium %}
+        {{ body_medium | font_face: font_display: 'swap' }}
+      {%- endif %}
+      {%- if body_semibold %}
+        {{ body_semibold | font_face: font_display: 'swap' }}
+      {%- endif %}
+      {%- comment -%}
+        THE DISPLAY ITALIC, added for the scripture pull-quotes.
+
+        Until this line the theme had registered no italic and set no
+        font-style anywhere — a grep for font-style across all 26 stylesheets
+        returned nothing. A browser asked for italic with no italic face
+        SYNTHESISES one by shearing the upright, which on a high-contrast
+        display serif like Playfair smears the thick/thin relationship the
+        face is chosen for. A quotation is exactly where that shows worst,
+        because it is set large.
+
+        This is not a third typeface: the two-typeface rule counts families,
+        and an italic is a cut of the family already registered above.
+
+        Guarded like the two weights above, and for the same reason —
+        font_modify returns nil when the family has no such variant, so a
+        merchant who swaps the display font for a single-cut face gets the
+        upright rather than a broken @font-face rule.
+      {%- endcomment -%}
+      {%- if display_italic %}
+        {{ display_italic | font_face: font_display: 'swap' }}
+      {%- endif %}
+    {% endstyle %}
+
+    {{ content_for_header }}
+
+    {%- comment -%}
+      Order matters. design-tokens.css defines every custom property; base.css
+      is the global element layer — reset, focus ring, motion suppression — and
+      consumes those tokens, so it has to come second. Phase 10 split them: a
+      file called design-tokens.css should define tokens and nothing else.
+    {%- endcomment -%}
+    {{ 'design-tokens.css' | asset_url | stylesheet_tag }}
+    {{ 'base.css' | asset_url | stylesheet_tag }}
+    {{ 'header.css' | asset_url | stylesheet_tag }}
+
+    {%- comment -%}
+      Shared components load from the layout; section stylesheets load from
+      their own section. The button system is used by the hero and by every
+      collection section, so it is a component rather than a section asset.
+      Phase 5 section 16 recorded the promotion; Phase 6 performed it.
+    {%- endcomment -%}
+    {%- comment -%}
+      Phase 18. The content column, which Phase 2 section 8 specified and the
+      implementation never built — twelve private copies of four declarations
+      until now. First of the components, because every other one sits inside
+      it.
+    {%- endcomment -%}
+    {{ 'component-container.css' | asset_url | stylesheet_tag }}
+    {{ 'component-button.css' | asset_url | stylesheet_tag }}
+
+    {%- comment -%}
+      Phase 8 promoted these two for the same reason Phase 6 promoted the
+      button system: each has more than one consumer, and the cart drawer is
+      rendered from this layout on nearly every page, so linking them from the
+      sections as well put two <link> tags for the same URL on every product
+      and cart page.
+    {%- endcomment -%}
+    {%- comment -%}
+      Phase 18 promoted the paginator for the reason Phase 6 promoted the button
+      system: a second consumer appeared. It had been built twice, under two
+      class systems, and the two had drifted.
+    {%- endcomment -%}
+    {{ 'component-pagination.css' | asset_url | stylesheet_tag }}
+    {{ 'component-quantity.css' | asset_url | stylesheet_tag }}
+    {{ 'component-cart-line.css' | asset_url | stylesheet_tag }}
+
+    {%- comment -%}
+      The only tokens a merchant may change, emitted after the stylesheets so
+      these :root declarations win over the ones in design-tokens.css.
+
+      Phase 10 moved the body of this block into snippets/css-variables.liquid,
+      which Phase 1 section 29.2 specifies by name, and replaced the three free
+      colour pickers with a verified scheme. The reasoning for the scheme is in
+      the snippet: a Shopify color setting has no validation hook, so a merchant
+      could silently invalidate every measured pairing in the system, and the
+      light-surface gold partner had to travel with the gold it belongs to.
+    {%- endcomment -%}
+    {% render 'css-variables', part: 'style' %}
+
+    <script>document.documentElement.classList.replace('no-js', 'js');</script>
+    <script src="{{ 'header.js' | asset_url }}" defer="defer"></script>
+    {%- comment -%}
+      Phase 8. The cart is reachable from every page — the header's control is
+      on all of them, and so is the quick-add control a product grid may carry
+      — so its behaviour is a layout script rather than a section one. Deferred,
+      like the header's: nothing it enhances needs it in order to work.
+    {%- endcomment -%}
+    <script src="{{ 'cart.js' | asset_url }}" defer="defer"></script>
+  </head>
+
+  <body class="template-{{ template.name | handle }}">
+    <a class="skip-link" href="#MainContent">{{ 'accessibility.skip_to_content' | t }}</a>
+
+    {% sections 'header-group' %}
+
+    <main id="MainContent" tabindex="-1">
+      {{ content_for_layout }}
+    </main>
+
+    {%- comment -%}
+      Phase 8. The cart drawer is rendered here rather than inside a template,
+      for three reasons:
+
+      1. It has to exist on every page, because the header's cart control is on
+         every page.
+      2. Rendered from the layout it is a STATICALLY rendered section, so its
+         section id is its filename — "cart-drawer" — which never changes. A
+         section placed in a JSON template is given a generated id that does,
+         and assets/cart.js would have to discover it at runtime.
+      3. It must be a direct child of <body>. The script marks the page's other
+         top-level regions inert while the drawer is open; a drawer nested
+         inside one of them would be made inert along with it.
+    {%- endcomment -%}
+    {%- comment -%}
+      Not on the cart page. There, the page IS the cart, and rendering the
+      drawer as well put two views of one cart on one screen — which can
+      disagree after an update, and which gave every cart line a duplicate DOM
+      id, silently re-pointing the drawer's quantity labels at the page's
+      inputs. On /cart the header's cart control stays what it is without
+      scripting: a link to the page the customer is already on.
+    {%- endcomment -%}
+    {%- comment -%}
+      Phase 11 added the merchant's choice. With "Cart page" selected the drawer
+      is not rendered at all — which is the whole switch, because assets/cart.js
+      is already written to tolerate its absence: onOpenerClick returns early
+      when Drawer.el is null, so the header control stays an ordinary link to
+      the cart page, and the add-to-cart path gates auto-open on Drawer.el too.
+    {%- endcomment -%}
+    {%- if settings.cart_type != 'page' -%}
+      {%- unless template.name == 'cart' -%}
+        {% section 'cart-drawer' %}
+      {%- endunless -%}
+    {%- endif -%}
+
+    {%- comment -%}
+      The cart's announcement region, and the strings the cart script is
+      allowed to say.
+
+      The region is in the layout, empty, rather than inside the drawer, for a
+      specific reason: after every cart change the drawer's contents are
+      replaced with freshly rendered markup, and a live region that is created
+      at the same moment as its text announces nothing at all. It also carries
+      data-cart-no-inert, because an inert subtree is removed from the
+      accessibility tree and a live region inside one is silent.
+
+      Every sentence comes from the locale file. The script writes no
+      user-facing English of its own, so none of it can be untranslatable.
+    {%- endcomment -%}
+    <div
+      id="CartStatus"
+      class="visually-hidden"
+      role="status"
+      aria-live="polite"
+      data-cart-no-inert
+    ></div>
+
+    <div
+      hidden
+      data-cart-no-inert
+      data-cart-strings
+      data-added="{{ 'cart.status.added' | t | escape }}"
+      data-updated="{{ 'cart.status.updated' | t | escape }}"
+      data-removed="{{ 'cart.status.removed' | t | escape }}"
+      data-note-saved="{{ 'cart.status.note_saved' | t | escape }}"
+      data-quantity-announce="{{ 'cart.status.quantity' | t | escape }}"
+      data-error-generic="{{ 'cart.errors.generic' | t | escape }}"
+      data-error-network="{{ 'cart.errors.network' | t | escape }}"
+    ></div>
+
+    {%- comment -%}
+      The footer group, added in Phase 10. Phase 1 section 29.2 specifies both
+      groups here: header-group above <main>, footer-group below it.
+
+      It sits after the cart's live region rather than before it, because the
+      region has to be reachable no matter what the footer contains, and the
+      script marks the page's other top-level regions inert while the drawer is
+      open — the footer among them.
+    {%- endcomment -%}
+    {% sections 'footer-group' %}
+  </body>
+</html>

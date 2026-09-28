@@ -1,0 +1,21 @@
+{%- comment -%}
+  GOD SQUAD — Cart icon bubble (render target)
+  Phase 8. This section is never placed in a template or a section group. It
+  exists so the Section Rendering API has something with a STABLE id to return.
+
+  A section placed in a JSON template is given a generated id such as
+  sections--1234__header, which changes; a section file rendered on its own
+  keeps its filename as its id, so assets/cart.js can ask for
+  "cart-icon-bubble" by name and never have to discover it at runtime.
+
+  It carries no schema deliberately. It needs no settings — a standalone render
+  target cannot receive them, the docs are explicit that it would fall back to
+  defaults — and it must not appear in the merchant's Add section list, which
+  is what a preset would do. enabled_on / disabled_on are omitted for the same
+  reason: their interaction with the Rendering API is undocumented, and leaving
+  them off removes the question.
+
+  Its entire body is the same snippet sections/header.liquid renders inline, so
+  the swapped markup and the server-rendered markup cannot drift apart.
+{%- endcomment -%}
+{% render 'cart-icon-bubble' %}

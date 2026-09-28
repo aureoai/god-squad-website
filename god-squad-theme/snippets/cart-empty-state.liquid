@@ -1,0 +1,46 @@
+{%- comment -%}
+  GOD SQUAD — Empty cart
+  Phase 8.
+
+  Accepts:
+  - url   {String} optional. The merchant's destination for the button.
+  - label {String} optional. The merchant's label for the button.
+
+  Usage:
+  {% render 'cart-empty-state', url: section.settings.empty_link, label: section.settings.empty_link_label %}
+
+  Two consumers — the drawer and the cart page — which is why it is a snippet.
+
+  THE DEFAULT DESTINATION IS THE HOME PAGE, NOT /collections/all.
+  routes.all_products_collection_url is the obvious answer and it is the wrong
+  one in this theme today: no templates/collection.json exists yet, so Shopify
+  would serve an error page to every customer who opened an empty cart and
+  pressed the one button in it. The home page does exist and carries both the
+  New Drop and Best Sellers rows, so it is where a customer with an empty cart
+  should land until a collection template ships. The merchant can point it
+  anywhere once one does.
+
+  No invented recommendations. The Phase 8 brief rules them out for this phase,
+  and there is no recommendation data to draw on in any case.
+{%- endcomment -%}
+
+{%- liquid
+  assign empty_url = url
+  if empty_url == blank
+    assign empty_url = routes.root_url
+  endif
+
+  assign empty_label = label
+  if empty_label == blank
+    assign empty_label = 'cart.empty.link' | t
+  endif
+-%}
+
+<div class="cart-empty">
+  <p class="cart-empty__title">{{ 'cart.empty.title' | t }}</p>
+  <p class="cart-empty__body">{{ 'cart.empty.body' | t }}</p>
+  <a class="button button--accent" href="{{ empty_url }}">
+    {{ empty_label }}
+    {% render 'icon-arrow' %}
+  </a>
+</div>

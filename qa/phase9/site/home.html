@@ -1,0 +1,553 @@
+<!doctype html>
+<html lang="en" class="no-js"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>God Squad — Phase 8 harness</title>
+<link rel="stylesheet" href="assets/design-tokens.css">
+<link rel="stylesheet" href="assets/base.css">
+<link rel="stylesheet" href="assets/header.css">
+<link rel="stylesheet" href="assets/component-container.css">
+<link rel="stylesheet" href="assets/component-button.css">
+<link rel="stylesheet" href="assets/component-pagination.css">
+<link rel="stylesheet" href="assets/component-quantity.css">
+<link rel="stylesheet" href="assets/component-cart-line.css">
+<script>document.documentElement.classList.replace('no-js','js');</script>
+<script>window.Shopify = window.Shopify || {routes: {root: '/'}};</script>
+<script src="assets/header.js" defer></script>
+<script src="assets/cart.js" defer></script>
+<style>:root{--header-overlay-offset:var(--header-height-mobile)}@media(min-width:1024px){:root{--header-overlay-offset:var(--header-height-desktop)}}</style></head><body class="template-index">
+<a class="skip-link" href="#MainContent">Skip to content</a>
+<div id="shopify-section-header" class="shopify-section"><style>
+    :root { --header-overlay-offset: var(--header-height-mobile); }
+    @media (min-width: 1024px) {
+      :root { --header-overlay-offset: var(--header-height-desktop); }
+    }
+  </style><header
+  class="header surface-dark header--overlay"
+  data-header
+  data-header-overlay
+><div class="header__scrim" aria-hidden="true"></div><div class="header__inner container"><div class="header__cluster header__cluster--start">
+      <button
+        type="button"
+        class="header__control header__menu-toggle"
+        aria-expanded="false"
+        aria-controls="MobileMenu"
+        data-menu-toggle
+      >
+        <svg class="icon icon--menu " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3.75 6.5h16.5"/><path d="M3.75 12h16.5"/><path d="M3.75 17.5h16.5"/></svg>
+
+        <span class="visually-hidden">Menu</span>
+      </button>
+    </div><div class="header__branding"><a
+          class="header__logo-link"
+          href="/"
+          aria-current="page"
+        ><img class="header__logo" src="img/logo.png" srcset="img/logo.png 120w, img/logo.png 180w, img/logo.png 240w, img/logo.png 360w, img/logo.png 480w, img/logo.png 600w" sizes="(min-width: 1024px) 240px, 160px" width="500" height="500" style="--logo-height-desktop: 78px; --logo-height-mobile: 56px;" alt="God Squad">
+        </a></div><nav class="header__nav" aria-label="Primary">
+      <ul class="header__nav-list" role="list"><li class="header__nav-item">
+              <a
+                class="header__nav-link"
+                href="/"
+                
+              >Home</a>
+            </li><li class="header__nav-item">
+              <a
+                class="header__nav-link"
+                href="/collections/all"
+                
+              >Shop</a>
+            </li><li class="header__nav-item">
+              <a
+                class="header__nav-link"
+                href="/#story"
+                
+              >Our Story</a>
+            </li><li class="header__nav-item">
+              <a
+                class="header__nav-link"
+                href="/#verse"
+                
+              >Verse</a>
+            </li></ul>
+    </nav><div class="header__cluster header__cluster--end"><a class="header__control" href="/search" data-search-trigger>
+          <svg class="icon icon--search " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="6.25"/><path d="M15.6 15.6 20.5 20.5"/></svg>
+
+          <span class="visually-hidden">Search</span>
+        </a><shopify-account
+          class="header__control header__account"
+          menu="customer-account-main-menu"
+        >
+          <span class="header__account-avatar" slot="signed-out-avatar">
+            <svg class="icon icon--account " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="8.25" r="3.75"/><path d="M4.75 19.75a7.25 7.25 0 0 1 14.5 0"/></svg>
+
+            <span class="visually-hidden">Account</span>
+          </span>
+        </shopify-account><a
+          class="header__control header__cart"
+          href="/cart"
+          data-cart-bubble
+          aria-controls="CartDrawer"
+        >
+          <svg class="icon icon--cart " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.5 7.75h13l-1.1 11.3a1.4 1.4 0 0 1-1.4 1.2H8a1.4 1.4 0 0 1-1.4-1.2Z"/><path d="M9 10V6.9a3 3 0 0 1 6 0V10"/></svg>
+
+<span class="visually-hidden">Cart</span>
+        </a></div>
+  </div><div class="header__search" id="HeaderSearch" data-search-panel hidden>
+    <form
+      class="header__search-form"
+      action="/search"
+      method="get"
+      role="search"
+    >
+      <label class="visually-hidden" for="HeaderSearchInput">
+        Search the store
+      </label>
+      <input
+        class="header__search-input"
+        id="HeaderSearchInput"
+        type="search"
+        name="q"
+        placeholder="Search the store…"
+        data-search-input
+      ><input type="hidden" name="type" value="product">
+      <button type="submit" class="button button--primary header__search-submit">
+        Search
+      </button>
+      <button type="button" class="header__control" data-search-close>
+        <svg class="icon icon--close " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.4 6.4 17.6 17.6"/><path d="M17.6 6.4 6.4 17.6"/></svg>
+
+        <span class="visually-hidden">Close search</span>
+      </button>
+    </form>
+  </div><div class="header__panel" id="MobileMenu" data-menu-panel hidden>
+    <div class="header__panel-header">
+      <span class="header__panel-title">Menu</span>
+      <button type="button" class="header__control" data-menu-close>
+        <svg class="icon icon--close " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.4 6.4 17.6 17.6"/><path d="M17.6 6.4 6.4 17.6"/></svg>
+
+        <span class="visually-hidden">Close menu</span>
+      </button>
+    </div>
+
+    <nav class="header__panel-nav" aria-label="Main">
+      <ul class="header__panel-list" role="list"><li>
+              <a
+                class="header__panel-link"
+                href="/"
+                
+              >Home</a>
+            </li><li>
+              <a
+                class="header__panel-link"
+                href="/collections/all"
+                
+              >Shop</a>
+            </li><li>
+              <a
+                class="header__panel-link"
+                href="/#story"
+                
+              >Our Story</a>
+            </li><li>
+              <a
+                class="header__panel-link"
+                href="/#verse"
+                
+              >Verse</a>
+            </li></ul>
+    </nav></div>
+
+  <div class="header__overlay" data-menu-overlay hidden></div>
+</header>
+
+
+</div>
+<main id="MainContent" tabindex="-1">
+<div id="shopify-section-hero" class="shopify-section"><link rel="stylesheet" href="assets/section-hero.css"><section
+  class="hero surface-dark hero--h-medium hero--align-left hero--pos-centre hero--overlay-medium hero--focal-centre-left"
+  
+>
+  <div class="hero__media"><img class="hero__image" src="img/hero.webp" srcset="img/hero.webp 420w, img/hero.webp 640w, img/hero.webp 750w, img/hero.webp 960w, img/hero.webp 1100w, img/hero.webp 1280w, img/hero.webp 1440w, img/hero.webp 1680w, img/hero.webp 1920w, img/hero.webp 2200w, img/hero.webp 2600w, img/hero.webp 3000w" sizes="100vw" width="1672" height="941" loading="eager" fetchpriority="high" decoding="async" alt=""><div class="hero__scrim" aria-hidden="true"></div></div>
+
+  <div class="hero__inner container">
+    <div class="hero__content"><p class="hero__eyebrow">Streetwear With A Purpose.</p><h1 class="hero__heading">Walk By <span class="hero__heading-accent">Faith.</span></h1><p class="hero__scripture">2 Corinthians 5:7</p><p class="hero__description">Different People. Same Purpose.</p></div>
+  </div>
+</section>
+
+
+</div>
+<div id="shopify-section-new-drop" class="shopify-section"><link rel="stylesheet" href="assets/component-product-card.css">
+<link rel="stylesheet" href="assets/section-featured-collection.css"><style>
+  #shopify-section-new-drop .product-grid { --product-cols: 2; }
+  @media (min-width: 768px) {
+    #shopify-section-new-drop .product-grid { --product-cols: 2; }
+  }
+  @media (min-width: 1024px) {
+    #shopify-section-new-drop .product-grid { --product-cols: 3; }
+  }
+</style>
+
+<div
+  class="featured-collection surface-light featured-collection--with-copy-column featured-collection--pt-standard featured-collection--pb-standard"
+  id="shop"
+>
+  <div class="featured-collection__inner container">
+    <div class="featured-collection__copy"><p class="featured-collection__eyebrow">New Drop /</p><h2 class="featured-collection__heading">The Faithful</h2><p class="featured-collection__description">Premium Essentials for a Higher Purpose.</p><a class="featured-collection__cta button button--primary" href="/collections/the-faithful">
+          View All Products
+          <svg class="icon icon--arrow " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 12h15.5"/><path d="M13.5 6 19.5 12l-6 6"/></svg>
+
+        </a></div>
+
+    <div class="featured-collection__products"><ul class="product-grid" role="list"><li class="product-grid__item">
+              <article class="product-card">
+  <a class="product-card__link" href="/products/signature-tee">
+    <div class="product-card__media"><img class="product-card__image" src="img/tee.webp" srcset="img/tee.webp 180w, img/tee.webp 240w, img/tee.webp 320w, img/tee.webp 400w, img/tee.webp 480w, img/tee.webp 600w, img/tee.webp 760w, img/tee.webp 900w, img/tee.webp 1100w, img/tee.webp 1200w" sizes="(min-width: 1440px) 297px, (min-width: 1339px) calc(((100vw - 128px) * 0.727 - 64px) / 3), (min-width: 1024px) calc(((100vw - 128px) * 0.727 - 32px) / 2), (min-width: 768px) calc((100vw - 64px - 32px) / 2), (min-width: 320px) calc((100vw - 48px - 16px) / 2), calc((100vw - 48px - 0px) / 1)" width="900" height="900" loading="lazy" decoding="async" alt="Signature Oversized Tee, front"></div>
+
+    <h3 class="product-card__title">Signature Oversized Tee</h3></a><p class="product-card__price"><span class="product-card__price-current">&#8369;1,290.00</span></p></article>
+
+            </li><li class="product-grid__item">
+              <article class="product-card">
+  <a class="product-card__link" href="/products/heavyweight-hoodie">
+    <div class="product-card__media"><img class="product-card__image" src="img/hoodie.webp" srcset="img/hoodie.webp 180w, img/hoodie.webp 240w, img/hoodie.webp 320w, img/hoodie.webp 400w, img/hoodie.webp 480w, img/hoodie.webp 600w, img/hoodie.webp 760w, img/hoodie.webp 900w, img/hoodie.webp 1100w, img/hoodie.webp 1200w" sizes="(min-width: 1440px) 297px, (min-width: 1339px) calc(((100vw - 128px) * 0.727 - 64px) / 3), (min-width: 1024px) calc(((100vw - 128px) * 0.727 - 32px) / 2), (min-width: 768px) calc((100vw - 64px - 32px) / 2), (min-width: 320px) calc((100vw - 48px - 16px) / 2), calc((100vw - 48px - 0px) / 1)" width="900" height="900" loading="lazy" decoding="async" alt=""></div>
+
+    <h3 class="product-card__title">Heavyweight Hoodie</h3></a><p class="product-card__price"><span class="visually-hidden">Sale price</span>
+        <span class="product-card__price-current">&#8369;2,490.00</span>
+        <span class="visually-hidden">Regular price</span>
+        <s class="product-card__price-compare">&#8369;2,990.00</s></p><div class="product-card__swatches"><span class="visually-hidden">Colour: Ink, Cream, Olive</span><span class="product-card__swatch" style="--swatch-fill: #0D0C0A;" aria-hidden="true"></span><span class="product-card__swatch" style="--swatch-fill: #F3EFE6;" aria-hidden="true"></span><span class="product-card__swatch" style="--swatch-fill: #4B5443;" aria-hidden="true"></span></div></article>
+
+            </li><li class="product-grid__item">
+              <article class="product-card">
+  <a class="product-card__link" href="/products/utility-cap">
+    <div class="product-card__media"><img class="product-card__image" src="img/cap.webp" srcset="img/cap.webp 180w, img/cap.webp 240w, img/cap.webp 320w, img/cap.webp 400w, img/cap.webp 480w, img/cap.webp 600w, img/cap.webp 760w, img/cap.webp 900w, img/cap.webp 1100w, img/cap.webp 1200w" sizes="(min-width: 1440px) 297px, (min-width: 1339px) calc(((100vw - 128px) * 0.727 - 64px) / 3), (min-width: 1024px) calc(((100vw - 128px) * 0.727 - 32px) / 2), (min-width: 768px) calc((100vw - 64px - 32px) / 2), (min-width: 320px) calc((100vw - 48px - 16px) / 2), calc((100vw - 48px - 0px) / 1)" width="900" height="900" loading="lazy" decoding="async" alt=""></div>
+
+    <h3 class="product-card__title">Utility Cap</h3></a><p class="product-card__price"><span class="product-card__price-current">&#8369;890.00</span></p></article>
+
+            </li></ul></div>
+  </div>
+
+</div>
+</div>
+<div id="shopify-section-best-sellers" class="shopify-section"><link rel="stylesheet" href="assets/component-product-card.css">
+<link rel="stylesheet" href="assets/section-featured-collection.css"><style>
+  #shopify-section-best-sellers .product-grid { --product-cols: 2; }
+  @media (min-width: 768px) {
+    #shopify-section-best-sellers .product-grid { --product-cols: 2; }
+  }
+  @media (min-width: 1024px) {
+    #shopify-section-best-sellers .product-grid { --product-cols: 4; }
+  }
+</style>
+
+<div
+  class="featured-collection surface-dark featured-collection--full-width featured-collection--pt-standard featured-collection--pb-standard"
+  
+>
+  <div class="featured-collection__inner container">
+    <div class="featured-collection__copy"><p class="featured-collection__eyebrow">Best Sellers /</p><h2 class="featured-collection__heading">The Pieces That Define The Movement</h2><p class="featured-collection__description">Chosen by the community.</p><a class="featured-collection__cta button button--primary" href="/collections/the-faithful">
+          Shop All Best Sellers
+          <svg class="icon icon--arrow " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 12h15.5"/><path d="M13.5 6 19.5 12l-6 6"/></svg>
+
+        </a></div>
+
+    <div class="featured-collection__products"><ul class="product-grid" role="list"><li class="product-grid__item">
+              <article class="product-card">
+  <a class="product-card__link" href="/products/signature-tee">
+    <div class="product-card__media"><img class="product-card__image" src="img/tee.webp" srcset="img/tee.webp 180w, img/tee.webp 240w, img/tee.webp 320w, img/tee.webp 400w, img/tee.webp 480w, img/tee.webp 600w, img/tee.webp 760w, img/tee.webp 900w, img/tee.webp 1100w, img/tee.webp 1200w" sizes="(min-width: 1440px) 313px, (min-width: 1280px) calc((100vw - 96px - 96px) / 4), (min-width: 1024px) calc((100vw - 96px - 64px) / 3), (min-width: 768px) calc((100vw - 64px - 32px) / 2), (min-width: 320px) calc((100vw - 48px - 16px) / 2), calc((100vw - 48px - 0px) / 1)" width="900" height="900" loading="lazy" decoding="async" alt="Signature Oversized Tee, front"></div>
+
+    <h3 class="product-card__title">Signature Oversized Tee</h3></a><p class="product-card__price"><span class="product-card__price-current">&#8369;1,290.00</span></p></article>
+
+            </li><li class="product-grid__item">
+              <article class="product-card">
+  <a class="product-card__link" href="/products/heavyweight-hoodie">
+    <div class="product-card__media"><img class="product-card__image" src="img/hoodie.webp" srcset="img/hoodie.webp 180w, img/hoodie.webp 240w, img/hoodie.webp 320w, img/hoodie.webp 400w, img/hoodie.webp 480w, img/hoodie.webp 600w, img/hoodie.webp 760w, img/hoodie.webp 900w, img/hoodie.webp 1100w, img/hoodie.webp 1200w" sizes="(min-width: 1440px) 313px, (min-width: 1280px) calc((100vw - 96px - 96px) / 4), (min-width: 1024px) calc((100vw - 96px - 64px) / 3), (min-width: 768px) calc((100vw - 64px - 32px) / 2), (min-width: 320px) calc((100vw - 48px - 16px) / 2), calc((100vw - 48px - 0px) / 1)" width="900" height="900" loading="lazy" decoding="async" alt=""></div>
+
+    <h3 class="product-card__title">Heavyweight Hoodie</h3></a><p class="product-card__price"><span class="visually-hidden">Sale price</span>
+        <span class="product-card__price-current">&#8369;2,490.00</span>
+        <span class="visually-hidden">Regular price</span>
+        <s class="product-card__price-compare">&#8369;2,990.00</s></p><div class="product-card__swatches"><span class="visually-hidden">Colour: Ink, Cream, Olive</span><span class="product-card__swatch" style="--swatch-fill: #0D0C0A;" aria-hidden="true"></span><span class="product-card__swatch" style="--swatch-fill: #F3EFE6;" aria-hidden="true"></span><span class="product-card__swatch" style="--swatch-fill: #4B5443;" aria-hidden="true"></span></div></article>
+
+            </li><li class="product-grid__item">
+              <article class="product-card">
+  <a class="product-card__link" href="/products/utility-cap">
+    <div class="product-card__media"><img class="product-card__image" src="img/cap.webp" srcset="img/cap.webp 180w, img/cap.webp 240w, img/cap.webp 320w, img/cap.webp 400w, img/cap.webp 480w, img/cap.webp 600w, img/cap.webp 760w, img/cap.webp 900w, img/cap.webp 1100w, img/cap.webp 1200w" sizes="(min-width: 1440px) 313px, (min-width: 1280px) calc((100vw - 96px - 96px) / 4), (min-width: 1024px) calc((100vw - 96px - 64px) / 3), (min-width: 768px) calc((100vw - 64px - 32px) / 2), (min-width: 320px) calc((100vw - 48px - 16px) / 2), calc((100vw - 48px - 0px) / 1)" width="900" height="900" loading="lazy" decoding="async" alt=""></div>
+
+    <h3 class="product-card__title">Utility Cap</h3></a><p class="product-card__price"><span class="product-card__price-current">&#8369;890.00</span></p></article>
+
+            </li><li class="product-grid__item">
+              <article class="product-card product-card--sold-out">
+  <a class="product-card__link" href="/products/sold-out-crew">
+    <div class="product-card__media"><img class="product-card__image" src="img/tee.webp" srcset="img/tee.webp 180w, img/tee.webp 240w, img/tee.webp 320w, img/tee.webp 400w, img/tee.webp 480w, img/tee.webp 600w, img/tee.webp 760w, img/tee.webp 900w, img/tee.webp 1100w, img/tee.webp 1200w" sizes="(min-width: 1440px) 313px, (min-width: 1280px) calc((100vw - 96px - 96px) / 4), (min-width: 1024px) calc((100vw - 96px - 64px) / 3), (min-width: 768px) calc((100vw - 64px - 32px) / 2), (min-width: 320px) calc((100vw - 48px - 16px) / 2), calc((100vw - 48px - 0px) / 1)" width="900" height="900" loading="lazy" decoding="async" alt=""><span class="product-card__badge" aria-hidden="true">Sold out</span></div>
+
+    <h3 class="product-card__title">Faith Crew</h3> <span class="visually-hidden">Sold out</span></a><p class="product-card__price"><span class="product-card__price-current">&#8369;1,690.00</span></p></article>
+
+            </li></ul></div>
+  </div>
+
+</div>
+</div>
+<div id="shopify-section-our-story" class="shopify-section"><link rel="stylesheet" href="assets/section-our-story.css">
+
+<div class="our-story surface-dark our-story--image-right our-story--pt-standard our-story--pb-standard our-story--has-caption our-story--has-values" id="story"><div class="our-story__media"><img class="our-story__image" src="img/story.webp" srcset="img/story.webp 480w, img/story.webp 640w, img/story.webp 900w, img/story.webp 1200w, img/story.webp 1500w, img/story.webp 1800w, img/story.webp 2100w, img/story.webp 2400w" sizes="(min-width: 1024px) 70vw, 100vw" width="535" height="348" loading="lazy" decoding="async" alt="God Squad community wearing faith-inspired streetwear"><div class="our-story__scrim" aria-hidden="true"></div>
+  </div>
+
+  <div class="our-story__inner container">
+    <div class="our-story__content"><p class="our-story__eyebrow">Our Story</p><h2 class="our-story__heading">Real People.<br />
+Bigger Purpose.</h2><div class="our-story__body rte"><p>God Squad is a Philippine streetwear brand built on faith, creativity, and community. We create pieces that inspire a generation to live different — with purpose.</p></div></div><p class="our-story__caption">Faith<br />
+Lives<br />
+Different<br />
+Here.</p></div><div class="our-story__values container">
+      <ul class="our-story__value-list" role="list"><li class="our-story__value" ><h3 class="our-story__value-title">Faith Driven</h3><p class="our-story__value-body">More Than Clothing</p></li><li class="our-story__value" ><h3 class="our-story__value-title">Community</h3><p class="our-story__value-body">People With Purpose</p></li><li class="our-story__value" ><h3 class="our-story__value-title">Premium Quality</h3><p class="our-story__value-body">Crafted To Inspire</p></li></ul>
+    </div></div>
+</div>
+<div id="shopify-section-verse-feature" class="shopify-section"><link rel="stylesheet" href="assets/section-verse-feature.css">
+
+<div class="verse-feature surface-light verse-feature--pt-standard verse-feature--pb-none verse-feature--has-message verse-feature--has-media" id="verse">
+  <div class="verse-feature__row"><div class="verse-feature__panel verse-feature__panel--verse"><p class="verse-feature__eyebrow">Today&#x27;s Verse</p><h2 class="verse-feature__reference">2 Corinthians 5:7</h2><blockquote class="verse-feature__quote">
+          <p>“For we walk by faith,<br />
+not by sight.”</p>
+        </blockquote><p class="verse-feature__caption">Walk By Faith.</p></div><div class="verse-feature__media"><img class="verse-feature__image" src="img/hero.webp" srcset="img/hero.webp 480w, img/hero.webp 640w, img/hero.webp 900w, img/hero.webp 1200w, img/hero.webp 1500w, img/hero.webp 1800w, img/hero.webp 2100w, img/hero.webp 2400w" sizes="(min-width: 1280px) 40vw, 100vw" width="1200" height="1600" loading="lazy" decoding="async" alt=""></div><div class="verse-feature__panel verse-feature__panel--message surface-dark"><p class="verse-feature__eyebrow">The Message</p><div class="verse-feature__message rte"><p>Faith means moving forward even when the destination isn't completely visible.</p></div></div></div></div>
+</div>
+<div id="shopify-section-verse-index" class="shopify-section"><link rel="stylesheet" href="assets/section-verse-index.css"><script src="assets/verse-filter.js" defer="defer"></script><div class="verse-index surface-light verse-index--pt-standard verse-index--pb-standard" >
+  <div class="verse-index__inner container"><div class="verse-index__head"><h2 class="verse-index__heading">Explore Verses</h2><span class="verse-index__rule" aria-hidden="true"></span><div
+          class="verse-index__filter"
+          role="group"
+          aria-label="Filter verses by category"
+          data-verse-filter
+          hidden
+        >
+          <button type="button" class="verse-chip" data-verse-chip="all" aria-pressed="true">
+            All
+          </button><button
+              type="button"
+              class="verse-chip"
+              data-verse-chip="faith"
+              aria-pressed="false"
+            >
+              Faith
+            </button><button
+              type="button"
+              class="verse-chip"
+              data-verse-chip="purpose"
+              aria-pressed="false"
+            >
+              Purpose
+            </button><button
+              type="button"
+              class="verse-chip"
+              data-verse-chip="courage"
+              aria-pressed="false"
+            >
+              Courage
+            </button><button
+              type="button"
+              class="verse-chip"
+              data-verse-chip="light"
+              aria-pressed="false"
+            >
+              Light
+            </button></div></div><ul class="verse-index__grid" role="list" data-verse-grid><li
+            class="verse-card"
+            data-verse-category="faith"
+            
+          >
+            <div class="verse-card__media"><img class="verse-card__image" src="img/story.webp" srcset="img/story.webp 320w, img/story.webp 480w, img/story.webp 640w, img/story.webp 900w, img/story.webp 1200w" sizes="(min-width: 1280px) 25vw, (min-width: 768px) 50vw, 100vw" width="1200" height="1600" loading="lazy" decoding="async" alt=""><div class="verse-card__scrim" aria-hidden="true"></div>
+            </div>
+
+            <div class="verse-card__body"><p class="verse-card__category">Faith</p><blockquote class="verse-card__quote">
+                  <p>“Walk by faith,<br />
+not by sight.”</p>
+                </blockquote><p class="verse-card__reference">2 Corinthians 5:7</p></div>
+          </li><li
+            class="verse-card"
+            data-verse-category="purpose"
+            
+          >
+            <div class="verse-card__media"><img class="verse-card__image" src="img/tee.webp" srcset="img/tee.webp 320w, img/tee.webp 480w, img/tee.webp 640w, img/tee.webp 900w, img/tee.webp 1200w" sizes="(min-width: 1280px) 25vw, (min-width: 768px) 50vw, 100vw" width="1200" height="1600" loading="lazy" decoding="async" alt=""><div class="verse-card__scrim" aria-hidden="true"></div>
+            </div>
+
+            <div class="verse-card__body"><p class="verse-card__category">Purpose</p><blockquote class="verse-card__quote">
+                  <p>“For I know the plans<br />
+I have for you.”</p>
+                </blockquote><p class="verse-card__reference">Jeremiah 29:11</p></div>
+          </li><li
+            class="verse-card"
+            data-verse-category="courage"
+            
+          >
+            <div class="verse-card__media"><img class="verse-card__image" src="img/hoodie.webp" srcset="img/hoodie.webp 320w, img/hoodie.webp 480w, img/hoodie.webp 640w, img/hoodie.webp 900w, img/hoodie.webp 1200w" sizes="(min-width: 1280px) 25vw, (min-width: 768px) 50vw, 100vw" width="1200" height="1600" loading="lazy" decoding="async" alt=""><div class="verse-card__scrim" aria-hidden="true"></div>
+            </div>
+
+            <div class="verse-card__body"><p class="verse-card__category">Courage</p><blockquote class="verse-card__quote">
+                  <p>“Be strong and<br />
+courageous.”</p>
+                </blockquote><p class="verse-card__reference">Joshua 1:9</p></div>
+          </li><li
+            class="verse-card"
+            data-verse-category="light"
+            
+          >
+            <div class="verse-card__media"><img class="verse-card__image" src="img/cap.webp" srcset="img/cap.webp 320w, img/cap.webp 480w, img/cap.webp 640w, img/cap.webp 900w, img/cap.webp 1200w" sizes="(min-width: 1280px) 25vw, (min-width: 768px) 50vw, 100vw" width="1200" height="1600" loading="lazy" decoding="async" alt=""><div class="verse-card__scrim" aria-hidden="true"></div>
+            </div>
+
+            <div class="verse-card__body"><p class="verse-card__category">Light</p><blockquote class="verse-card__quote">
+                  <p>“Let your light shine<br />
+before others.”</p>
+                </blockquote><p class="verse-card__reference">Matthew 5:16</p></div>
+          </li></ul><p
+          class="visually-hidden"
+          role="status"
+          data-verse-status="Showing [count] verses."
+        ></p></div>
+</div>
+</div>
+<div id="shopify-section-words-we-wear" class="shopify-section"><link rel="stylesheet" href="assets/section-words-we-wear.css">
+
+<div class="words-we-wear surface-light words-we-wear--pt-none words-we-wear--pb-standard" >
+  <div class="words-we-wear__inner container">
+
+    <div class="words-we-wear__intro"><h2 class="words-we-wear__heading">Words<br />
+We Wear.</h2><div class="words-we-wear__body rte"><p>Scripture isn't just something we read. It's a way of life. It shapes what we create, what we wear, and how we move.</p></div></div><ul class="words-we-wear__tiles" role="list"><li
+            class="words-we-wear__tile surface-dark"
+            
+          ><div class="words-we-wear__tile-inner"><img class="words-we-wear__image" src="img/story.webp" srcset="img/story.webp 320w, img/story.webp 480w, img/story.webp 640w, img/story.webp 900w, img/story.webp 1200w" sizes="(min-width: 1440px) 20vw, (min-width: 1024px) 25vw, 50vw" width="1200" height="1600" loading="lazy" decoding="async" alt=""><span class="words-we-wear__scrim" aria-hidden="true"></span><span class="words-we-wear__phrase">Walk<br />
+By Faith.</span><span class="words-we-wear__ordinal" aria-hidden="true">01
+                </span>
+              </div></li><li
+            class="words-we-wear__tile surface-dark"
+            
+          ><div class="words-we-wear__tile-inner"><img class="words-we-wear__image" src="img/tee.webp" srcset="img/tee.webp 320w, img/tee.webp 480w, img/tee.webp 640w, img/tee.webp 900w, img/tee.webp 1200w" sizes="(min-width: 1440px) 20vw, (min-width: 1024px) 25vw, 50vw" width="1200" height="1600" loading="lazy" decoding="async" alt=""><span class="words-we-wear__scrim" aria-hidden="true"></span><span class="words-we-wear__phrase">Built<br />
+Different.</span><span class="words-we-wear__ordinal" aria-hidden="true">02
+                </span>
+              </div></li><li
+            class="words-we-wear__tile surface-dark"
+            
+          ><div class="words-we-wear__tile-inner"><img class="words-we-wear__image" src="img/hoodie.webp" srcset="img/hoodie.webp 320w, img/hoodie.webp 480w, img/hoodie.webp 640w, img/hoodie.webp 900w, img/hoodie.webp 1200w" sizes="(min-width: 1440px) 20vw, (min-width: 1024px) 25vw, 50vw" width="1200" height="1600" loading="lazy" decoding="async" alt=""><span class="words-we-wear__scrim" aria-hidden="true"></span><span class="words-we-wear__phrase">For A Higher<br />
+Purpose.</span><span class="words-we-wear__ordinal" aria-hidden="true">03
+                </span>
+              </div></li><li
+            class="words-we-wear__tile surface-dark"
+            
+          ><div class="words-we-wear__tile-inner"><img class="words-we-wear__image" src="img/cap.webp" srcset="img/cap.webp 320w, img/cap.webp 480w, img/cap.webp 640w, img/cap.webp 900w, img/cap.webp 1200w" sizes="(min-width: 1440px) 20vw, (min-width: 1024px) 25vw, 50vw" width="1200" height="1600" loading="lazy" decoding="async" alt=""><span class="words-we-wear__scrim" aria-hidden="true"></span><span class="words-we-wear__phrase">Let Your<br />
+Light Shine.</span><span class="words-we-wear__ordinal" aria-hidden="true">04
+                </span>
+              </div></li></ul></div>
+</div>
+</div>
+</main>
+<div id="shopify-section-cart-drawer" class="shopify-section"><link rel="stylesheet" href="assets/section-cart-drawer.css">
+
+<div
+  class="cart-drawer surface-dark"
+  id="CartDrawer"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="CartDrawerTitle"
+  data-cart-drawer
+  data-auto-open="true"
+  hidden
+><div class="cart-drawer__overlay" data-cart-overlay aria-hidden="true"></div>
+
+  <div class="cart-drawer__panel">
+    <div class="cart-drawer__header"><h2 class="cart-drawer__title" id="CartDrawerTitle" tabindex="-1">
+        Your cart
+      </h2>
+      <button type="button" class="cart-drawer__close" data-cart-close>
+        <svg class="icon icon--close " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.4 6.4 17.6 17.6"/><path d="M17.6 6.4 6.4 17.6"/></svg>
+
+        <span class="visually-hidden">Close cart</span>
+      </button>
+    </div><div class="visually-hidden" role="status" aria-live="polite" data-cart-drawer-status></div><p class="cart-drawer__error" data-cart-error role="alert" hidden></p>
+
+    <div class="cart-drawer__inner" data-cart-drawer-inner><div class="cart-empty">
+  <p class="cart-empty__title">Your cart is empty.</p>
+  <p class="cart-empty__body">Find something that speaks to your purpose.</p>
+  <a class="button button--accent" href="/">
+    Shop the collection
+    <svg class="icon icon--arrow " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 12h15.5"/><path d="M13.5 6 19.5 12l-6 6"/></svg>
+
+  </a>
+</div>
+</div>
+  </div>
+</div>
+
+
+</div>
+<div id="CartStatus" class="visually-hidden" role="status" aria-live="polite" data-cart-no-inert></div>
+<div hidden data-cart-no-inert data-cart-strings
+  data-added="Added to your cart."
+  data-updated="Cart updated."
+  data-removed="Removed from your cart."
+  data-note-saved="Order note saved."
+  data-quantity-announce="Quantity: [count]"
+  data-error-generic="Unable to update your cart. Please try again."
+  data-error-network="We could not reach the store. Check your connection and try again."></div>
+<div id="shopify-section-brand-values" class="shopify-section"><link rel="stylesheet" href="assets/section-brand-values.css">
+
+<div class="brand-values surface-dark brand-values--cols-4 brand-values--dividers">
+  <div class="brand-values__inner container"><ul class="brand-values__list" role="list"><li
+          class="brand-values__item"
+          
+        ><div class="brand-values__body">
+              <svg class="icon icon--crown brand-values__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3.75 17.75V7.25l4.5 4.25L12 5.5l3.75 6 4.5-4.25v10.5Z"/><path d="M3.75 14.5h16.5"/></svg>
+<span class="brand-values__title">Faith Driven</span><span class="brand-values__sub">More Than Clothing</span></div></li><li
+          class="brand-values__item"
+          
+        ><div class="brand-values__body">
+              <svg class="icon icon--community brand-values__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="8.25" r="2.9"/><path d="M6.9 19.25a5.1 5.1 0 0 1 10.2 0"/><circle cx="5.3" cy="10.4" r="2.15"/><path d="M2 18.5a3.75 3.75 0 0 1 2.95-3.66"/><circle cx="18.7" cy="10.4" r="2.15"/><path d="M22 18.5a3.75 3.75 0 0 0-2.95-3.66"/></svg>
+<span class="brand-values__title">Community</span><span class="brand-values__sub">People With Purpose</span></div></li><li
+          class="brand-values__item"
+          
+        ><div class="brand-values__body">
+              <svg class="icon icon--globe brand-values__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 3v18"/><path d="M3 12h18"/><path d="M4.2 7.5h15.6"/><path d="M4.2 16.5h15.6"/><path d="M12 3a5 9 0 0 1 0 18"/><path d="M12 3a5 9 0 0 0 0 18"/></svg>
+<span class="brand-values__title">Worldwide</span><span class="brand-values__sub">Shipping Available</span></div></li><li
+          class="brand-values__item"
+          
+        ><div class="brand-values__body">
+              <svg class="icon icon--diamond brand-values__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.75 3.75h10.5L21 9.5 12 20.5 3 9.5Z"/><path d="M3 9.5h18"/><path d="m6.75 3.75 2.75 5.75L12 20.5"/><path d="m17.25 3.75-2.75 5.75L12 20.5"/></svg>
+<span class="brand-values__title">Premium Quality</span><span class="brand-values__sub">Crafted To Inspire</span></div></li></ul></div>
+</div>
+</div>
+<div id="shopify-section-footer" class="shopify-section"><link rel="stylesheet" href="assets/section-footer.css"><footer class="footer surface-dark" role="contentinfo">
+  <div class="footer__inner container"><div class="footer__brand"><a class="footer__logo-link" href="/"><img class="footer__logo" src="img/logo.png" srcset="img/logo.png 112w, img/logo.png 168w, img/logo.png 224w, img/logo.png 336w" sizes="112px" width="500" height="500" loading="lazy" alt=""><span class="visually-hidden">God Squad</span>
+      </a><div class="footer__lockup-text"><p class="footer__tagline">Different People.<br />
+Same Purpose.</p></div><nav class="footer__social" aria-label="Social"><ul class="footer__social-list" role="list"><li>
+                  <a class="footer__link footer__social-link" href="https://example.com/instagram">
+                    <svg class="icon icon--instagram " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3.5" y="3.5" width="17" height="17" rx="4.75"/><circle cx="12" cy="12" r="3.9"/><path d="M16.95 7.05h.01"/></svg>
+
+                    <span class="visually-hidden">Instagram</span>
+                  </a>
+                </li><li>
+                  <a class="footer__link footer__social-link" href="https://example.com/facebook">
+                    <svg class="icon icon--facebook " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M17.5 3.25h-2.75a4.75 4.75 0 0 0-4.75 4.75v2.75H7.25v4h2.75v6.5h4v-6.5h2.75l.75-4h-3.5V8a.75.75 0 0 1 .75-.75h2.75Z"/></svg>
+
+                    <span class="visually-hidden">Facebook</span>
+                  </a>
+                </li><li>
+                  <a class="footer__link footer__social-link" href="https://example.com/tiktok">
+                    <svg class="icon icon--tiktok " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9.5 11.75a4.25 4.25 0 1 0 4.25 4.25V3.75a5.25 5.25 0 0 0 5.25 5.25"/></svg>
+
+                    <span class="visually-hidden">TikTok</span>
+                  </a>
+                </li><li>
+                  <a class="footer__link footer__social-link" href="https://example.com/youtube">
+                    <svg class="icon icon--youtube " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2.9 16.85a23.6 23.6 0 0 1 0-9.7 2.1 2.1 0 0 1 1.47-1.47 48.5 48.5 0 0 1 15.26 0 2.1 2.1 0 0 1 1.47 1.47 23.6 23.6 0 0 1 0 9.7 2.1 2.1 0 0 1-1.47 1.47 48.5 48.5 0 0 1-15.26 0 2.1 2.1 0 0 1-1.47-1.47Z"/><path d="m10 14.9 4.7-2.9-4.7-2.9Z"/></svg>
+
+                    <span class="visually-hidden">YouTube</span>
+                  </a>
+                </li></ul>
+          </nav><p class="footer__strapline">A Brighter Tomorrow</p></div><div class="footer__utility"><nav class="footer__policies" aria-label="Policies">
+            <ul class="footer__policy-list" role="list"><li>
+                    <a class="footer__link" href="/policies/refund-policy">Refund policy</a>
+                  </li><li>
+                    <a class="footer__link" href="/policies/privacy-policy">Privacy policy</a>
+                  </li></ul>
+          </nav></div><div class="footer__bottom">
+      <p class="footer__copyright">
+        © 2026 God Squad
+      </p>
+    </div></div>
+</footer>
+
+
+</div>
+</body></html>

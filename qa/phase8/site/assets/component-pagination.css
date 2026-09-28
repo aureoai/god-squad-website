@@ -1,0 +1,86 @@
+/* ============================================================================
+   GOD SQUAD — Pagination
+   Phase 18. The paginator, as a component, because it has two consumers.
+
+   It lived in section-main-collection.css with a comment that named its own
+   promotion trigger: "It stays in this stylesheet only while this is its single
+   consumer. The moment a second surface renders it, the block moves to
+   assets/component-pagination.css and is linked from layout/theme.liquid."
+
+   Phase 13 gave it a second consumer and the move did not happen, so
+   main-search grew its own paginator under its own class names in its own
+   stylesheet — and the two drifted. Collection rendered caption type and marked
+   the current page with weight and a rule; search rendered tracked uppercase
+   label type and marked the current page with gold.
+
+   These are collection's rules. snippets/pagination.liquid records which half
+   of each implementation survived and why; the short version is that the type
+   and the current-page marker are collection's, and the accessibility is
+   search's.
+
+   Loaded from layout/theme.liquid beside the other shared components, which is
+   the rule Phase 6 applied to the button system and Phase 8 to the cart line.
+   ========================================================================== */
+
+.pagination {
+  margin-block-start: var(--space-9);
+}
+
+.pagination__list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* --target-min on both axes: these are primary navigation controls and a
+   single digit is otherwise a target a few pixels wide. */
+.pagination__link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--target-min);
+  min-height: var(--target-min);
+  padding-inline: var(--space-3);
+  border-block-end: var(--border-width-strong) solid transparent;
+  color: inherit;
+  font-family: var(--font-body);
+  font-size: var(--type-caption-size);
+  font-weight: var(--type-caption-weight);
+  letter-spacing: var(--type-caption-ls);
+  text-transform: uppercase;
+  text-decoration: none;
+  transition:
+    color var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+/* The current page carries its own weight and a rule beneath it as well as
+   aria-current, so the state is never colour alone (SC 1.4.1). */
+.pagination__link--current {
+  border-block-end-color: var(--accent-current);
+  font-weight: var(--weight-semibold);
+}
+
+.pagination__gap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--target-min-aa);
+  min-height: var(--target-min);
+  color: var(--color-text-current-muted);
+  font-family: var(--font-body);
+  font-size: var(--type-caption-size);
+}
+
+/* Phase 2 section 22.1: every hover rule is gated, or a touch tap can leave a
+   control in its hover state after navigation with no pointer to explain it. */
+@media (hover: hover) and (pointer: fine) {
+  a.pagination__link:hover {
+    border-block-end-color: var(--color-border-current-interactive);
+  }
+}

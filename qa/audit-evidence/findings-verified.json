@@ -1,0 +1,518 @@
+{
+ "confirmed": [
+  {
+   "id": "C1",
+   "severity": "high",
+   "title": "Our Story background is a hero crop with baked-in headline text",
+   "detail": "The Our Story section uses ./01-hero-model-mu98p88t-7jig.webp, a 650x480 crop of the mockup's HERO. Fragments of the mockup headline ('PURPOSE', 'K BY', 'TH.') and the 'More Than Clothing' script are visible in the render at every width, most obviously at 768 and 375 where the fade is vertical. The mockup's Our Story shows three models; that asset (images/our-story.webp) exists but is unused.",
+   "evidence": "",
+   "corrections": [
+    "Minor note for the premise, not the claim: the story asset is NOT byte-identical to images/hero-model.webp (md5 74bc4fd4 vs 6d545230, 359 differing bytes) although both are 650x480 and 39,966 bytes.",
+    "Minor aside for the evidence file, not the claim: 01-hero-model-mu98p88t-7jig.webp is the same size and dimensions as images/hero-model.webp but not byte-identical (md5 74bc4fd4... vs 6d545230...).",
+    "One note for the evidence file, not the claim: the root webp is NOT byte-identical to images/hero-model.webp (same 39,966 B size, but cmp differs at byte 34287 and md5s differ); it is a separate re-encode of the same crop."
+   ]
+  },
+  {
+   "id": "C2",
+   "severity": "high",
+   "title": "Product images are low-resolution mockup crops that are upscaled everywhere",
+   "detail": "Product images are 215-235 px crops. They render at 288 px on desktop (1.2-1.3x) and 327 CSS px on a 2x phone (2.8x device-pixel upscale), so they look soft.",
+   "evidence": "",
+   "corrections": []
+  },
+  {
+   "id": "C3",
+   "severity": "medium",
+   "title": "Two 404 requests for literal template strings on every load",
+   "detail": "The browser requests /{{ p.img }} and /{{ v.icon }} before the runtime processes the <sc-for> template. Harmless visually but two failed requests and two console errors per page view.",
+   "evidence": "",
+   "corrections": [
+    "The requests come from the parser creating the raw <img> elements (x-dc is only hidden with display:none), not solely the preload scanner; effect is identical.",
+    "Attribute it to the browser parsing the raw template's <img src=\"{{ p.img }}\"> inside <x-dc> before the runtime replaces it, i.e. an artifact of the Claude Design runtime, not of the page authoring. It is harmless and disappears once the markup is ported, so it is a note rather than something to fix in the prototype (low, not medium)."
+   ]
+  },
+  {
+   "id": "C5",
+   "severity": "high",
+   "title": "No navigation at all below 900px",
+   "detail": "Nav links are display:none under 900px and the hamburger is a span with no handler, so tablet and mobile users have no menu.",
+   "evidence": "",
+   "corrections": [
+    "Accurate as a description of the rendered page, but this is the expected state of a static Claude Design export (no interactivity was authored), so it is a Phase 1 build item rather than a regression."
+   ]
+  },
+  {
+   "id": "C6",
+   "severity": "high",
+   "title": "Search, account and cart are bare images; page has zero buttons",
+   "detail": "The three utility icons are <img> with no link or button wrapper; the hamburger is a span. Nothing in the header is keyboard-operable except the five nav links.",
+   "evidence": "",
+   "corrections": []
+  },
+  {
+   "id": "C7",
+   "severity": "medium",
+   "title": "Document lacks title, lang, header and main landmarks",
+   "detail": "document.title is empty, <html> has no lang, there is no <header> or <main>; the nav lives inside the hero section.",
+   "evidence": "",
+   "corrections": []
+  },
+  {
+   "id": "C8",
+   "severity": "low",
+   "title": "Third product orphaned at tablet width",
+   "detail": "At 768 px the product grid is two columns, so the Utility Cap sits alone on a second row.",
+   "evidence": "",
+   "corrections": []
+  },
+  {
+   "id": "C9",
+   "severity": "low",
+   "title": "Price rows misalign at about 1024 px",
+   "detail": "'Signature Oversized Tee' wraps to two lines at 1024 so its price sits lower than the hoodie and cap prices.",
+   "evidence": "",
+   "corrections": []
+  },
+  {
+   "id": "C10",
+   "severity": "high",
+   "title": "2 MB hero PNG served at every viewport",
+   "detail": "images/hero-group.png (1672x941, 1.99 MB PNG) is the hero at all widths including a 375 px band; there is no srcset, no lazy loading, no width/height attributes anywhere.",
+   "evidence": "",
+   "corrections": [
+    "Lazy loading is not applicable to the hero itself (it is the LCP image and should load eagerly); the missing srcset/sizes and intrinsic dimensions are the real defect on the hero, while loading=lazy applies to the below-fold product, story and footer images."
+   ]
+  },
+  {
+   "id": "C11",
+   "severity": "low",
+   "title": "No horizontal overflow at any tested width",
+   "detail": "scrollWidth equals innerWidth and no element extends past the viewport at 375, 768, 1024 and 1440.",
+   "evidence": "",
+   "corrections": [
+    "Pedantic: at widths with a scrollbar, scrollWidth equals clientWidth (innerWidth minus the 15px scrollbar), not innerWidth."
+   ]
+  },
+  {
+   "id": "C12",
+   "severity": "low",
+   "title": "Unused Playfair Display 700 weight in the font request",
+   "detail": "The Google Fonts URL asks for Playfair Display 700 and 900; only 900 is ever used.",
+   "evidence": "",
+   "corrections": [
+    "Immaterial rather than low: Google Fonts serves a separate @font-face per weight and the browser only downloads weights actually used, so the unused 700 costs a few bytes of CSS, not a font-file request. Cosmetic cleanup only."
+   ]
+  },
+  {
+   "id": "C13",
+   "severity": "medium",
+   "title": "Page depends on the unpkg CDN at runtime",
+   "detail": "React and ReactDOM are loaded from unpkg when the page loads; without network the product grid and value tiles never render.",
+   "evidence": "",
+   "corrections": [
+    "The dependency is stronger than stated: hideRawTemplate() (line 1820) injects x-dc{display:none!important} synchronously and init()/boot() run only after loadReactUmd() resolves (lines 1906-1910, failure logs and throws), so without network the ENTIRE page stays blank, not just the product grid and value tiles.",
+    "The consequence is understated. hideRawTemplate() (line 1818-1822, called unconditionally at 1906) injects 'x-dc{display:none!important}' before React is requested (confirmed live: that style is in <head>), and boot() never runs if the CDN fails, so without network the ENTIRE page stays blank, not just the product grid and value tiles. Severity should be raised accordingly.",
+    "The consequence is understated. hideRawTemplate() injects x-dc{display:none} immediately and loadReactUmd().then(init).catch() only logs and rethrows, so if unpkg is unreachable the entire page stays blank, not just the product grid and value tiles."
+   ]
+  },
+  {
+   "id": "C14",
+   "severity": "low",
+   "title": "Footer social set differs from the mockup",
+   "detail": "The render shows Facebook and Instagram only; the mockup shows Instagram, Facebook, TikTok and YouTube. Editor history shows this was a deliberate removal of placeholder boxes, so it is an open decision rather than a bug.",
+   "evidence": "",
+   "corrections": []
+  },
+  {
+   "id": "C15",
+   "severity": "medium",
+   "title": "Header tap targets are far below 44 px on mobile",
+   "detail": "Hamburger is 22x16, search/account/cart are 24x24, social icons 28x28.",
+   "evidence": "",
+   "corrections": [
+    "Note that the header icons are not interactive at all yet (C6), so the target size only becomes a live issue once they are wired; the social links are real anchors today."
+   ]
+  },
+  {
+   "id": "C16",
+   "severity": "low",
+   "title": "Cart badge text is 9 px",
+   "detail": "The cart count badge uses 9 px text.",
+   "evidence": "",
+   "corrections": [
+    "It matches the mockup's own tiny badge and the digit is supplementary information, so this is cosmetic."
+   ]
+  },
+  {
+   "id": "C17",
+   "severity": "low",
+   "title": "Right hero column collides with the model's back print at 1024-1440",
+   "detail": "The 'More Than Clothing' script and 'A HIGHER PURPOSE' sit on top of the right-hand model's back-print text, reducing legibility.",
+   "evidence": "",
+   "corrections": []
+  },
+  {
+   "id": "FIDELITY-1",
+   "severity": "medium",
+   "title": "Hero photo is a three-model group shot, not the mockup's single capped model",
+   "detail": "The approved mockup's hero shows one male model (black cap, sunglasses, chest logo, hand raised) to the right of the headline on a dark building backdrop. Every render instead uses images/hero-group.png, a separately generated three-model image (hoodie man, woman in cream sweatshirt, back-print man) that resembles the mockup's OUR STORY composition. Net effect: hero and story imagery are inverted relative to the mockup (the mockup's hero model now only appears in Our Story, see C1). Editor history shows the group photo was supplied by the user, so this is an open decision rather than a bug, but it is the largest single visual departure from the mockup and C18's claim that the 1440 hero matches the mockup's composition is not accurate on the photo itself.",
+   "evidence": "Mockup: C:/Users/TEST/OneDrive/Documents/GodSquad Website/uploads/God-Squad-Images/00-full-mockup-reference.webp (hero, single model). Renders desktop-1440.png, laptop-1024.png, tablet-768.png, mobile-375.png all show three models. HTML: <img data-r=\"hero-img\" src=\"images/hero-group.png\">; images/hero-group.png is byte-identical (1,989,201 bytes) to uploads/'ChatGPT Image Sep 20, 2026, 11_06_34 AM.png'. Editor screenshot C:/Users/TEST/OneDrive/Documents/GodSquad Website/uploads/pasted-1789874193900-0.png: user prompt 'Replace the images in Hero Section' and assistant reply that the hero 'already uses the group photo you attached last time (images/hero-group.png)'.",
+   "corrections": []
+  },
+  {
+   "id": "FIDELITY-2",
+   "severity": "medium",
+   "title": "Hero headline breaks into three lines at 1024/1440 and one line at 768, never the mockup's two-line lockup",
+   "detail": "The mockup sets 'WALK BY' on line one and gold 'FAITH.' on line two. At 1440 and 1024 the render stacks 'WALK' / 'BY' / 'FAITH.' (three lines), and at 768 it collapses to a single line 'WALK BY FAITH.' at 65px. Only the 375 capture reproduces the two-line lockup. Cause: the h1 uses font-size clamp(56px,8.5vw,112px) with text-wrap:balance inside a hero column of 1.1fr out of 2.9fr (about 546px at 1440) minus 96px padding, roughly 450px, which cannot hold 'WALK BY' at 112px; below 900px the column becomes full width so the whole phrase fits on one line.",
+   "evidence": "desktop-1440.png: 'WALK' (y about 245-345), 'BY' (about 350-440), 'FAITH.' (about 450-535) three lines; laptop-1024.png same three-line stack at 87px; tablet-768.png: single line 'WALK BY FAITH.' at y about 700. HTML h1: font-size:clamp(56px,8.5vw,112px);line-height:.88;text-wrap:balance; hero grid-template-columns:minmax(0,1.1fr) minmax(0,1.1fr) minmax(0,.7fr); hero-copy padding:170px 48px 56px. Mockup 00-full-mockup-reference.webp: two lines.",
+   "corrections": []
+  },
+  {
+   "id": "FIDELITY-3",
+   "severity": "medium",
+   "title": "Product photos sit in visible square tiles and are edge-cropped; the cap's brim is clipped",
+   "detail": "In the mockup the tee, hoodie and cap float on the uniform cream section with generous margins and no container. The render wraps each image in a 1:1 box with its own background (#ebe6dc) and object-fit:cover, so each product reads as a boxed square whose edges are visible (subtle at 1440, obvious at 768 and in the mobile capture), the garments run to the box edges, and the non-square cap crop (215x190) is scaled 1.52x to 326x288 at 1440 (1.80x at 768) so roughly 19px (1440) / 23px (768) are cut from each side; the brim touches the left tile edge. The mockup shows the complete cap with clear space around it.",
+   "evidence": "HTML: <div style=\"width:100%;aspect-ratio:1/1;...;background:#ebe6dc\"><img ... style=\"width:100%;height:100%;object-fit:cover\">. Pixel samples in desktop-1440.png: section background (243,239,230) at (300,950) and (600,806); inside the tee tile (241,235,228) at (446,950)/(600,810) and (238,234,226) at (460,950), (239,234,222) at (600,1090); tile bounds about x 445-733, y 808-1096. Detail crops C:/Users/TEST/AppData/Local/Temp/claude/C--Users-TEST-OneDrive-Documents-GodSquad-Website/de238d03-508d-43ce-a377-210f71ff0033/scratchpad/crops/d-cap.png and d-tee.png show the box edge and the brim at the left edge. tablet-768.png: cap tile box clearly visible at about x 24-366, y 1895-2190. Natural sizes from evidence: cap 215x190, tee 235x230, hoodie 235x235.",
+   "corrections": [
+    "In tablet-768.png the cap tile actually spans x 24-373 (350px, headless capture without scrollbar) rather than 24-366; immaterial to the finding.",
+    "Mechanism nuance: because the img covers 100% of the box, the #ebe6dc tile colour never actually paints; the visible square is the product crop's own baked-in background (241,235,228) differing from the section's (243,239,230). Same visual result.",
+    "At 1440 what shows as the 'box' is mostly the product photos' own off-white background (the images cover the tile fully), not the #ebe6dc tile colour itself; the visual effect is the same."
+   ]
+  },
+  {
+   "id": "FIDELITY-4",
+   "severity": "medium",
+   "title": "Nav and footer wordmarks render at about half the mockup's relative size",
+   "detail": "The mockup's nav wordmark is 114x87 px on a 1024-wide canvas (11% of page width) and the footer wordmark 70x53 (6.8%). The render's nav wordmark is 66x50 px at 1440 (4.6%) and 66x50 at 1024 (6.4%); the footer wordmark is 47x36 at 1440 (3.3%). The mark is smaller in absolute pixels than in the mockup even though the render canvas is 40% wider. Cause: images/WHITE FONT LOGO.png is 500x500 with large transparent padding around the mark, so the 78px-high box (56px in footer / under 900px) yields only a 50px (36px) visible wordmark.",
+   "evidence": "Bright-pixel bounding boxes: C:/Users/TEST/OneDrive/Documents/GodSquad Website/uploads/GODSQUAD WEBSITE MOCKUP.png (1024x1536) nav logo x 51-164, y 59-145 (114x87); footer logo 70x53. desktop-1440.png nav logo x 60-125, y 77-126 (66x50); footer logo x 52-98, y 1987-2022 (47x36). laptop-1024.png nav logo 66x50. Crops d-logo.png vs m-logo.png in the scratchpad crops folder. HTML: <img data-r=\"logo\" src=\"images/WHITE FONT LOGO.png\" style=\"height:78px;width:auto\">; footer height:56px; [data-r=logo]{height:56px} under 900px.",
+   "corrections": []
+  },
+  {
+   "id": "FIDELITY-5",
+   "severity": "low",
+   "title": "Our Story heading wraps to three lines at 1440 and four at 1024 instead of the mockup's two",
+   "detail": "The mockup sets 'REAL PEOPLE.' / 'BIGGER PURPOSE.' on two lines. At 1440 the render breaks as 'REAL PEOPLE.' / 'BIGGER' / 'PURPOSE.' and at 1024 as 'REAL' / 'PEOPLE.' / 'BIGGER' / 'PURPOSE.', pushing the paragraph and CTA down and making the copy column look cramped next to the photo. The story copy column is minmax(260px,.9fr) of 2.9fr (about 447px at 1440, 318px at 1024) minus 96px padding, too narrow for 'BIGGER PURPOSE.' at the 40px/36px heading size. The 768 and 375 captures match the mockup's two lines because the column becomes full width.",
+   "evidence": "desktop-1440.png: heading at y about 1275-1400 shows three lines; laptop-1024.png crop C:/Users/TEST/AppData/Local/Temp/claude/C--Users-TEST-OneDrive-Documents-GodSquad-Website/de238d03-508d-43ce-a377-210f71ff0033/scratchpad/crops/l-storyhead.png shows four lines. HTML h2: font-size:clamp(32px,4vw,40px);line-height:1.05 with explicit <br> after 'Real People.'; story grid-template-columns:minmax(260px,.9fr) minmax(0,1.6fr) minmax(170px,.4fr); story-copy padding:56px 48px.",
+   "corrections": []
+  },
+  {
+   "id": "FIDELITY-6",
+   "severity": "low",
+   "title": "Hero photo starts with a hard horizontal edge under the black announcement bar / nav strip",
+   "detail": "In the mockup the announcement bar and nav sit on the dark hero photo, whose top is continuously dark. In the render the announcement bar is a solid black strip outside the hero section, and the photo begins directly beneath it with bright sky and building tops visible, producing a visible hard line across the top right at 1024 and 1440. Below 900px the photo band sits under a solid black nav strip with the same abrupt edge (sky at the top of the band at 768). The vertical fade only starts at 0.55 alpha, so it does not hide the seam.",
+   "evidence": "Crop C:/Users/TEST/AppData/Local/Temp/claude/C--Users-TEST-OneDrive-Documents-GodSquad-Website/de238d03-508d-43ce-a377-210f71ff0033/scratchpad/crops/d-topedge.png (desktop-1440.png x 900-1440, y 0-130): black bar then sky/building begins abruptly at y=40. tablet-768.png: photo band begins at y about 128 under the nav strip with sky at its top edge. HTML: announcement div precedes <section data-r=\"hero\">; hero-fade second gradient linear-gradient(180deg,rgba(13,12,10,.55) 0%,rgba(13,12,10,0) 30%,...). Mockup 00-full-mockup-reference.webp: top 40px of the page is dark building, no seam.",
+   "corrections": [
+    "'Bright sky' overstates it: under the 55% top fade the photo top reads as dark grey (RGB ~45-50), so the seam is visible but subtle at 1440."
+   ]
+  },
+  {
+   "id": "FIDELITY-7",
+   "severity": "low",
+   "title": "'FAITH LIVES DIFFERENT HERE.' becomes an orphan block under the Our Story CTA below 900px",
+   "detail": "In the mockup this four-line caption is an overlay at the top-right corner of the story photo. Under 900px the story-side column stacks after the copy column, so the caption and its 40px rule appear as an unrelated text block beneath the 'OUR STORY' button, separated from the photo it captions, at both 768 and in the mobile capture.",
+   "evidence": "tablet-768.png: 'FAITH' begins at y about 3190 immediately after the 'OUR STORY' button (y about 3095-3145). Mobile slice C:/Users/TEST/AppData/Local/Temp/claude/C--Users-TEST-OneDrive-Documents-GodSquad-Website/de238d03-508d-43ce-a377-210f71ff0033/scratchpad/slices/mobile-375-04.png: 'FAITH / LIVES / DIFFERENT / HERE.' plus rule 40px under the button at y 495-600 of the slice. HTML: @media (max-width:900px) [data-r=story]{grid-template-columns:minmax(0,1fr)} and [data-r=story-side]{padding:0 24px 40px}; the story-img gets order:-1 but story-side keeps source order after story-copy.",
+   "corrections": []
+  },
+  {
+   "id": "FIDELITY-8",
+   "severity": "low",
+   "title": "Footer social icons are outlined circles, not the mockup's plain glyphs",
+   "detail": "The mockup footer uses small plain white social glyphs. The render's icon-facebook.png and icon-instagram.png are glyphs inside thin circular outlines at 28x28, which reads as a different icon style next to the 'A BRIGHTER TOMORROW' divider. C14 already covers which networks are present; this is about the style of the ones that remain.",
+   "evidence": "desktop-1440.png footer at y about 2000, x about 1085-1140: two circled icons. Mockup 00-full-mockup-reference.webp footer: four plain glyphs (Instagram, Facebook, TikTok, YouTube) with no circles. HTML: <img src=\"images/icon-facebook.png\" style=\"height:28px;width:28px\"> and icon-instagram.png (130x130 RGBA).",
+   "corrections": []
+  },
+  {
+   "id": "FIDELITY-9",
+   "severity": "low",
+   "title": "Announcement-bar globe is gold in the render, white in the mockup (deliberate edit)",
+   "detail": "The mockup's 'WORLDWIDE SHIPPING' label is preceded by a white globe glyph on the dark bar. The render shows a gold globe (images/icon-globe.png at 16px). Editor history shows this was requested and re-requested by the user, so it is an open decision rather than a defect, but it is a concrete visible difference from the approved mockup.",
+   "evidence": "desktop-1440.png top right: gold globe before 'WORLDWIDE SHIPPING'. Mockup 00-full-mockup-reference.webp: white globe. Editor screenshots C:/Users/TEST/OneDrive/Documents/GodSquad Website/uploads/pasted-1789874322321-0.png and pasted-1789874476205-0.png: 'Replace the globe icon at the worldwide upper right side before the nav' and 'Announcement bar now uses the gold globe icon next to Worldwide Shipping'. HTML: <img src=\"images/icon-globe.png\" alt=\"\" style=\"height:16px;width:auto\">.",
+   "corrections": []
+  },
+  {
+   "id": "FIDELITY-10",
+   "severity": "low",
+   "title": "The mobile-375 render is a roughly 490px-wide layout cropped to 375px, not a true 375px render",
+   "detail": "The headless capture at 375 was laid out wider (Edge/Chromium enforces a minimum window width on Windows) and the PNG is cropped to the left 375px. Consequences visible in the file: the centred announcement lines are centred at x about 245 (a 490px layout) instead of 187; the single-column product tiles run off the right edge with no right margin; the nav's right icon group shows only the hamburger and search glyph with account and cart pushed off-canvas. None of these are page defects (the DOM evidence at a real 375/DPR2 viewport reports no overflow and all four icons present), so this PNG should not be used to support mobile fidelity claims; the 768 capture is genuine (announcement text spans 48-717, all four nav icons at 572-744).",
+   "evidence": "C:/Users/TEST/AppData/Local/Temp/claude/C--Users-TEST-OneDrive-Documents-GodSquad-Website/de238d03-508d-43ce-a377-210f71ff0033/scratchpad/shots/mobile-375.png: announcement line 1 content x 126-362 (centre 244), line 2 x 155-335 (centre 245); cap tile row y 2700 content x 24-374 (reaches the image edge); nav row y 80-130 bright runs only at 296-317 (hamburger) and 349-362 (search glyph). tablet-768.png nav row y 30-80 bright runs at 572-593, 632-635, 679-681, 735 (hamburger, search, account, cart) ending at the 24px right padding. CSS: [data-r=announce] is column/centered under 520px, so its lines mark the layout centre.",
+   "corrections": [
+    "The cause (Chromium minimum headless window width) is a plausible inference, not proven; the artifact itself is certain."
+   ]
+  },
+  {
+   "id": "RESPONSIVE-1",
+   "severity": "high",
+   "title": "Hero fade is offset by the nav height below 900px: black band across the photo plus a hard bottom edge",
+   "detail": "Under the max-width:900px media query the nav becomes position:relative with order:-2, so it is the first in-flow child of the hero section (88px tall at 375 and 768). The fade overlay keeps `top:0; height:max(62vw,320px)` positioned against the SECTION, not the image, so its gradient runs over the nav and the top of the photo and reaches solid #0d0c0a 88px above the photo's bottom. Result at every width under 900: the photo goes fully black in a horizontal band (through the man's hoodie/hands), then snaps back to full brightness for its last 88px, and ends with a hard edge against the black copy block. The story section does not have this problem because it has no in-flow element before the image (storyFade 2724-3004 == storyImg). Fix: offset the fade by the nav height, or wrap image+fade in one relative container so the fade tracks the image.",
+   "evidence": "Live DOM (127.0.0.1:8765, mobile preset 375x812): heroFade y=59 h=320 (59-379) vs heroImg y=147 h=320 (147-467); nav y=59 h=88. Tablet 768: heroFade 41-517 vs heroImg 129-605. Landscape 812x375: heroFade 41-544 vs heroImg 129-632. Pixel samples in tablet-768.png at x=60: RGB 13,12,11 (solid #0d0c0a) at y=450-515, then 197,180,168 at y=518 through 215,196,179 at y=604, then 13,12,10 at y=606. mobile-375.png at x=40: 13,12,10 at y=340-370, 179,164,154 at y=380, bright to y=460, black at y=468. Live 375 screenshot shows the black band across the hoodie and the hard edge at the pants/stairs. CSS: `[data-r=hero-fade]{inset:auto 0 auto 0!important;top:0!important;height:max(62vw,320px)!important;background:linear-gradient(180deg,rgba(13,12,10,0) 55%,#0d0c0a 100%)!important}` and `[data-r=nav]{position:relative!important;...;order:-2}`.",
+   "corrections": []
+  },
+  {
+   "id": "RESPONSIVE-2",
+   "severity": "medium",
+   "title": "The mobile-375.png capture is not a 375px layout; it is a ~492px layout clipped to 375px (do not trust its horizontal composition)",
+   "detail": "The headless capture's content is laid out roughly 492px wide and clipped by the wrapper's overflow:hidden, so it misrepresents the phone layout: header icons appear missing, product photos look cut off at the right edge, and text/tiles look off-centre. None of that happens at a real 375px viewport. Vertical stacking order in the PNG is still representative, but any finding about icon presence, centring, right gutters or product-image cropping drawn from that file is a capture artifact (likely the browser's minimum window width in headless mode). The capture also stops at 4,400px inside the values strip, so the Premium Quality tile and the footer were never captured at mobile. Recommend recapturing with DevTools device emulation (or the Browser pane mobile preset).",
+   "evidence": "mobile-375.png: nav shows only the hamburger (bright columns x=296-317) and search (x=346-364); 'HEAVYWEIGHT HOODIE' label dark pixels span x=156-334 (centre 245, expected 187); announcement lines centre at x~246-248; product-image background (#ebe6dc family) runs from x=24 to x=374 with no right gutter at y=1500; the 'OUR STORY' button spans x=24-192 (left-anchored, consistent with a wider box). Live DOM at a true 375 viewport: menu x=179 w=22, search x=227, account x=277, cart x=327 w=24 (right edge 351 = 375-24), product images 327x327 at x=24, scrollWidth 375, docH 4382, values 3520-4218, footer 4218-4382. Live 375 screenshot shows all four icons and centred announcement text.",
+   "corrections": []
+  },
+  {
+   "id": "RESPONSIVE-3",
+   "severity": "medium",
+   "title": "Desktop side-column captions become orphan text blocks in the single-column flow (hero and story)",
+   "detail": "On desktop the 'More Than Clothing.' script + 'A Higher Purpose.' column and the 'Faith Lives Different Here.' column are decorative overlays beside the photos. Under 900px they are kept as ordinary blocks appended after the main copy. In the hero this yields five stacked taglines under the photo (Streetwear With A Purpose / 2 Corinthians 5:7 / Different People Same Purpose / More Than Clothing. / A Higher Purpose.) and 563px of text on black beneath a 320px image; the hero alone is 970px (1.2 phone screens) and the shop section does not start until y=1029. In the story section the side caption plus its 40px rule/padding adds a 145px orphan after the CTA. Consider hiding [data-r=hero-side] and [data-r=story-side] on <=900px or folding one line into the main copy.",
+   "evidence": "Live DOM 375x812: hero y=59 h=970; heroImg h=320 (147-467); heroCopy y=467 h=352; heroSide y=819 h=211 (ends 1030); drop section starts y=1029. storyCopy y=3004 h=371, storyCta y=3285 h=50, storySide y=3375 h=145 (ends 3520). Tablet 768: heroSide y=916 h=139, storySide y=3177 h=145. CSS: `[data-r=hero-side]{padding:0 24px 40px!important;flex-direction:row...}` and at <=520 `flex-direction:column`; `[data-r=story-side]{padding:0 24px 40px!important}`. Visible in mobile-375.png slice 819-1030 and 3375-3520 (both slices are pure text blocks on black).",
+   "corrections": [
+    "This is a deliberate responsive treatment, not an oversight: the 900px query explicitly restyles hero-side (row layout, rotate(-6deg), rule hidden) and story-side. Treat it as a design recommendation rather than a defect."
+   ]
+  },
+  {
+   "id": "RESPONSIVE-4",
+   "severity": "medium",
+   "title": "New Drop is 1,695px tall on a phone (2.1 screens) for three products, with the only control above the grid and no tappable cards",
+   "detail": "Below 520px the product grid is forced to one column, so each card is a 327px square image plus ~108px of labels (435px pitch). Three products consume 1,285px, and the whole section 1,695px. The one actionable element, 'View All Products' (242x50), sits above the grid because the copy column stacks first; the cards contain no <a>/<button> and the 16px swatches are inert spans, so after scrolling 1.6 screens of products the user reaches the story image with nothing to tap and must scroll back up. A 2-up grid at 375 (~154px cards) is the streetwear-store norm, halves the section height, and also reduces the device-pixel upscale in C2 (154 CSS px from 235 natural instead of 327).",
+   "evidence": "Live DOM 375x812: drop y=1029 h=1695; viewAll y=1317 (above products); products grid y=1399 h=1285; productImgs 327x327 at y=1399, 1834, 2269; `document.querySelectorAll('[data-r=products] a, [data-r=products] button').length` = 0. CSS: `@media (max-width:520px){[data-r=products]{grid-template-columns:minmax(0,1fr)!important}}`. Landscape 812x375 shows the 2-column variant works (365px cards) with the third product orphaned as in C8.",
+   "corrections": [
+    "The single column under 520px is an explicit authored rule, so this is a design critique (2-up would halve the section and reduce the C2 upscale) rather than a bug; the inert cards are already covered by TECHNICAL-4."
+   ]
+  },
+  {
+   "id": "RESPONSIVE-5",
+   "severity": "low",
+   "title": "Values strip is a 698px single column on phones; at 768 the right-column tiles draw a stray border at the viewport edge",
+   "detail": "Under 520px the four value tiles stack one per row at 174px each (698px, 86% of a phone screen) for four two-line labels, although each tile's content (44px icon + ~160px label) fits comfortably 2-up at 375 (tiles are 377px wide at 768 and 399px at 812 with large slack). At 521-900px the 2-column grid keeps the inline `border-right:1px` on every tile, so the second column paints a 1px vertical rule at the right viewport edge, and every tile keeps `border-bottom:1px` so the last row's border doubles with the section's own border-bottom into a 2px line.",
+   "evidence": "Live DOM 375: values y=3520 h=698; four tiles 375x174 at y=3521/3695/3869/4043. Tablet 768: tiles 377x174 with computed borderRightWidth 1px and borderBottomWidth 1px on all four (second column x=377, right edge 754 = viewport edge). CSS: `[data-r=value]{padding:32px 16px!important;border-bottom:1px solid rgba(255,255,255,.1)}` in the 900 query; `border-right:none` only inside the 520 query; the section itself has `border-bottom:1px solid rgba(255,255,255,.1)`.",
+   "corrections": [
+    "The single-column stack under 520 is explicit CSS (judgment call); the concrete oversights are the stray right rule at 521-900 and the doubled bottom rule. The 4th tile also draws border-right at desktop, hidden only because it coincides with the wrapper edge."
+   ]
+  },
+  {
+   "id": "RESPONSIVE-6",
+   "severity": "low",
+   "title": "Announcement bar keeps a 48px gutter at 521-900px while everything else uses 24px (dead [data-r=pad] rule)",
+   "detail": "The 900px media query's first rule targets `[data-r=pad]`, but no element in the HTML carries data-r=\"pad\", so the announcement bar keeps its inline `padding:12px 48px` on tablets while the nav, hero copy, drop, story and footer all switch to 24px. The left edges of 'GOOD PEOPLE. HIGHER PURPOSE.' (x=48) and the logo box / 'STREETWEAR WITH A PURPOSE' (x=24) visibly disagree at the top of the tablet render. Under 520px the bar gets its own override of `padding:10px 16px`, which is a third gutter value (16px) rather than the 24px used elsewhere.",
+   "evidence": "Tablet 768 live DOM: announce paddingLeft 48px, nav paddingLeft 24px, hero-copy paddingLeft 24px. tablet-768.png top-left crop: announcement text begins x~48, logo at x~35, 'STREETWEAR WITH A PURPOSE' at x=24. HTML: `[data-r=pad]{padding-left:24px!important;padding-right:24px!important}` with zero data-r=\"pad\" elements in the source; `[data-r=announce]{...padding:10px 16px!important}` only in the 520 query.",
+   "corrections": []
+  },
+  {
+   "id": "RESPONSIVE-7",
+   "severity": "low",
+   "title": "Hero image band is sized with 62vw and no viewport-height cap: taller than the screen on landscape phones",
+   "detail": "`height:62vw` grows with width but is never limited by height. On an 812x375 landscape phone the band is 503px tall, 1.34x the viewport, and follows a 41px announcement bar and 88px nav, so the photo spans y=129-632 and the H1 starts at y=689, nearly two screens down; the fade offset from RESPONSIVE-1 also lands in the middle of that band. A `max-height` in vh (or clamp) on [data-r=hero-img]/[data-r=hero-fade] would keep the headline reachable in landscape.",
+   "evidence": "Live DOM at 812x375: heroImg y=129 h=503 w=797; heroFade y=41 h=503; h1 y=689 h=61; vh=375; docH 3939. CSS: `[data-r=hero-img]{...height:62vw!important;min-height:320px!important;order:-1}` inside the max-width:900px query, no max-height anywhere.",
+   "corrections": []
+  },
+  {
+   "id": "RESPONSIVE-8",
+   "severity": "low",
+   "title": "Phone hero crop shows only the central two-thirds of the photo with no art direction; the third model and back-print message are cut",
+   "detail": "At 375 the band is 375x320 (aspect 1.17:1) filled from the 1672x941 (1.78:1) PNG with object-fit:cover. The cover scale is set by height (320/941 = 0.34), giving a 568px-wide scaled image of which 193px (34%) is cropped, 96px each side; `object-position:center 30%` has no effect because there is no vertical slack. The right-hand model with the 'Built Different For A Higher Purpose' back print (the only on-garment message in the hero) is cut through mid-body, and the group composition the mockup relies on becomes a two-person crop. No <picture>/srcset offers a portrait-oriented crop for phones (C10 covers weight; this is composition).",
+   "evidence": "Live DOM 375: heroImg 375x320; CSS `object-fit:cover;object-position:center 30%` inline, `object-position:center 30%!important` in the 900 query. Live 375 screenshot: third model visible only as a cap and sleeve at the right edge x~340-375, back print not visible. tablet-768.png (753x476 band, ~11% cropped) shows all three models and the back print. Arithmetic: 1672x941 scaled by 0.340 = 568x320; 568-375 = 193px cropped.",
+   "corrections": [
+    "The visual consequence (third model cut mid-body, back print hidden) follows from the geometry and the group composition but could not be re-inspected in a true-375 capture here, since mobile-375.png is a wider layout; the crop arithmetic itself is correct."
+   ]
+  },
+  {
+   "id": "RESPONSIVE-9",
+   "severity": "low",
+   "title": "Footer stacks into a column at 521-900px although both groups fit on one row",
+   "detail": "The 900px query forces `flex-direction:column; align-items:flex-start` on the footer. At 768 the left group (logo + tagline) is 230px wide and the right group (two social icons + 'A Brighter Tomorrow') 271px wide, 501px in a 705px content box, so the row layout would still fit with the 32px gap. The stacked version makes a 164px-tall footer with the social icons left-aligned under the logo instead of the mockup's single band. Keeping the row down to ~560px and stacking only below that would match the desktop composition on tablets.",
+   "evidence": "Tablet 768 live DOM: footer y=3673 h=164, computed flexDirection 'column'; footerLeft x=24 w=230 y=3701; footerRight x=24 w=271 y=3781. CSS: `[data-r=footer]{flex-direction:column!important;align-items:flex-start!important;padding:28px 24px!important;gap:24px!important}` inside the max-width:900px query. Same 164px height at 375 (footer y=4218 h=164).",
+   "corrections": [
+    "The stack at <=900 is an explicit authored breakpoint; this is a recommendation about where the breakpoint should sit, not a bug."
+   ]
+  },
+  {
+   "id": "RESPONSIVE-10",
+   "severity": "low",
+   "title": "5.4-screen mobile page with a header that scrolls away and no back-to-top or persistent navigation",
+   "detail": "At 375x812 the document is 4,382px: hero 970 + New Drop 1,695 + Story 797 + Values 698 + Footer 164 (+59 announcement). The nav is `position:relative` below 900px, so even once the hamburger works (C5) the menu, search, account and cart are only reachable by scrolling back to the top; there is no sticky header, no back-to-top control and no in-footer links to the same destinations. On a long single-page store this is the main way phone users get to Shop/Cart.",
+   "evidence": "Live DOM 375x812: docH 4382, vh 812 (5.4 viewports); nav computed position 'relative', y=59 h=88; section heights hero 970, drop 1695, story 797, values 698, footer 164. Footer contains only two social links (footer a count = 2) and two taglines, no nav links. CSS: `[data-r=nav]{position:relative!important;padding:16px 24px!important;order:-2}`.",
+   "corrections": []
+  },
+  {
+   "id": "RESPONSIVE-11",
+   "severity": "low",
+   "title": "Most mobile secondary text is 11-13px tracked uppercase; body copy never exceeds 15px",
+   "detail": "Apart from the H1 (56px), the H2s and the script, the phone typography is built from small tracked caps: 11px .22-.26em for the announcement bar, value subtitles (#bdb6a8 on #0d0c0a) and both footer taglines; 12px .2-.22em for product names, the story side caption, nav links and the two CTAs; 13px .3em for eyebrows; the only paragraph is 15px. Letter-spacing of .2-.3em at 11-13px on a 375px screen makes short labels long and light, and nothing on the page reaches the 16px commonly used as the mobile body floor. C16 already covers the 9px cart badge; this is the rest of the scale.",
+   "evidence": "Live DOM 375: computed font sizes on text leaves = 9, 11, 12, 13, 14, 15, 16, 56px. HTML inline styles: announce `font-size:11px;letter-spacing:.22em`, value sub `font-size:11px;letter-spacing:.2em;color:#bdb6a8`, footer taglines `font-size:11px;letter-spacing:.26em`, product name `font-size:12px;letter-spacing:.2em`, CTAs `font-size:12px;letter-spacing:.22em`, story paragraph `font-size:15px`. No mobile override of any font size in the media queries except the clamp() minimums on headings.",
+   "corrections": [
+    "The '16px' entry in the live list is the hidden <script type=\"text/x-dc\"> node, not rendered text, so the statement that no visible text reaches 16px holds; the claim's own evidence line should not list 16px among text leaves.",
+    "The '16px' in the measured font-size list is the hidden <script type=\"text/x-dc\"> element in <body> (it has a text node), not visible copy; the claim's 15px ceiling for readable text stands.",
+    "This scale reproduces the approved mockup's own small tracked caps, so it is a brand/mockup decision rather than an implementation slip, and the 16px 'floor' is a convention, not a requirement."
+   ]
+  },
+  {
+   "id": "TECHNICAL-1",
+   "severity": "high",
+   "title": "Hero fade overlay is offset from the hero image by the nav height below 900px",
+   "detail": "Under 900px the nav becomes in-flow (`[data-r=nav]{position:relative;order:-2}`, line 29) and sits at the top of the hero grid, but `[data-r=hero-fade]{top:0;height:max(62vw,320px)}` (line 22) is still measured from the section top. The gradient therefore goes fully opaque 88px above the bottom of the photo, an unfaded strip of the photo reappears beneath the black band, and the image then ends in a hard edge against the copy. Fix by anchoring the fade to the image (wrap img+fade, or offset the fade by the nav height, or move the nav out of the hero section).",
+   "evidence": "Live DOM at 375x812: nav top 59 h 88 (position relative); hero-fade top 59 h 320 (y 59-379); hero-img top 147 h 320 (y 147-467); hero-copy starts at 467. Visible in mobile-375.png (top 640px): photo fades to solid black around y 300-380, then legs/steps reappear unfaded from ~380 to 467 with a hard cut. Same in tablet-768.png: fade reaches black at ~y 520, photo strip visible ~520-605, hard edge at 605. Story section is unaffected (story-img and story-fade both top 2724, h 280) because it has no in-flow element above the image.",
+   "corrections": []
+  },
+  {
+   "id": "TECHNICAL-2",
+   "severity": "medium",
+   "title": "C4 is incorrect: the runtime implements style-hover, so both CTAs do have a hover state",
+   "detail": "support.js `collectProps` treats any `style-*` attribute as a pseudo-class (`if (key.startsWith(\"style-\")) pseudoClasses.push(host.pseudoClass(key.slice(6), value))`) and `createPseudoSheet` inserts `.scpN:hover{...!important}` into a head stylesheet while adding the class to the element. The attribute is stripped from the DOM (which is why the earlier count was 0) but the effect is live, and the `!important` beats the inline background. C4 should be withdrawn. What remains true: `style-hover` is a Claude-Design-only attribute, so the hover must be re-expressed as ordinary CSS when the markup leaves the dc-runtime (e.g. for Shopify); the nav links' only hover is the global `a:hover{color:#d8c08a}` (line 16), and the PNG icon links have no hover at all.",
+   "evidence": "support.js lines ~424-427 (collectProps) and the createPseudoSheet block (~lines 1535-1560). Live head stylesheet rules: `.scp0:hover { background: rgb(42, 40, 35) !important; color: rgb(243, 239, 230) !important; }` and `.scp1:hover { background: rgb(230, 211, 166) !important; color: rgb(13, 12, 10) !important; }`; rendered anchors: `<a class=\"scp0\">View All Products →</a>`, `<a class=\"scp1\">Our Story →</a>`.",
+   "corrections": []
+  },
+  {
+   "id": "TECHNICAL-3",
+   "severity": "medium",
+   "title": "Template syntax uses Liquid's own {{ }} delimiters, so a direct paste into a Shopify section silently renders empty product and value tiles",
+   "detail": "The product grid and value tiles are driven by `<sc-for list=\"{{ products }}\">`, `<sc-if value=\"{{ p.img }}\">`, `{{ p.name }}`, `{{ p.price }}`, `background:{{ s }}`, `{{ v.icon }}`, `{{ v.title }}`, `{{ v.sub }}` (lines 107-120, 143-149) and all data lives only in `<script type=\"text/x-dc\" data-dc-script>` (lines 169-188), which nothing but support.js executes. Liquid evaluates `{{ products }}`/`{{ p.name }}` as undefined variables and outputs empty strings, and `<sc-for>`, `<sc-if>`, `<x-dc>`, `<helmet>` stay in the DOM as unknown elements. The grid must be rewritten as `{% for product in collection.products %}` with `product.featured_image | image_url`, `product.price | money`, etc., and the values block as section blocks with schema.",
+   "evidence": "HTML lines 9-10, 107-120, 143-149, 169-188; support.js `walkFor`/`walkIf`/`compileAttr` are the only consumers of that syntax; the two 404s for `/%7B%7B%20p.img%20%7D%7D` and `/%7B%7B%20v.icon%20%7D%7D` show the browser already treats the placeholders literally before the runtime runs.",
+   "corrections": []
+  },
+  {
+   "id": "TECHNICAL-4",
+   "severity": "medium",
+   "title": "The commerce surface is inert: no product links, placeholder hrefs, hard-coded cart count and symbol-only currency",
+   "detail": "Nothing in the New Drop grid is clickable or focusable: the `[data-r=products]` container holds 0 `<a>` elements, product names are `<div>`s, and there is no add-to-cart. Six of the nine links are `href=\"#\"` (Home, Verse, View All Products, Our Story CTA, Facebook, Instagram), which scroll to the top of the page when clicked; Shop and Collections both point at `#shop`; the Home active underline (line 71) is hard-coded. The cart badge is the literal text `0` (line 78). Prices are string-concatenated in JS (`cur + '1,290'`, lines 172-177) so the `currency` prop (data-props enum ₱/$/€) only swaps the symbol; selecting `$` shows `$1,290` for the same item. For Shopify these become `product.url`, `product.price | money`, `cart.item_count`, `routes.*`.",
+   "evidence": "Live DOM: productsAnchors 0, productsChildren 3; focusables = A:#:Home, A:#shop:Shop, A:#shop:Collections, A:#story:Our Story, A:#:Verse, A:#:View All Products, A:#:Our Story, A:#:Facebook, A:#:Instagram; cartBadge '0'. `grep -c 'href=\"#\"'` = 6. HTML lines 71-72, 78, 104, 132, 160-161, 169-177.",
+   "corrections": []
+  },
+  {
+   "id": "TECHNICAL-5",
+   "severity": "medium",
+   "title": "Colour swatches have no accessible name or semantics",
+   "detail": "Each swatch is `<span style=\"width:16px;height:16px;border-radius:50%;background:{{ s }}\">` (line 116): no text, no title, no aria-label, no role, and the colour name is not stated anywhere on the page. Screen-reader users get nothing, and they are not interactive (no variant selection), so they also fail as controls. Either give each an sr-only label with the colour name (from `variant.option1` in Shopify) or mark the row `aria-hidden` and put the colour names in text.",
+   "evidence": "Live DOM: 9 swatch spans, each with aria-label null, title '', role null, textContent ''. Backgrounds rgb(13,12,10), rgb(243,239,230), rgb(75,84,67).",
+   "corrections": []
+  },
+  {
+   "id": "TECHNICAL-6",
+   "severity": "medium",
+   "title": "Every icon is a ~30 KB RGBA PNG rendered at 16-44 px; ~350 KB of raster that cannot be recoloured",
+   "detail": "Ten icon placements come from nine 110-150 px PNGs totalling 308,521 bytes: icon-globe.png (35,625 B) is drawn at 16 px in the announcement bar and 44 px in the values row; search/account/cart (28-29 KB each) at 24 px; facebook/instagram (37-42 KB) at 28 px; crown/community/diamond (33-40 KB) at 44 px. The logo is a 500x500 PNG (37,836 B) drawn at 78/56 px. Because the colour is baked into the pixels, no CSS hover/focus colour is possible (the global `a:hover{color:#d8c08a}` does nothing for the social links) and the icons cannot follow theme colour settings. Inline SVG (or a single SVG sprite with `currentColor`) would be well under 1 KB each.",
+   "evidence": "File sizes from `stat` in images/; `file` reports 110x110 / 130x110 / 150x110 / 130x130 RGBA PNGs; live measurements: icon-globe 16x16 and 44x44, search/account/cart 24x24, facebook/instagram 28x28, crown 52x44, community 60x44, diamond 52x44, logo 56/78 px from naturalWidth 500. Referenced page weight 2,491,648 B across 17 files, of which icons+logo are 346 KB and hero-group.png is 1,989 KB.",
+   "corrections": [
+    "'Cannot be recoloured' is slightly absolute (CSS filters can tint a raster), but no clean hover/theme colouring is possible, so the point stands."
+   ]
+  },
+  {
+   "id": "TECHNICAL-7",
+   "severity": "medium",
+   "title": "support.js is an editor/streaming runtime: hidden-until-React render chain, double HTML fetch, new Function eval and editor bookkeeping in the DOM",
+   "detail": "(a) `hideRawTemplate()` injects `x-dc{display:none!important}` and `loadReactUmd()` then appends two unpkg scripts with `async=false`, so nothing is visible until HTML -> support.js -> React -> ReactDOM have all arrived and `boot()` has run (three dependent hops before first content). (b) `boot()` calls `fetch(location.href)` and recompiles/re-renders the whole template from the raw text, so the HTML document is requested twice and React renders the page twice on every load; on file:// this fetch simply fails. (c) The `<script data-dc-script>` logic is evaluated with `new Function` (`evalDcLogic`), which requires `unsafe-eval` under any CSP. (d) The rendered DOM carries 137 `data-dc-tpl` attributes and 14 `.sc-interp` wrapper spans (editor bookkeeping), and the runtime posts `__dc_booted`/`__dc_design_mode` messages to `window.parent` with origin `*`. None of this belongs in a production theme; the markup needs to be extracted as static Liquid/HTML with no dc-runtime.",
+   "evidence": "support.js: hideRawTemplate ~line 1818-1822; loadScript/loadReactUmd ~1823-1847 (`s.async = false`); boot() `fetch(location.href)` line 159 followed by `runtime.updateHtml(rootName, raw.template)`; `evalDcLogic` `new Function(...)` line 844 (and 1218 for x-import); postMessage at ~1385-1388 and ~1855-1862. Network log per load: `/God%20Squad%20Website.dc.html` appears twice (document + `fetch`), plus support.js, two unpkg scripts, Google Fonts CSS. Live DOM: dcTplAttrs 137, scInterp 14, head scripts = support.js, react.production.min.js, react-dom.production.min.js.",
+   "corrections": []
+  },
+  {
+   "id": "TECHNICAL-8",
+   "severity": "low",
+   "title": "Sections are not full-bleed above 1440px; the cream New Drop band and hero photo sit in a 1440px box with dark gutters",
+   "detail": "Everything is wrapped in `<div style=\"width:100%;max-width:1440px;margin:0 auto;background:#0d0c0a;overflow:hidden\">` (line 55) and section backgrounds are on the inner sections, so on any viewport wider than 1440 the #f3efe6 New Drop section, the hero photograph and the value-row borders stop at the wrapper edge while body shows #0d0c0a either side. The renders were only captured up to 1440 so this was not visible. Fix: give each section a full-width background and constrain only an inner container.",
+   "evidence": "Live at 1920x1080: wrapper, #shop and hero-img all left 233 / right 1673 / width 1440; #shop background rgb(243,239,230), body background rgb(13,12,10); h1 at its 112px clamp cap.",
+   "corrections": []
+  },
+  {
+   "id": "TECHNICAL-9",
+   "severity": "low",
+   "title": "Font loading: preconnect is incomplete and the stylesheet link lives in the body template",
+   "detail": "Line 11 preconnects only to fonts.googleapis.com (the CSS host) and without `crossorigin`; the five font files come from fonts.gstatic.com, which has no preconnect, so each font-file fetch waits for a fresh DNS/TLS handshake after the CSS arrives. The `<link>`s sit inside `<helmet>` in the body: the runtime removes them with `<x-dc>` and re-appends clones to `<head>` during render (`createHelmetManager.compile`). In a Shopify theme these fonts should come from `font_picker` settings / `font_face` (or self-hosted assets/) rather than a Google Fonts `<link>`.",
+   "evidence": "HTML lines 11-12; live head: `preconnect https://fonts.googleapis.com/ co=null` is the only preconnect; support.js helmet compile (~lines 1420-1470) clones LINK/META nodes into head. document.fonts shows Jost 400/500/600, Kaushan Script 400 and Playfair Display 900 loaded from gstatic.",
+   "corrections": []
+  },
+  {
+   "id": "TECHNICAL-10",
+   "severity": "low",
+   "title": "Dead, duplicate and unsafe-named assets: 16.9 MB project for a 2.5 MB page, plus a no-op background colour on the logo wrappers",
+   "detail": "The page references 17 files (2,491,648 B) but the folder holds 16.9 MB. Byte-identical copies by md5: hero-group.png x3 (images/, root `chatgpt-image-sep-20-...png`, uploads/`ChatGPT Image ... 11_06_34 AM.png`), icons-sprite.png x3 (two uploads copies), social-sprite.png x2, logo.png = uploads/God-Squad-Images/06-logo.png, our-story.webp = 05-our-story-models.webp; the two 2172x724 sprites (834 KB + 928 KB) are unreferenced, as are `GODSQUAD WEBSITE MOCKUP.png` (1.87 MB), two different `white-font-trans-*.png` in the root and three pasted editor screenshots (3.9 MB). None of this should be copied into a theme's assets/. Separately, the logo wrappers use `background:#0230` (lines 69 and 155): a 4-digit hex whose alpha is 0, so it is dead CSS. The logo asset itself is `images/WHITE FONT LOGO.png` (spaces and uppercase, requested as `WHITE%20FONT%20LOGO.png`); rename it to a URL-safe asset name before it goes into assets/.",
+   "evidence": "`md5sum` output: c5f73461... for all three hero copies, e5f38184... for the three sprite copies, 59f7085f... for both social sprites, 01f17bc1... for logo.png/06-logo.png, 07accc16... for our-story.webp/05-our-story-models.webp; `du -sk .` = 16,890 KB; live computed background of the logo wrapper = rgba(0, 34, 51, 0); network request `/images/WHITE%20FONT%20LOGO.png`.",
+   "corrections": []
+  },
+  {
+   "id": "TECHNICAL-11",
+   "severity": "low",
+   "title": "Inline-style-only CSS with an !important attribute-selector responsive layer; header is structurally welded to the hero",
+   "detail": "There are 77 `style=\"` attributes and zero classes; the responsive behaviour is 55 `!important` declarations keyed on `[data-r=...]` attributes (lines 17-52, 60 data-r hooks in the file). Palette literals are repeated (#0d0c0a x18, #f3efe6 x13, #d8c08a x10) so nothing can be driven by theme settings. The `<nav>` is a child of the hero `<section>`, absolutely positioned over it, with the hero copy padded `170px` top (line 82) and `190px` (line 90) to clear it, and the announcement bar is a sibling div. In a Shopify 2.0 theme the announcement bar and header must be sections in the header group and the hero a separate section; as written the header cannot be separated from the hero without re-laying out the hero (and TECHNICAL-1 is a direct consequence of that coupling). Colours, fonts and copy need to move to `settings_schema.json`/section schema.",
+   "evidence": "grep counts on the HTML: `style=\"` 77, `!important` 55, `data-r=` 60, `class=` 0, `#0d0c0a` 18, `#f3efe6` 13, `#d8c08a` 10; HTML lines 17-52 (media rules), 64-95 (nav inside hero, hero-copy padding 170px, hero-side padding 190px), 58-61 (announcement bar).",
+   "corrections": []
+  }
+ ],
+ "refuted": [
+  {
+   "id": "C4",
+   "title": "CTA hover styles are dead",
+   "why": [
+    "REFUTE: The runtime does implement style-hover. support.js collectProps (lines 428-429) converts any style-* attribute into host.pseudoClass(...); createPseudoSheet (lines 1567-1590) inserts '.scpN:hover{...}' with importantify() into a head stylesheet and the class is added to the element (lines 809-811). Live DOM: rules '.scp0:hover { background: rgb(42, 40, 35) !important; color: rgb(243, 239, 230) !important; }' and '.scp1:hover { background: rgb(230, 211, 166) !important; ... }' exist and the two CTAs carry class scp0/scp1. The attribute count of 0 only reflects that the attribute is consumed, not that the hover is dead. | correction: Both CTAs have a working hover state under the dc-runtime. The real finding is that style-hover is a Claude-Design-only convention that must be re-expressed as ordinary CSS when the markup leaves support.js (as TECHNICAL-2 states)."
+   ]
+  },
+  {
+   "id": "C18",
+   "title": "Desktop render is faithful to the approved mockup",
+   "why": [
+    "REFUTE: The 1440 render departs from the mockup in more than C1, C14 and sharpness: the hero photo is a three-model group (mockup: single capped model), the headline breaks WALK/BY/FAITH. on three lines (mockup: two), the nav wordmark is 66x50 versus the mockup's 114x87 on a narrower canvas, the story heading breaks on three lines (mockup: two), products sit in visible cream tiles with the cap edge-cropped, the social icons are circled, and the globe is gold. Palette, copy, section order and type families do match, but the composition claim for the hero is not accurate. | correction: Restate as: palette, copy, section order and typefaces match the mockup at 1440; composition differs in the hero photo, headline and story-heading line breaks, wordmark size, product tiles, social icon style and globe colour (see FIDELITY-1 through FIDELITY-9)."
+   ]
+  }
+ ],
+ "critic_additions": [
+  {
+   "title": "Three of five nav links fail contrast over the hero sky at 1024 and 1440 (Collections, Our Story, Verse at 2.4-2.9:1)",
+   "detail": "The primary navigation is 12px white text laid directly on the hero photo. Home and Shop land on the left model's dark hair and pass easily, but Collections, Our Story and Verse sit on the bright sky and tower between the two models, where the vertical fade has already thinned to about 0.4 alpha. Effective contrast is 2.4-2.9:1 (WCAG AA needs 4.5:1 for this size). At 1024 the gold Home link also moves onto a bright area and drops to 3.5:1. The search/account/cart icons at 1440 sit at 3.7-4.8:1, just above the 3:1 UI-component floor. In the approved mockup the nav sits on a dark building top, so this is a consequence of the hero photo swap (FIDELITY-1) plus a top fade that is too weak (.55 at 0% to 0 at 30%). A solid or stronger top band under the nav, or moving the nav out of the hero (TECHNICAL-11), fixes it without touching the photo.",
+   "evidence": "Measured in the Browser pane at 1440x900 and 1024x900: the same-origin images/hero-group.png was drawn to a canvas with the rendered cover crop, photo luminance averaged under each element's box, then composited with the inline gradient alphas at the element centre (hero-fade, line 66: horizontal stops .92/.75/.15/.1/.8, vertical .55 at 0% to 0 at 30%; nav text baseline y=91-103 gives aV about 0.39-0.41). Contrast of #f3efe6 (or #d8c08a for Home) against the effective background, 1440: Home 7.4:1, Shop 7.8:1, Collections 2.8:1 (photo L=.55, aH=.17), Our Story 2.4:1 (L=.62, aH=.13), Verse 2.4:1 (L=.63, aH=.11); Search 3.7:1, Account 4.1:1, Cart 4.8:1. 1024: Home (gold) 3.5:1 (L=.74), Shop 10:1, Collections 2.9:1, Our Story 2.4:1, Verse 2.4:1, Cart 4.6:1. Visible in desktop-1440.png at x=619-947, y=91 and laptop-1024.png at x=411-739, y=91, where the three links overlay the sky and tower. Mockup 00-full-mockup-reference.webp: nav links at y=87 over a dark facade.",
+   "severity": "high"
+  },
+  {
+   "title": "C13 understates the failure mode: if React cannot be fetched the whole page is blank, not just the grid and tiles (file:// itself is fine)",
+   "detail": "support.js hides the entire <x-dc> template synchronously at parse time and only reveals it by mounting React. The React/ReactDOM load from unpkg has no fallback: on failure the catch logs one console error and re-throws, and the hiding style is never removed, so an ad-blocker, corporate proxy, captive portal, offline demo or SRI mismatch produces a completely black page with no message. Everything visible (announcement bar, hero, nav, footer) is inside <x-dc>, so nothing survives. Separately, opening the file by double-click (file://) does work: boot() parses the template from the live DOM first and the self-fetch that fails on file:// is only a refresh with an empty catch. With JavaScript disabled the raw template shows instead, including a product card that reads '{{ p.name }}' with a broken '{{ p.img }}' image.",
+   "evidence": "support.js 1818-1822: hideRawTemplate() appends 'x-dc{display:none!important}' to <head>; called at line 1906 before loadReactUmd(). Lines 1907-1910: loadReactUmd().then(init).catch((err) => { console.error('[dc] failed to load React or boot:', err); throw err; }) with no un-hide or fallback render. Lines 1143-1146: React/ReactDOM 18.3.1 production UMD from unpkg with SRI. All page markup is inside <x-dc> (dc.html lines 9-168). boot() lines 150-164: parseDcDocument(doc) runs first; fetch(location.href) at 159 has .catch(() => {}). <helmet> style/link (lines 10-54) are in the body, so the no-JS raw view is styled.",
+   "severity": "medium"
+  },
+  {
+   "title": "The peso sign in every price and the arrow in both CTAs are not in Jost and render in the system fallback font",
+   "detail": "Jost's loaded faces do not contain U+20B1 (₱) or U+2192 (→). The browser substitutes a per-character system fallback, so the currency symbol next to Jost 600 digits and the arrow next to Jost 500 button text come from a different typeface (on this Windows machine the width matches the generic serif, i.e. Times New Roman, with synthesized weight). The result differs per OS (Segoe/Times on Windows, Helvetica/SF on macOS and iOS, Roboto on Android), so prices and CTAs will not look the same across devices, and none match the mockup, whose ₱ is a sans glyph matching the digits. Fix: use an SVG or icon arrow, and either pick a font that includes ₱ for the price element, add a small subset font for the symbol, or render the currency as 'PHP'.",
+   "evidence": "Measured in the Browser pane with hidden spans. '₱' at font:600 14px: 8.56px with 'Jost', 8.56px with 'Jost, serif', 8.56px with 'serif', but 7.70px with 'Jost, monospace' and 7.70px with 'monospace'. '→' at font:500 12px: 12.00px for Jost / Jost, serif / serif versus 6.61px for Jost, monospace / monospace. Glyph width tracks the fallback family, so the glyph is not drawn by Jost. document.fonts lists Jost 400/500/600 in both latin (U+0-FF...) and latin-ext (U+100-2BA...) ranges as loaded, and document.fonts.check('600 14px Jost','₱') returns true only because nothing further can be loaded. Affected markup: price line 113 fed by cur + '1,290' etc. (lines 172-177); '<span>→</span>' at lines 104 and 132.",
+   "severity": "medium"
+  },
+  {
+   "title": "The Our Story slot needs an image at least 2000 px wide; both the current crop and the unused replacement are far too small, so C1's asset swap alone still yields a soft image",
+   "detail": "C1 correctly identifies the wrong asset, but the fix it implies (use images/our-story.webp) does not solve the resolution problem. The section renders the image at about 1000 CSS px wide on desktop, and both candidate files are small lossy crops of the 1024x1536 mockup. The current file is already upscaled 1.5x on a 1x display and about 3x on a 2x display, and the three-model crop would be upscaled even more. On top of that, object-position:center top with cover scaling discards 29% of the picture's height at 1440 (the hands and chest), so what is shown is a cropped fragment of an upscaled fragment. The section needs an original photograph (or a re-render) at roughly 2000 px wide with a srcset, not another mockup crop.",
+   "evidence": "01-hero-model-mu98p88t-7jig.webp is 650x480 (39,966 B), rendered at 998x520 CSS px at 1440 (scale 1.535; 1,996 device px on a 2x screen, 3.07x), 753x461 at 768 and 375x280 at 375. Cover math at 1440: scaled 998x737, 217 px (29%) of height cut from the bottom because of object-position:center top (line 126). images/our-story.webp (C1's replacement) is 535x348 (41,004 B): 1.87x at 1440, 3.7x on 2x. Both are described in uploads/God-Squad-Images README as crops from the 1024x1536 mockup, so no larger master exists in the project.",
+   "severity": "medium"
+  },
+  {
+   "title": "Hero PNG has no alpha channel, so the PNG format buys nothing; it is a straight JPEG/WebP conversion",
+   "detail": "C10 gives the weight of the hero image but not why it is that large: the file is a photographic RGB PNG. There is no transparency to preserve, so it can be re-encoded as JPEG or WebP without any compositing changes and would typically shrink by roughly an order of magnitude at the same visual quality. The logo is the only asset that actually needs an alpha channel.",
+   "evidence": "PNG IHDR read from disk: images/hero-group.png = 1672x941, bit depth 8, colour type 2 (RGB, no alpha), 1,989,201 bytes. images/WHITE FONT LOGO.png = 500x500, colour type 6 (RGBA). The three product images are already WebP (9-12 KB each).",
+   "severity": "low"
+  },
+  {
+   "title": "No favicon, meta description, canonical or Open Graph/Twitter tags",
+   "detail": "Beyond the empty title and missing lang (C7), the document head carries no favicon link, no description, no canonical URL and no social preview tags. Shared as-is, the URL produces a link card with no title, no description and no image, and the browser tab shows the default document icon. For the Shopify port these come from the theme's head snippet, but the prototype gives the port nothing to carry over (no chosen description copy, no OG image).",
+   "evidence": "dc.html lines 3-7: <head> contains only <meta charset>, <meta viewport> and <script src=\"./support.js\">. grep -i for favicon, rel=\"icon\", og:, description, canonical across the .dc.html and support.js returns nothing. The runtime's helmet manager only re-appends the Google Fonts <link> and the <style> (lines 10-54).",
+   "severity": "low"
+  },
+  {
+   "title": "Footer has no copyright, policy, contact or navigation links (mockup omits them too; open decision)",
+   "detail": "The footer is purely decorative: logo, tagline, two social links to '#' and the 'A Brighter Tomorrow' line. There is no copyright line, no privacy/terms/shipping/returns link, no contact or newsletter capture, and no repeat of Shop / Our Story for users who reach the bottom of a 4,400 px mobile page (RESPONSIVE-10). The approved mockup shows the same minimal band, so this is a content decision to make before the Shopify port rather than a build defect, but a store footer normally carries the legal links.",
+   "evidence": "dc.html lines 153-166: <footer> contains the logo div, 'Different People. Same Purpose.', two <a href=\"#\"> social links, a divider and 'A Brighter Tomorrow'; no other links or text. Mockup 00-full-mockup-reference.webp bottom band (y=1420-1520 of 1536) shows the same elements plus TikTok/YouTube (C14).",
+   "severity": "low"
+  },
+  {
+   "title": "Product names and value titles are plain divs, CTA arrows are unlabelled glyphs, and the hamburger's aria-label sits on a role-less span",
+   "detail": "The document outline is h1 'Walk By Faith.' then h2 'The Faithful' and h2 'Real People. Bigger Purpose.' with nothing beneath the product or value groups, so heading navigation cannot reach a product. Both CTAs include a bare arrow span that screen readers append as 'rightwards arrow' to the link name. The hamburger's aria-label is on a <span> with no role, which ARIA 1.2 prohibits on generic elements and which most screen readers ignore, so even when C5/C6 are fixed the label needs a real button.",
+   "evidence": "dc.html line 112: <div style=\"font-size:12px...\">{{ p.name }}</div>; line 146: <div ...>{{ v.title }}</div>; lines 104 and 132: '<span>→</span>' inside the two CTA links with no aria-hidden; line 75: <span data-r=\"nav-menu\" aria-label=\"Menu\"> with no role. Rendered DOM (evidence file): zero <button> elements, headings limited to one h1 and two h2.",
+   "severity": "low"
+  }
+ ],
+ "gaps": [
+  "Keyboard walkthrough: Tab order through the 9 links, visibility of the default focus ring on the dark photo and on the cream section, Enter/Space on each control, and the absence of a skip link. Only the DOM inventory was checked, not actual keyboard use.",
+  "Screen-reader pass (NVDA/JAWS on Windows, VoiceOver on macOS/iOS) to hear how the ₱ and → fallbacks, the div-based product names, the image alt text (story alt says 'community' but shows one man), and the role-less hamburger are announced.",
+  "Lighthouse and axe-core runs. The contrast figures above are computed from sampled photo luminance and gradient alphas, not from an accessibility engine; an axe run would also catch anything the manual pass missed, and Lighthouse would give throttled LCP/FCP/CLS for the three-hop runtime chain and the 2 MB PNG. My buffered CLS read was 0 on a warm localhost load and LCP did not report, so no performance numbers exist yet.",
+  "Cold-cache, throttled (Slow 4G, 4x CPU) load to see how long the page stays blank while support.js, React, ReactDOM and the second HTML fetch arrive, and whether the display=swap fonts cause a visible Playfair/Georgia reflow of the headline.",
+  "Empirical test of the failure modes derived from code: block unpkg.com in DevTools (expected: black page, one console error), disable JavaScript (expected: raw template with '{{ p.name }}'), and open the file by double-click from OneDrive. The Browser pane served the file over its own HTTP server, so true file:// was not exercised.",
+  "Genuine 375px and landscape 812x375 device captures (RESPONSIVE-2/7); the mobile-375.png is a clipped ~490px layout and stops inside the values strip, so the fourth value tile and the footer were never seen at phone size. Test on a real iPhone (Safari) and Android Chrome, including text-wrap:balance support in older Safari.",
+  "Widths that were not captured: 1920/2560 (TECHNICAL-8's dark gutters are asserted from the wrapper CSS), the 901-1023 band (measured at 920: h1 78px, 'FAITH.' 264px wide overflows its 247px content box by 17px into the padding, harmless but unseen), and the 521-767 band (measured: the headline stays on one line at 56px down to at least 560px, products 2-up at 286px at 640; the two-line lockup only appears below roughly 540px, which refines FIDELITY-2).",
+  "Cross-browser renders in Firefox and Safari (aspect-ratio tiles, !important object-position overrides, Kaushan Script rotation, font smoothing) and Windows High Contrast / forced-colors mode, where the gold-on-black palette and raster PNG icons behave differently from CSS-coloured SVG.",
+  "Hover and focus-state pass with screenshots: nav a:hover to gold (Home is already gold so it has no hover change), the two style-hover CTAs, and the social icon links that have no hover at all; TECHNICAL-2 is code-derived, not observed.",
+  "Browser zoom at 200% and OS text scaling: everything is in px with vw clamps, so the hero and nav were not checked for wrapping or overlap when text is enlarged.",
+  "Favicon request: neither the headless capture nor the Browser pane requested /favicon.ico, so the third 404 that a normal tab will produce was not observed.",
+  "Above-the-fold check on common laptop viewports (1366x768, 1280x720): at 1440 the announcement bar plus hero is ~760px tall, so on 768px-high screens the fold falls inside the hero and nothing of New Drop is visible without scrolling; not measured.",
+  "Real HiDPI inspection of the product tiles and story image on a 2x display; C2 and the story-image finding are inferred from pixel maths, not viewed at device resolution.",
+  "Mockup overlay at a common width (scale the 1024 mockup to 1440 and diff against desktop-1440.png) to quantify spacing and scale deviations; the FIDELITY items are eyeballed comparisons.",
+  "Font-payload audit: confirm which subsets are fetched (Jost latin plus latin-ext for 400/500/600 were observed) and total font bytes, and whether Kaushan Script is worth a full font file for three words."
+ ]
+}

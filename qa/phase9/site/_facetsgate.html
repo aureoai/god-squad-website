@@ -1,0 +1,45 @@
+<!doctype html><meta charset="utf-8"><title>WAIT</title><body style="margin:0">
+<pre id="o" style="display:none"></pre>
+<script>
+var W = [[1440, 900], [1280, 800], [768, 1024], [375, 812]], res = {}, i = 0;
+function step() {
+  if (i >= W.length) {
+    document.title = 'DONE';
+    document.getElementById('o').textContent = '<<<' + JSON.stringify(res) + '>>>';
+    return;
+  }
+  var w = W[i][0], h = W[i][1];
+  var f = document.createElement('iframe');
+  f.style.cssText = 'border:0;display:block;width:' + w + 'px;height:' + h + 'px';
+  f.src = 's-collection-filters.html';
+  document.body.appendChild(f);
+  f.onload = function () {
+    setTimeout(function () {
+      var d = f.contentDocument, win = f.contentWindow;
+      var toggle = d.querySelector('[data-facets-toggle]');
+      var panel = d.querySelector('[data-facets]');
+      var out = { hasToggle: !!toggle, hasPanel: !!panel };
+      if (toggle) {
+        out.toggleHidden = toggle.hidden;
+        out.toggleDisplay = win.getComputedStyle(toggle).display;
+        out.toggleVisible = toggle.offsetParent !== null;
+      }
+      if (toggle && out.toggleVisible) {
+        /* Press it, exactly as a customer would. */
+        toggle.click();
+        out.htmlClass = d.documentElement.className;
+        out.bodyOverflow = win.getComputedStyle(d.body).overflow;
+        out.scrollLocked = win.getComputedStyle(d.body).overflow === 'hidden';
+        var bar = d.querySelector('.facets__bar');
+        out.barDisplay = bar ? win.getComputedStyle(bar).display : null;
+        out.activeAfterOpen = d.activeElement ? (d.activeElement.className || d.activeElement.tagName) : null;
+        out.panelPosition = panel ? win.getComputedStyle(panel).position : null;
+        out.panelIsDrawer = panel ? panel.classList.contains('facets--drawer') : null;
+      }
+      res[w + 'x' + h] = out;
+      f.remove(); i++; step();
+    }, 400);
+  };
+}
+step();
+</script>

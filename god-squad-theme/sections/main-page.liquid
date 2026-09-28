@@ -1,0 +1,202 @@
+{%- comment -%}
+  GOD SQUAD — Page
+  Phase 10. The template every /pages/<handle> URL resolves to.
+
+  Sources of truth:
+  - PHASE-1-WEBSITE-AUDIT.md SHOP-09, which sections/main-cart.liquid records as
+    the finding that Shopify serves an error page for any storefront route whose
+    template is missing, and which lists "page" among the templates still
+    missing after Phase 8. This file removes it from that list.
+  - PHASE-2-DESIGN-SYSTEM.md §26.2 (measure) and §14.4 (the 60-75 character
+    reading target), as assets/section-our-story.css records them.
+
+  IT IS THE DESTINATION THE THEME ALREADY POINTS AT.
+  sections/our-story.liquid tells the merchant, in the button_url info string,
+  to "Create the page in Shopify admin first, then select it here." Until this
+  file existed that instruction led to an error page, and so did every link to a
+  size guide, a shipping page, a returns page or an About page.
+
+  SHOPIFY IS THE SOURCE OF TRUTH, AND HERE IT IS THE MERCHANT'S PROSE.
+  There is no copy in this file. The title is page.title and the body is
+  page.content — merchant HTML from the Shopify rich-text editor, rendered
+  as it stands. The theme styles those elements; it never writes, edits,
+  truncates or reorders a word of them. No About text, no policy, no shipping
+  claim and no scripture is invented here.
+
+  THE TITLE IS HIDDEN, NEVER REMOVED.
+  "Show the page title" is a visibility setting, not a rendering one. A merchant
+  whose rich text already opens with its own title wants one heading on the
+  screen, not none in the document: dropping the h1 would leave the page with no
+  level-1 heading at all, which is the outline defect Phase 1 HTML-03 records,
+  and their own first heading would be left hanging at whatever level they chose
+  with nothing above it. So the h1 always renders and the setting adds the
+  visually-hidden utility to it, which keeps it in the accessibility tree and
+  out of the picture.
+
+  WHAT IS DELIBERATELY NOT HERE.
+  No breadcrumb — a page has no parent in this theme's navigation and inventing
+  a trail would mean inventing a hierarchy. No share row, no author, no date, no
+  "last updated", no table of contents, no related pages, no page image banner.
+  Each is either a business fact nobody has supplied or a composition that would
+  have to be undone by whichever phase owns it; this surface's job is to present
+  merchant prose, not to add a second voice above it.
+
+  THIS main-* SECTION DOES CARRY SPACING SETTINGS, WHICH main-cart AND
+  main-product DO NOT.
+  On those two the page rhythm is fixed because the page is one composition that
+  Shopify's own templates never extend. templates/page.json is different: a
+  merchant can and will add sections beneath this one — a collection row under a
+  size guide, an Our Story band under an About page — so where the prose band
+  stops is a composition decision that belongs to them. The surface select is
+  exposed for the same reason main-product exposes one: both cream and ink carry
+  body copy at 17.04:1 in design-tokens.css §2, so neither is disqualified.
+
+  ZERO JavaScript.
+{%- endcomment -%}
+
+{%- liquid
+  assign show_heading = section.settings.show_heading
+
+  assign surface_class = 'surface-light'
+  if section.settings.surface == 'dark'
+    assign surface_class = 'surface-dark'
+  endif
+
+  comment
+    The title's class string is built here so the markup stays a straight render
+    with no control flow in it. visually-hidden is the utility defined once in
+    assets/header.css, which layout/theme.liquid loads on every page; this
+    composes it rather than shipping a second copy of the clip recipe.
+  endcomment
+  assign title_classes = 'main-page__title'
+  if show_heading == false
+    assign title_classes = title_classes | append: ' visually-hidden'
+  endif
+
+  assign classes = 'main-page '
+  assign classes = classes | append: surface_class
+  assign classes = classes | append: ' main-page--pt-' | append: section.settings.spacing_top
+  assign classes = classes | append: ' main-page--pb-' | append: section.settings.spacing_bottom
+  comment
+    A derived-state modifier. The gap between the title and the prose cannot be
+    set on the title: visually-hidden takes the h1 out of flow, where a margin
+    does nothing. It sits on the prose instead — which means it outlives the
+    hidden title, and this modifier is what takes it away, so the band does not
+    open with 40px of nothing.
+  endcomment
+  if show_heading == false
+    assign classes = classes | append: ' main-page--no-heading'
+  endif
+-%}
+
+{%- comment -%}
+  No render guard, and the stylesheet link is therefore unwrapped at the top of
+  the file. A template-bound section always renders: there is no unconfigured
+  state to cost a request, because the page exists or the route does not.
+
+  No header-clearance rule either, here or in the stylesheet. The Phase 4
+  header only overlays its first section when template.name == 'index'
+  (sections/header.liquid), so on a page template it is in normal flow and
+  --header-overlay-offset is never published.
+{%- endcomment -%}
+{{ 'section-main-page.css' | asset_url | stylesheet_tag }}
+
+<div class="{{ classes }}" {{ section.shopify_attributes }}>
+  <div class="main-page__inner container">
+    <div class="main-page__column">
+      <h1 class="{{ title_classes }}">{{ page.title | escape }}</h1>
+
+      {%- if page.content != blank -%}
+        {%- comment -%}
+          Merchant HTML, output as it stands. It is not passed through strip_html
+          — the formatting is the point — and it is not escaped, because Shopify
+          sanitises rich-text content on save and escaping it here would render
+          the merchant's own tags as visible text.
+        {%- endcomment -%}
+        <div class="main-page__content">{{ page.content }}</div>
+      {%- elsif request.design_mode -%}
+        {%- comment -%}
+          Theme Editor only. A titled page with no body is a state a merchant
+          reaches by creating the page and not yet writing it, and on the live
+          storefront it is simply a short page rather than an error — so the
+          note is never shown to a customer.
+        {%- endcomment -%}
+        <p class="main-page__notice">{{ 'sections.main_page.no_content' | t }}</p>
+      {%- endif -%}
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Page",
+  "tag": "section",
+  "class": "main-page-section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "paragraph",
+      "content": "The title and the text come from the page itself, in Shopify admin under Online Store > Pages. Nothing on this page is written in the theme."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_heading",
+      "label": "Show the page title",
+      "default": true,
+      "info": "Turn this off only when your page text already opens with its own title. The title is still read out by screen readers and still counts as the page's first-level heading — it is hidden from view, not removed. Inside the page text, start at Heading 2: Heading 1 belongs to the title, and the theme cannot change the level of text you have already written."
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "surface",
+      "label": "Colour scheme",
+      "info": "Cream is the default, as it is on the product page. Long text is legible on both; the theme switches text, border, accent and focus colours to suit whichever you choose.",
+      "options": [
+        { "value": "light", "label": "Cream" },
+        { "value": "dark", "label": "Ink" }
+      ],
+      "default": "light"
+    },
+    {
+      "type": "paragraph",
+      "content": "The text sits in a single reading column and stays there on the widest screen, inside the 60 to 75 characters a line the design system targets. Line length is what makes long text readable, so it is not a setting."
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "select",
+      "id": "spacing_top",
+      "label": "Space above",
+      "options": [
+        { "value": "none", "label": "None" },
+        { "value": "tight", "label": "Tight" },
+        { "value": "standard", "label": "Standard" }
+      ],
+      "default": "standard"
+    },
+    {
+      "type": "select",
+      "id": "spacing_bottom",
+      "label": "Space below",
+      "options": [
+        { "value": "none", "label": "None" },
+        { "value": "tight", "label": "Tight" },
+        { "value": "standard", "label": "Standard" }
+      ],
+      "default": "standard",
+      "info": "Set this to None when you add another section directly beneath this one and want the two to meet."
+    }
+  ],
+  "enabled_on": {
+    "templates": ["page"]
+  }
+}
+{% endschema %}

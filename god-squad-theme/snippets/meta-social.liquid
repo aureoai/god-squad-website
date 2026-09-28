@@ -1,0 +1,119 @@
+{%- comment -%}
+  GOD SQUAD — Social metadata
+  Phase 16. Open Graph and Twitter card tags, emitted once from the head.
+
+  Accepts:
+  - nothing. Everything is read from the page's own Shopify objects.
+
+  Usage:
+  {% render 'meta-social' %}
+
+  WHY THIS EXISTS.
+  Phase 16 measured the rendered head of all seven templates and found zero
+  Open Graph tags, zero Twitter tags and no apple-touch-icon. Without them a
+  link to this store pasted into Messenger, Viber, Instagram, X or Slack shows
+  whatever the platform can scrape — usually the raw URL and a random image, or
+  nothing. For a brand whose customers share on social, that is the first
+  impression of the store.
+
+  EVERY VALUE COMES FROM SHOPIFY. NOTHING HERE IS WRITTEN COPY.
+  The title is page_title, the description is page_description, the URL is
+  canonical_url and the site name is shop.name — the same objects the <title>
+  and the canonical already use, so the card can never disagree with the page.
+  There is no hand-written marketing sentence in this file and no invented
+  claim about the brand.
+
+  THE IMAGE CHAIN, MOST SPECIFIC FIRST.
+    product page     the product's own featured image
+    collection page  the collection's image, when the merchant has set one
+    anything else    the merchant's share image, then the logo
+  Each step is guarded, so a store with no images at any level emits no og:image
+  at all rather than a broken URL. An og:image that 404s is worse than none: the
+  platform caches the failure.
+
+  1200px WIDE, NOT THE ORIGINAL.
+  Facebook and X want roughly 1200x630. Serving the original would push a
+  multi-megabyte photograph to every scraper. The width/height tags carry the
+  real dimensions of the version being served, which is what stops the platforms
+  re-fetching to measure it.
+
+  NO twitter:image.
+  X falls back to og:image for a summary_large_image card, so a second copy of
+  the same URL is a tag that can only ever drift out of step with the first.
+  Dawn makes the same choice.
+
+  NO og:price.
+  The product's price and availability are already published, correctly and in
+  the format search engines actually consume, by the structured_data filter in
+  sections/main-product.liquid. A second copy in a different vocabulary is a
+  second thing to keep in step, and the OG product-price tags are legacy.
+{%- endcomment -%}
+
+{%- liquid
+  assign og_type = 'website'
+  if request.page_type == 'product'
+    assign og_type = 'product'
+  elsif request.page_type == 'article'
+    assign og_type = 'article'
+  endif
+
+  assign share_image = blank
+  if request.page_type == 'product' and product.featured_media != blank
+    assign share_image = product.featured_media.preview_image
+  elsif request.page_type == 'collection' and collection.featured_image != blank
+    assign share_image = collection.featured_image
+  elsif settings.share_image != blank
+    assign share_image = settings.share_image
+  elsif settings.logo != blank
+    assign share_image = settings.logo
+  endif
+-%}
+
+<meta property="og:site_name" content="{{ shop.name | escape }}">
+<meta property="og:url" content="{{ canonical_url }}">
+<meta property="og:title" content="{{ page_title | escape }}">
+<meta property="og:type" content="{{ og_type }}">
+{%- if page_description != blank %}
+  <meta property="og:description" content="{{ page_description | escape }}">
+{%- endif %}
+
+{%- if share_image != blank -%}
+  <meta property="og:image" content="http:{{ share_image | image_url: width: 1200 }}">
+  <meta property="og:image:secure_url" content="https:{{ share_image | image_url: width: 1200 }}">
+
+  {%- comment -%}
+    The dimensions of the file actually being served, derived from the source
+    image's own width and height.
+
+    NOT from aspect_ratio. The first version of this divided 1200 by
+    share_image.aspect_ratio, and the Phase 16 head audit failed on every one of
+    the seven templates with a division by zero: aspect_ratio is not populated on
+    every image drop, and Liquid treats the missing value as 0. Shopify would
+    have thrown the same error on a live store — on every page, in the head.
+
+    width is always present on a real image and is never zero, so dividing by it
+    is safe. It is still guarded, because an empty drop reaches here as 0 too and
+    the point of these tags is to stop a scraper re-fetching the image — not
+    worth taking the page down for.
+  {%- endcomment -%}
+  {%- if share_image.width > 0 and share_image.height > 0 -%}
+    {%- assign share_height = share_image.height | times: 1200 | divided_by: share_image.width -%}
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="{{ share_height }}">
+  {%- endif -%}
+
+  {%- if share_image.alt != blank %}
+    <meta property="og:image:alt" content="{{ share_image.alt | escape }}">
+  {%- endif %}
+{%- endif -%}
+
+{%- comment -%}
+  summary_large_image only when there is an image to be large. With no image the
+  card type promises a picture the scraper will not find, and X renders the
+  degraded version — so the plain summary card is the honest choice there.
+{%- endcomment -%}
+<meta name="twitter:card" content="{% if share_image != blank %}summary_large_image{% else %}summary{% endif %}">
+<meta name="twitter:title" content="{{ page_title | escape }}">
+{%- if page_description != blank %}
+  <meta name="twitter:description" content="{{ page_description | escape }}">
+{%- endif %}

@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GOD SQUAD — local test index</title>
+<style>
+  :root {
+    --ink: #0D0C0A; --cream: #F3EFE6; --gold: #D8C08A;
+    --muted: #8a857a; --line: rgba(243,239,230,.14); --ok: #7FB069; --warn: #E0A458; --no: #C9695E;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 40px 24px 80px;
+    background: var(--ink); color: var(--cream);
+    font: 16px/1.6 ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif;
+  }
+  .wrap { max-width: 1100px; margin-inline: auto; }
+  h1 { font-size: 28px; letter-spacing: .02em; margin: 0 0 4px; }
+  h1 small { display: block; font-size: 14px; font-weight: 400; color: var(--muted); letter-spacing: 0; margin-top: 6px; }
+  h2 { font-size: 13px; letter-spacing: .18em; text-transform: uppercase; color: var(--gold);
+       margin: 40px 0 6px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  h2 span { color: var(--muted); letter-spacing: 0; text-transform: none; font-weight: 400; }
+  p { margin: 8px 0; }
+  .lead { color: var(--muted); max-width: 70ch; }
+  code, kbd { font-family: var(--mono); font-size: .88em; background: rgba(243,239,230,.07);
+              padding: 2px 6px; border-radius: 2px; }
+  pre { background: rgba(243,239,230,.05); border: 1px solid var(--line); border-radius: 2px;
+        padding: 14px 16px; overflow-x: auto; font-family: var(--mono); font-size: 13px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; margin-top: 14px; }
+  a.card { display: block; padding: 12px 14px; border: 1px solid var(--line); border-radius: 2px;
+           color: var(--cream); text-decoration: none; transition: border-color .15s, background-color .15s; }
+  a.card:hover { border-color: var(--gold); background: rgba(216,192,138,.06); }
+  a.card b { display: block; font-size: 14px; letter-spacing: .01em; }
+  a.card em { display: block; font-style: normal; font-size: 12.5px; color: var(--muted); margin-top: 3px; }
+  .status { display: inline-block; font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
+            padding: 2px 7px; border-radius: 2px; margin-left: 6px; vertical-align: 1px; }
+  .s-ok { background: rgba(127,176,105,.18); color: var(--ok); }
+  .s-part { background: rgba(224,164,88,.18); color: var(--warn); }
+  .s-no { background: rgba(201,105,94,.18); color: var(--no); }
+  table { width: 100%; border-collapse: collapse; margin-top: 14px; font-size: 14.5px; }
+  th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-size: 11.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+  .note { border-left: 2px solid var(--gold); padding: 10px 0 10px 16px; margin: 18px 0; color: var(--muted); }
+  .note b { color: var(--cream); }
+  #ping { font-family: var(--mono); font-size: 13px; }
+  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>GOD SQUAD — local test index
+  <small>Real <code>.liquid</code> files rendered against mock Shopify data. Not a Shopify store.</small>
+</h1>
+
+<h2>Start here <span>— run it as a site you can click through</span></h2>
+<p class="lead">This is the better way to check the design. One command maps the theme's real
+Shopify routes onto the rendered pages, so the site behaves like a site: click a product card and
+you land on the product page, click the cart and you get the cart, and an unknown URL gives the
+theme's own 404.</p>
+<pre>cd "C:/Users/TEST/AppData/Local/Temp/claude/C--Users-TEST-OneDrive-Documents-GodSquad-Website/de238d03-508d-43ce-a377-210f71ff0033/scratchpad" &amp;&amp; python serve-site.py</pre>
+<p class="lead">Then open <b>http://127.0.0.1:8000</b>. A small bar at the bottom shows which route
+you are on and which fixture it resolved to, with shortcuts to every state. It does not need the
+two servers below.</p>
+<div class="note">
+<b>The routing is the only fake part.</b> Every page is the theme's own Liquid, CSS and JavaScript.
+But Shopify decides which product a URL resolves to, and this maps each handle to whichever fixture
+best demonstrates that kind of product — so the price on the card you clicked may not match the page
+you land on. The fixtures exercise the theme; they are not a consistent catalogue.
+</div>
+
+<h2>The individual pages <span>— if you want one surface at a time</span></h2>
+<p class="lead">These links need the two servers below. The runnable site above is usually what you want.</p>
+
+<h2>Before you click <span>— the two servers have to be running</span></h2>
+<p class="lead">Every link below points at a local server. If the dots are red, run these two commands
+(each in its own terminal, and leave them running):</p>
+<pre>cd "C:/Users/TEST/AppData/Local/Temp/claude/C--Users-TEST-OneDrive-Documents-GodSquad-Website/de238d03-508d-43ce-a377-210f71ff0033/scratchpad/phase9/site" &amp;&amp; python -m http.server 8809</pre>
+<pre>cd "C:/Users/TEST/AppData/Local/Temp/claude/C--Users-TEST-OneDrive-Documents-GodSquad-Website/de238d03-508d-43ce-a377-210f71ff0033/scratchpad/phase8/site" &amp;&amp; python -m http.server 8808</pre>
+<p id="ping"><span class="dot" id="d9"></span>port 8809 <span id="t9">checking…</span>
+   &nbsp;&nbsp; <span class="dot" id="d8"></span>port 8808 <span id="t8">checking…</span></p>
+
+<div class="note">
+<b>That scratchpad directory is temporary.</b> If these paths 404, the harness has been cleared —
+the theme is unaffected, but the test pages would need regenerating. This is the risk flagged in
+<code>PRE-INTEGRATION-DESIGN-REVIEW.md</code>.
+</div>
+
+<h2>What works here, and what cannot <span>— read this or you will file false bugs</span></h2>
+<table>
+  <tr><th>Behaviour</th><th>Works locally?</th><th>Why</th></tr>
+  <tr><td>Layout, typography, colour, spacing, responsive</td>
+      <td><span class="status s-ok">yes</span></td>
+      <td>Real CSS, real rendered Liquid. Resize the window freely.</td></tr>
+  <tr><td>Mobile menu, cart drawer, filter drawer, accordions</td>
+      <td><span class="status s-ok">yes</span></td>
+      <td>Real JavaScript, no server needed to open and close them.</td></tr>
+  <tr><td>Variant picker, quantity stepper, product gallery</td>
+      <td><span class="status s-ok">yes</span></td>
+      <td>Client-side. Swatches and sizes switch, the stepper clamps.</td></tr>
+  <tr><td>Keyboard navigation, focus rings, reduced motion</td>
+      <td><span class="status s-ok">yes</span></td>
+      <td>Tab through anything. <kbd>Esc</kbd> closes drawers.</td></tr>
+  <tr><td><b>Add to cart / update / remove</b></td>
+      <td><span class="status s-no">no</span></td>
+      <td>Needs Shopify's <code>/cart/*.js</code> endpoints. There is no backend — the request fails
+          and you will see the theme's <em>error</em> state, which is itself correct behaviour.</td></tr>
+  <tr><td><b>Real search and real filtering</b></td>
+      <td><span class="status s-no">no</span></td>
+      <td>Shopify does the querying. The pages below are fixed renders of each result state.</td></tr>
+  <tr><td><b>Checkout</b></td>
+      <td><span class="status s-no">no</span></td>
+      <td>Shopify-hosted. Nothing in the theme can simulate it.</td></tr>
+  <tr><td><b>Photography</b></td>
+      <td><span class="status s-part">placeholders</span></td>
+      <td>The pages below show <b>six placeholder images</b> — the prototype's own crops, copied in
+          by the harness build. They are AI-generated with unconfirmed rights and are small
+          (the hero is 713&times;401 shown at 1265px wide, so it looks soft). The <b>theme</b> ships
+          zero images and no <b>merchant</b> photography exists. So judge composition and the shape
+          of the image slot, not the picture quality — and expect the finished site to look
+          materially different here.</td></tr>
+</table>
+
+<h2>1 — The main journey <span>click these in order</span></h2>
+<div class="grid">
+  <a class="card" href="http://127.0.0.1:8809/home.html"><b>Homepage</b><em>hero → new drop → our story → footer</em></a>
+  <a class="card" href="http://127.0.0.1:8809/s-collection.html"><b>Collection</b><em>the catalogue grid, 6 products</em></a>
+  <a class="card" href="http://127.0.0.1:8809/s-collection-filters.html"><b>Collection + filters</b><em>facets row; drawer below 768px</em></a>
+  <a class="card" href="http://127.0.0.1:8809/p-sizes.html"><b>Product — sizes</b><em>variant picker, add to cart</em></a>
+  <a class="card" href="http://127.0.0.1:8809/p-multi.html"><b>Product — colour + size</b><em>two option dimensions, swatches</em></a>
+  <a class="card" href="http://127.0.0.1:8809/c-many.html"><b>Cart drawer</b><em>opens over the page</em></a>
+  <a class="card" href="http://127.0.0.1:8809/c-page-many.html"><b>Cart page</b><em>full-page cart, totals, checkout button</em></a>
+</div>
+
+<h2>2 — States you should check <span>the ones that break first in production</span></h2>
+<div class="grid">
+  <a class="card" href="http://127.0.0.1:8809/p-soldout.html"><b>Sold out</b><em>disabled add, availability copy</em></a>
+  <a class="card" href="http://127.0.0.1:8809/p-long.html"><b>Long product copy</b><em>where real descriptions land</em></a>
+  <a class="card" href="http://127.0.0.1:8809/p-minimal.html"><b>Minimal product</b><em>no description, no extras</em></a>
+  <a class="card" href="http://127.0.0.1:8809/c-empty.html"><b>Empty cart drawer</b><em>the empty state + its link</em></a>
+  <a class="card" href="http://127.0.0.1:8809/c-page-empty.html"><b>Empty cart page</b><em>same state, full page</em></a>
+  <a class="card" href="http://127.0.0.1:8809/c-page-note.html"><b>Cart with order note</b><em>the note disclosure</em></a>
+  <a class="card" href="http://127.0.0.1:8809/s-search.html"><b>Search results</b><em>results grid + pagination</em></a>
+  <a class="card" href="http://127.0.0.1:8809/s-search-none.html"><b>Search — no results</b><em>zero-result state</em></a>
+  <a class="card" href="http://127.0.0.1:8809/s-collection-empty.html"><b>Empty collection</b><em>merchant has no products in it</em></a>
+  <a class="card" href="http://127.0.0.1:8809/s-404.html"><b>404</b><em>not-found page</em></a>
+  <a class="card" href="http://127.0.0.1:8809/s-page.html"><b>Content page</b><em>rich-text page template</em></a>
+</div>
+
+<h2>3 — Variations <span>how merchant settings change a surface</span></h2>
+<div class="grid">
+  <a class="card" href="http://127.0.0.1:8809/hero-full.html"><b>Hero — full height</b><em>height setting</em></a>
+  <a class="card" href="http://127.0.0.1:8809/hero-large.html"><b>Hero — large</b><em>height setting</em></a>
+  <a class="card" href="http://127.0.0.1:8809/hero-cta.html"><b>Hero — with button</b><em>the button appears once it has a destination</em></a>
+  <a class="card" href="http://127.0.0.1:8809/home-one.html"><b>Home — 1 column</b><em>grid ceiling setting</em></a>
+  <a class="card" href="http://127.0.0.1:8809/home-three.html"><b>Home — 3 column</b><em>grid ceiling setting</em></a>
+  <a class="card" href="http://127.0.0.1:8809/home-eight.html"><b>Home — 8 products</b><em>product count setting</em></a>
+  <a class="card" href="http://127.0.0.1:8809/home-reordered.html"><b>Home — reordered</b><em>sections moved in the editor</em></a>
+  <a class="card" href="http://127.0.0.1:8809/p-carousel.html"><b>Product — carousel gallery</b><em>vs the stacked default</em></a>
+  <a class="card" href="http://127.0.0.1:8809/p-single.html"><b>Product — one image</b><em>gallery with nothing to page</em></a>
+  <a class="card" href="http://127.0.0.1:8809/p-ink.html"><b>Product — ink surface</b><em>the dark-surface variant</em></a>
+</div>
+
+<h2>4 — What to actually look for</h2>
+<table>
+  <tr><th>Do this</th><th>Because</th></tr>
+  <tr><td><b>Narrow the window to ~375px</b> on the cart page and the collection page</td>
+      <td>The drawer/row switch is at 768px and the filter UI becomes a drawer below it. A live
+          typography defect in Phase 18 was visible only at phone width.</td></tr>
+  <tr><td><b>Tab through the homepage without touching the mouse</b></td>
+      <td>Skip link first, then header, then content. Every control should show a visible ring.</td></tr>
+  <tr><td><b>Open the cart drawer, then press Tab repeatedly</b></td>
+      <td>Focus must stay inside the drawer and <kbd>Esc</kbd> must close it and return focus to the
+          button that opened it.</td></tr>
+  <tr><td><b>Open a filter group, then a product accordion</b></td>
+      <td>All three disclosure chevrons should point <b>down</b> closed and <b>up</b> open. That was
+          wrong in two of three places until Phase 18.</td></tr>
+  <tr><td><b>Click "Add to bag"</b></td>
+      <td>It will fail — there is no backend. What you are checking is that it fails <em>gracefully</em>:
+          a readable message, no raw error, no stuck spinner.</td></tr>
+  <tr><td><b>Judge the image <em>slot</em>, not the image</b></td>
+      <td>The pictures are low-resolution prototype crops standing in for photography that does not
+          exist yet. Their softness and their cropping are artefacts of the placeholder, not of the
+          theme.</td></tr>
+  <tr><td><b>Scroll slowly the first time</b></td>
+      <td>Images below the fold are lazy-loaded, so a band can look empty for a moment before its
+          picture appears. That is the loading strategy working, not a missing image.</td></tr>
+</table>
+
+<h2>5 — Testing it properly <span>the only way to see the real flow</span></h2>
+<p class="lead">Nothing above tests the purchase flow, because the purchase flow is Shopify's. To see the
+site actually working end to end it has to go on a real store — zipped and uploaded, then configured in
+order. <b>§10 of <code>GODSQUAD-THEME-REFERENCE-MANUAL.md</code></b> is the nine-stage runbook for
+exactly that, including the five things that can only be verified against a live store.</p>
+<p class="lead">The automated suites are the other half: 199 structural checks, 74 contrast
+measurements, and the interaction assertions for cart, product and drawer lifecycles. They cover what
+clicking cannot.</p>
+
+<script>
+(function () {
+  function ping(port, dot, txt) {
+    var d = document.getElementById(dot), t = document.getElementById(txt);
+    var img = new Image();
+    var done = false;
+    var timer = setTimeout(function () {
+      if (!done) { done = true; d.style.background = '#C9695E'; t.textContent = 'not responding — start it above'; }
+    }, 2500);
+    fetch('http://127.0.0.1:' + port + '/', { mode: 'no-cors' })
+      .then(function () { if (!done) { done = true; clearTimeout(timer); d.style.background = '#7FB069'; t.textContent = 'running'; } })
+      .catch(function () { if (!done) { done = true; clearTimeout(timer); d.style.background = '#C9695E'; t.textContent = 'not responding — start it above'; } });
+  }
+  ping(8809, 'd9', 't9');
+  ping(8808, 'd8', 't8');
+})();
+</script>
+
+</div>
+</body>
+</html>

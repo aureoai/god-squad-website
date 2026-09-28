@@ -1,0 +1,268 @@
+{%- comment -%}
+  GOD SQUAD — Product media gallery
+  Phase 8.
+
+  Accepts:
+  - product    {Object}  required.
+  - section_id {String}  required. Namespaces every id on the page.
+  - layout     {String}  optional, 'stacked' (default) or 'carousel'.
+  - sizes      {String}  optional. The sizes attribute for the media. The
+                         section owns the grid, so the section computes it.
+
+  Usage:
+  {% render 'product-media-gallery', product: product, section_id: section.id %}
+
+  EVERY MEDIUM IS REACHABLE WITH JAVASCRIPT OFF.
+  The brief's rule — "All actual product media must remain accessible. Do not
+  display only the first image if additional product media exists" — is met
+  structurally rather than by script. Every medium is in the DOM at full size;
+  the two layouts are a CSS switch over one markup:
+
+    stacked   the media run down the column and the customer scrolls. This is
+              the editorial default and needs no script at all.
+    carousel  one frame at a time in a scroll-snap scroller. Native scrolling
+              and swiping still work with no script; the thumbnail rail is a
+              list of in-page anchors, so it works too.
+
+  There is no carousel library, no slider, and nothing about buying this
+  product depends on this file's behaviour.
+
+  MEDIA IS product.media, NOT product.images.
+  images cannot represent a video or a 3D model, and a variant's featured_image
+  cannot either — only featured_media can. Dispatching on media_type is what
+  lets the four Shopify types render correctly, with an else arm so a type
+  added later still draws rather than vanishing.
+
+  LOADING.
+  The first medium is the page's largest above-the-fold image and is the LCP
+  candidate: loading eager, fetchpriority high. Everything after it is lazy.
+  Phase 2 §14.6 and the brief agree — "do NOT blindly lazy-load every product
+  image", and equally do not eagerly load six of them.
+
+  OBJECT-POSITION IS SHOPIFY'S.
+  image_tag writes an inline object-position onto the img from the image's
+  focal point, and an inline style beats any rule in a stylesheet. The frames
+  below therefore crop with object-fit and leave the position alone, and no
+  style: parameter is passed to image_tag. This is the same finding Phase 7
+  recorded for the story band.
+{%- endcomment -%}
+
+{%- liquid
+  assign gallery_layout = layout | default: 'stacked'
+  assign media_items = product.media
+  assign media_count = media_items.size
+
+  comment
+    The medium the page opens on. A variant carries featured_media when the
+    merchant has assigned one; when it has not, the first medium leads. Matched
+    on id rather than position, because position is nil for media sourced from
+    a metafield.
+  endcomment
+  assign active_media_id = product.selected_or_first_available_variant.featured_media.id
+
+  comment
+    The slot the image occupies. The caller knows the grid and computes it;
+    the fallback is the honest shape of the same thing for a caller that does
+    not, and is never what the product section uses.
+  endcomment
+  assign media_sizes = sizes | default: '(min-width: 1024px) calc((100vw - 128px) * 0.64), 100vw'
+-%}
+
+{%- if media_count > 0 -%}
+  <div
+    class="product-gallery product-gallery--{{ gallery_layout }}"
+    data-product-gallery
+    data-gallery-layout="{{ gallery_layout }}"
+  >
+    <div class="product-gallery__viewport" data-gallery-viewport>
+      {%- for media in media_items -%}
+        {%- liquid
+          assign is_active = false
+          if active_media_id != blank
+            if media.id == active_media_id
+              assign is_active = true
+            endif
+          elsif forloop.first
+            assign is_active = true
+          endif
+
+          assign slide_id = section_id | append: '-media-' | append: media.id
+        -%}
+        <div
+          class="product-gallery__slide{% if is_active %} is-active{% endif %}"
+          id="{{ slide_id }}"
+          data-media-id="{{ media.id }}"
+          data-media-type="{{ media.media_type }}"
+        >
+          <div class="product-gallery__frame">
+            {%- case media.media_type -%}
+              {%- when 'image' -%}
+                {%- comment -%}
+                  PHASE 16: is_active, NOT forloop.first.
+
+                  The slide the page opens on is the active one — the variant's
+                  featured media when it has one (see is_active above, which
+                  falls back to forloop.first when it does not). Keying the
+                  eager load and fetchpriority to forloop.first meant that on
+                  any product whose selected variant is not the first medium,
+                  the browser was told to hurry an image nobody was looking at
+                  and to lazy-load the LCP element.
+
+                  forloop.first still gets loading: eager, because the stacked
+                  desktop layout renders every slide in document order and the
+                  first one is on screen there regardless. Only ONE image gets
+                  fetchpriority, and it is the active one.
+                {%- endcomment -%}
+                {%- if is_active -%}
+                  {{
+                    media
+                    | image_url: width: 1800
+                    | image_tag:
+                      class: 'product-gallery__image',
+                      widths: '360, 480, 640, 800, 960, 1200, 1400, 1600, 1800',
+                      sizes: media_sizes,
+                      loading: 'eager',
+                      fetchpriority: 'high',
+                      decoding: 'async',
+                      alt: media.alt
+                  }}
+                {%- elsif forloop.first -%}
+                  {{
+                    media
+                    | image_url: width: 1800
+                    | image_tag:
+                      class: 'product-gallery__image',
+                      widths: '360, 480, 640, 800, 960, 1200, 1400, 1600, 1800',
+                      sizes: media_sizes,
+                      loading: 'eager',
+                      decoding: 'async',
+                      alt: media.alt
+                  }}
+                {%- else -%}
+                  {{
+                    media
+                    | image_url: width: 1800
+                    | image_tag:
+                      class: 'product-gallery__image',
+                      widths: '360, 480, 640, 800, 960, 1200, 1400, 1600, 1800',
+                      sizes: media_sizes,
+                      loading: 'lazy',
+                      decoding: 'async',
+                      alt: media.alt
+                  }}
+                {%- endif -%}
+
+              {%- when 'video' -%}
+                {%- comment -%}
+                  Shopify-hosted video. video_tag needs no script of its own.
+                  Controls are on and autoplay is off: an autoplaying product
+                  video is motion the customer did not ask for, which Phase 2
+                  §21.5 rules out, and it costs a stranger on a phone data they
+                  did not choose to spend.
+                {%- endcomment -%}
+                {{ media | video_tag: class: 'product-gallery__video', controls: true, preload: 'metadata', image_size: '1200x' }}
+
+              {%- when 'external_video' -%}
+                {{ media | external_video_url: autoplay: false | external_video_tag: class: 'product-gallery__video', loading: 'lazy' }}
+
+              {%- when 'model' -%}
+                {%- comment -%}
+                  A 3D model renders as inert markup until the theme calls
+                  Shopify.loadFeatures for model-viewer-ui, and augmented
+                  reality needs a second, independent call. No God Squad
+                  product carries a model today, so the loader is not shipped
+                  and this arm renders the static preview Shopify supplies
+                  instead of an element that would never initialise. Recorded
+                  as a known limitation rather than half-built.
+                {%- endcomment -%}
+                {%- if media.preview_image != blank -%}
+                  {{
+                    media.preview_image
+                    | image_url: width: 1800
+                    | image_tag:
+                      class: 'product-gallery__image',
+                      widths: '360, 480, 640, 800, 960, 1200, 1400, 1600, 1800',
+                      sizes: media_sizes,
+                      loading: 'lazy',
+                      decoding: 'async',
+                      alt: media.alt
+                  }}
+                {%- endif -%}
+
+              {%- else -%}
+                {%- comment -%}
+                  A media type added to Shopify after this was written. It
+                  renders through the generic filter rather than disappearing.
+                {%- endcomment -%}
+                {{ media | media_tag: class: 'product-gallery__media' }}
+            {%- endcase -%}
+          </div>
+        </div>
+      {%- endfor -%}
+    </div>
+
+    {%- if media_count > 1 -%}
+      {%- comment -%}
+        The rail. Anchors, not buttons: with no script an anchor still brings
+        its slide into view, and it is keyboard-operable for free. The script
+        cancels the jump so no history entry is created — the brief asks that
+        browsing media not fill the back button — and scrolls smoothly instead.
+      {%- endcomment -%}
+      <nav class="product-gallery__rail" aria-label="{{ 'products.media.rail_label' | t }}" data-gallery-rail>
+        <ul class="product-gallery__thumbs" role="list">
+          {%- for media in media_items -%}
+            {%- liquid
+              assign is_active = false
+              if active_media_id != blank
+                if media.id == active_media_id
+                  assign is_active = true
+                endif
+              elsif forloop.first
+                assign is_active = true
+              endif
+              assign slide_id = section_id | append: '-media-' | append: media.id
+            -%}
+            <li class="product-gallery__thumb-item">
+              <a
+                class="product-gallery__thumb{% if is_active %} is-active{% endif %}"
+                href="#{{ slide_id }}"
+                data-gallery-thumb
+                data-media-id="{{ media.id }}"
+                {% if is_active %}aria-current="true"{% endif %}
+              >
+                {%- if media.preview_image != blank -%}
+                  {{
+                    media.preview_image
+                    | image_url: width: 240
+                    | image_tag:
+                      class: 'product-gallery__thumb-image',
+                      widths: '80, 120, 160, 240',
+                      sizes: '80px',
+                      loading: 'lazy',
+                      decoding: 'async',
+                      alt: ''
+                  }}
+                {%- endif -%}
+                <span class="visually-hidden">
+                  {{- 'products.media.go_to' | t: index: forloop.index, count: media_count -}}
+                  {%- unless media.media_type == 'image' -%}
+                    {{ ' ' }}{{ media.media_type }}
+                  {%- endunless -%}
+                </span>
+              </a>
+            </li>
+          {%- endfor -%}
+        </ul>
+      </nav>
+    {%- endif -%}
+  </div>
+{%- else -%}
+  {%- comment -%}
+    No media on the product. The frame still draws so the page keeps its
+    proportions, and nothing stands in for a photograph that does not exist.
+    Phase 3 records production product photography as still outstanding.
+  {%- endcomment -%}
+  <div class="product-gallery product-gallery--empty">
+    <div class="product-gallery__frame product-gallery__frame--empty" aria-hidden="true"></div>
+  </div>
+{%- endif -%}

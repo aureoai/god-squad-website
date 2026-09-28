@@ -1,0 +1,84 @@
+{%- comment -%}
+  GOD SQUAD — Cart note
+  Phase 14. Shopify's own cart note, and nothing beside it.
+
+  Accepts:
+  - id      {String} required. The textarea's id. Two cart surfaces can render
+                     this, so it is namespaced by the caller for the same
+                     reason snippets/cart-line-item.liquid namespaces its own.
+  - form_id {String} optional. Only needed if the caller places this outside
+                     the cart form; both current callers place it inside.
+
+  Usage:
+  {% render 'cart-note', id: 'CartDrawerNote' %}
+
+  Two consumers — the drawer and the cart page — which is why it is a snippet.
+
+  IT IS ONE FIELD NAMED note, BECAUSE THAT IS THE WHOLE FEATURE.
+  Shopify's cart carries a single free-text note, posted as `note` by the cart
+  form and settable through /cart/update.js. There is nothing here to design:
+  a second field, a dropdown of reasons or a "gift message" variant would all
+  be inventing store policy that nobody supplied, and the Phase 14 brief rules
+  out exactly that — "If not required: do not add a large unnecessary field."
+
+  So it is off by default, and the merchant turns it on per surface.
+
+  "ORDER NOTE", NOT "SPECIAL INSTRUCTIONS".
+  The brief names the label and names the wording it does not want. Both
+  strings live in the locale file, so neither is written in markup.
+
+  A <details>, FOR THE DRAWER'S SAKE.
+  A permanently open textarea costs about 120px, which in a 420px drawer is
+  taken from the cart lines — the part the customer came for. Collapsed, the
+  note is one row of text until it is wanted.
+
+  This is safe because of a fact Phase 13 established and tested: form controls
+  inside a CLOSED <details> are still submitted. Collapsing the note never
+  discards it. It is rendered open when the cart already carries one, so an
+  existing note is never hidden behind a control the customer has to find.
+
+  And it is a native disclosure — no ARIA, no script — which is the same
+  reasoning sections/main-product.liquid records for its description and
+  snippets/facets.liquid for its filter groups.
+{%- endcomment -%}
+
+<details class="cart-note" {% if cart.note != blank %}open{% endif %}>
+  <summary class="cart-note__summary">
+    <span class="cart-note__summary-label">{{ 'cart.note.label' | t }}</span>
+    {% render 'icon-chevron' %}
+  </summary>
+
+  <div class="cart-note__body">
+    {%- comment -%}
+      A real <label>, not a placeholder. A placeholder is not an accessible
+      name, and it disappears the moment the customer starts typing — which is
+      precisely when they most need to know what the field is for.
+
+      The label is visually hidden because the summary above it already carries
+      the same words: shown, the field would read "Order note / Order note".
+    {%- endcomment -%}
+    <label class="visually-hidden" for="{{ id }}">{{ 'cart.note.label' | t }}</label>
+    {%- comment -%}
+      PHASE 17: cart.note IS ESCAPED.
+
+      Liquid does not escape output, and a </textarea> inside the note closes
+      this element early — verified by rendering a note of
+      "</textarea><img src=x onerror=...>", which produced a live element after
+      the field. The note is customer-supplied and is also settable through
+      /cart/update.js, so it is untrusted input however it arrived.
+
+      escape, not escape_once: the stored value is plain text, and escape_once
+      would leave a literal "&amp;" typed by a customer looking like an entity.
+    {%- endcomment -%}
+    <textarea
+      class="cart-note__field"
+      id="{{ id }}"
+      name="note"
+      rows="3"
+      data-cart-note
+      {% if form_id != blank %}form="{{ form_id }}"{% endif %}
+    >{{ cart.note | escape }}</textarea>
+
+    <p class="cart-note__help">{{ 'cart.note.help' | t }}</p>
+  </div>
+</details>

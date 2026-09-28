@@ -1,0 +1,39 @@
+/* ============================================================================
+   GOD SQUAD — Container
+   Phase 18. The content column, as one utility.
+
+   PHASE-2-DESIGN-SYSTEM.md section 8 specifies this class, its two modifiers
+   and the markup they belong in. The implementation never built it, so twelve
+   elements across eleven stylesheets each grew a private copy of the same four
+   declarations — the width of the site defined twelve times, and twelve places
+   to miss if it ever changes.
+
+   Verified before consolidating: all twelve were byte-identical, all used
+   --container-standard with --gutter, and none was overridden at a breakpoint.
+   Nothing about the rendered page changes.
+
+   NOT EVERY max-width IS A CONTAINER. Three rules use a narrow width with no
+   gutter padding — .header__search-form, .main-page__column and
+   .main-search__form — and .container--narrow would give them padding they
+   deliberately do not have. They keep their own declarations, and this note is
+   here so the next person does not "finish the job" by sweeping them in.
+   ========================================================================== */
+
+.container {
+  width: 100%;
+  max-width: var(--container-standard);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+/* The two modifiers Phase 2 defines. --wide is for full-width editorial
+   imagery, --narrow for long-form reading. Neither has a consumer yet; they
+   are here because the utility is incomplete without them and because a
+   section that needs one should find it rather than invent a width. */
+.container--wide {
+  max-width: var(--container-wide);
+}
+
+.container--narrow {
+  max-width: var(--container-narrow);
+}

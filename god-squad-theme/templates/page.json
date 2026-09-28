@@ -1,0 +1,16 @@
+{
+  "sections": {
+    "main": {
+      "type": "main-page",
+      "settings": {
+        "show_heading": true,
+        "surface": "light",
+        "spacing_top": "standard",
+        "spacing_bottom": "standard"
+      }
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

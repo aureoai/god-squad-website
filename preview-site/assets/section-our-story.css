@@ -1,0 +1,506 @@
+/* ============================================================================
+   GOD SQUAD — Our Story
+   Phase 7. Every value is a token from design-tokens.css. No raw hex, no magic
+   numbers, no !important, and no JavaScript.
+
+   The composition is the three-track rail Phase 2 §26.3 records as the band's
+   signature — copy / image window / caption rail, --split-rail 0.9fr 1.6fr
+   0.4fr — with the photograph offset rather than centred behind the copy. It
+   is deliberately not a two-column block.
+
+   Below --bp-lg the rail collapses: the photograph takes a defined band of its
+   own and the copy sits beneath it on flat ink. The caption rail is not
+   rendered at all down there — display:none on .our-story__caption in this
+   file, lifted at the split — because Phase 1 STORY-04 recorded it stacking as
+   an orphan after the button.
+   ========================================================================== */
+
+.our-story {
+  position: relative;
+  width: 100%;
+  isolation: isolate;
+  /* The scrim's base colour. Every wash in this file fades into the band's own
+     background, so the photograph dissolves into the band rather than into a
+     colour the band is not. Written as channels because rgba() needs them
+     separately; the two values are --gs-ink and --gs-cream, reached through
+     the surface rather than through the palette. */
+  --os-scrim-rgb: 13, 12, 10;
+}
+
+.our-story.surface-light {
+  --os-scrim-rgb: 243, 239, 230;
+}
+
+/* Spacing selects from three system values rather than accepting a free pixel
+   number, so a band cannot land off the Phase 2 §7.4 rhythm. The chosen value
+   goes into a custom property so the first-section header clearance below can
+   be added to it rather than replacing it. */
+.our-story {
+  --os-space-top: 0px;
+  --os-space-bottom: 0px;
+  padding-block: calc(var(--os-header-clearance, 0px) + var(--os-space-top)) var(--os-space-bottom);
+}
+
+.our-story--pt-standard { --os-space-top: var(--section-pad-block); }
+.our-story--pt-tight    { --os-space-top: var(--section-pad-block-tight); }
+.our-story--pt-none     { --os-space-top: 0px; }
+.our-story--pb-standard { --os-space-bottom: var(--section-pad-block); }
+.our-story--pb-tight    { --os-space-bottom: var(--section-pad-block-tight); }
+.our-story--pb-none     { --os-space-bottom: 0px; }
+
+/* The Phase 4 header overlays the FIRST section of the home page. This band is
+   not first as shipped, but a merchant can reorder, and a section that finds
+   itself first would otherwise sit under the navigation. Same mechanism the
+   collection row uses; the property resolves to 0 when the header is not
+   overlaying. */
+main > .shopify-section:first-child .our-story {
+  --os-header-clearance: var(--header-overlay-offset, 0px);
+}
+
+/* ------------------------------------------------------------------- media
+   Below the split the photograph is a band of its own with a defined ratio.
+   Phase 1 STORY-02 recorded the prototype's slot as having no aspect-ratio or
+   focal-point rule at all, so the visible crop changed unpredictably with
+   width and the subject collided with the copy. Both are defined here. */
+
+.our-story__media {
+  position: relative;
+  width: 100%;
+  /* Portrait on a phone: the band sits under a thumb, and the taller frame
+     holds the subject where a landscape crop would lose it. This is the same
+     4/5 the hero uses on a phone, and it is referenced through the token
+     rather than written out. */
+  aspect-ratio: var(--hero-aspect-mobile);
+  overflow: hidden;
+  background-color: var(--color-bg-primary);
+}
+
+/* Landscape from the tablet tier. 4/5 at 768 is a 960px-tall band that pushes
+   every word below the fold — measured, not assumed. 3/2 is 512px there, and
+   it is also the canonical story asset's own ratio (images/our-story.webp is
+   535x348, 1.537:1), so at this tier the photograph is shown essentially
+   uncropped. Phase 2 §14.4 defines no editorial landscape ratio token; this
+   is recorded as a token gap rather than as a value chosen here. */
+@media (min-width: 768px) {
+  .our-story__media {
+    aspect-ratio: 3 / 2;
+  }
+}
+
+/* The crop centre is Shopify's own focal point, not a second control here.
+
+   image_tag writes style="object-position:X% Y%" straight onto the <img>
+   whenever the image carries a focal point set in admin, and an inline style
+   outranks every rule in this file. A theme-side focal select would therefore
+   have moved nothing on exactly the images a merchant had bothered to position
+   — a control that silently did nothing. It was removed, and admin is the
+   single source of truth, which is what Phase 1 STORY-02 asked for.
+
+   The value below is the default for an image with no focal point set. The
+   prototype used `center top`, which discarded about a fifth of the picture's
+   height at 1440 — the hands and chest that carry the composition's gesture. */
+.our-story__image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 33%;
+}
+
+/* The photograph dissolves into the band rather than ending on a hard edge.
+   Below the split that is --scrim-bottom, a Phase 2 token, used as it stands.
+
+   Above the split it is a horizontal wash written out at the breakpoint rather
+   than taken from --scrim-story-horizontal. Two reasons, both measured: the
+   token's stops (ink to 30%, 0.55 at 42%, clear at 56%) are the prototype's,
+   and the caption rail over them measured 1.69-2.14:1 against the 4.5:1 a
+   tracked 12px line needs; and the token is a fixed ink, while this band has to
+   fade into cream as well. The stops below are the measured ones and their base
+   colour follows the surface. Recorded as a token the band cannot use, not as a
+   token overlooked. */
+.our-story__scrim {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-raised);
+  pointer-events: none;
+  background: var(--scrim-bottom);
+}
+
+/* ------------------------------------------------------------------ inner */
+
+.our-story__inner {
+  position: relative;
+  z-index: var(--z-raised);
+  padding-block-start: var(--space-8);
+}
+
+.our-story__content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+/* ------------------------------------------------------------- typography */
+
+.our-story__eyebrow {
+  margin: 0;
+  /* The one place gold carries small text, and it is legitimate: on the ink
+     band --accent-current is --color-accent at 11.01:1. On cream the surface
+     class swaps it for --color-accent-strong at 4.66:1 automatically. */
+  color: var(--accent-current);
+  font-family: var(--font-body);
+  font-size: var(--type-eyebrow-size);
+  font-weight: var(--type-eyebrow-weight);
+  letter-spacing: var(--type-eyebrow-ls);
+  text-transform: uppercase;
+}
+
+/* --type-display-m is the story scale (Phase 2 §26.1): 32 -> 40px, not the
+   64px commerce scale and not the 112px hero scale. */
+.our-story__heading {
+  margin: var(--space-5) 0 0;
+  /* No character cap: the break is in the markup now, so a cap here would only
+     introduce a second, accidental one. */
+  color: inherit;
+  font-family: var(--font-display);
+  font-size: var(--type-display-m-size);
+  font-weight: var(--weight-black);
+  line-height: var(--type-display-m-lh);
+  letter-spacing: var(--type-display-m-ls);
+  text-transform: uppercase;
+  /* NOT overflow-wrap: anywhere. It collapses an element's min-content width
+     to one character, which lets a grid track shrink below its own longest
+     word — the defect Phase 6 measured and removed. */
+  overflow-wrap: break-word;
+}
+
+/* The cap follows the composition, which is what Phase 2 §26.2 actually says:
+   the prototype's 320px is "an editorial caption measure, not a reading
+   measure", correct for a three-sentence brand statement and wrong for
+   anything longer.
+
+   Stacked, the copy is a full-width reading column and takes the reading
+   measure --measure-body (68ch), inside §14.4's 60-75 target. At 375 the column
+   is narrower than the cap anyway and nothing changes; at 768-1023 it is the
+   difference between a 324px ribbon in a 640px column and a paragraph.
+
+   At the split the copy moves into the rail's 0.9fr track beside the
+   photograph, where it is editorial copy over an image again, and takes
+   --measure-narrow. The track is about 416px there, so the narrow cap is what
+   draws and the reading cap would never bind. See the breakpoint block. */
+.our-story__body {
+  margin: var(--space-6) 0 0;
+  max-width: var(--measure-body);
+  color: var(--color-text-current-muted);
+  font-family: var(--font-body);
+  font-size: var(--type-body-size);
+  line-height: var(--type-body-lh);
+}
+
+.our-story__body > :first-child { margin-block-start: 0; }
+.our-story__body > :last-child  { margin-block-end: 0; }
+.our-story__body p { margin-block: var(--space-4) 0; }
+
+.our-story__body a {
+  color: inherit;
+  text-underline-offset: var(--link-underline-offset);
+  text-decoration-thickness: var(--link-underline-thickness);
+}
+
+/* Phase 18. The other four surfaces that style a merchant rich-text link
+   declare this same rest rule; two of them had a hover and three did not, so
+   the identical link responded on some pages and not others. Pointer-scoped
+   per PHASE-2 22.1 rule 5. */
+@media (hover: hover) and (pointer: fine) {
+  .our-story__body a:hover {
+    color: var(--accent-current);
+  }
+}
+
+.our-story__cta {
+  margin-top: var(--space-7);
+}
+
+/* --------------------------------------------------------------- caption
+   The narrow tracked column at the band's edge. Phase 2 §26.1 gives it
+   --type-caption-size and --type-caption-ls, and ends it with a hairline. */
+
+/* Below the split the rail is not shown at all. Phase 1 STORY-04 recorded it
+   stacking as a four-line orphan after the button on the prototype's small
+   screens, and asked Phase 7 to decide its behaviour and expose the choice.
+   The decision is that it belongs to the wide composition: it is editorial
+   texture at the band's edge, and there is no band edge once the composition
+   stacks. display:none rather than visibility or opacity, so it leaves the
+   accessibility tree too and is not read out on a phone either. The setting
+   turns it off everywhere. */
+.our-story__caption {
+  display: none;
+  margin: var(--space-8) 0 0;
+  color: inherit;
+  font-family: var(--font-body);
+  font-size: var(--type-caption-size);
+  font-weight: var(--type-caption-weight);
+  letter-spacing: var(--type-caption-ls);
+  line-height: 1.8;
+  text-transform: uppercase;
+}
+
+.our-story__caption::after {
+  content: "";
+  display: block;
+  width: var(--space-7);
+  height: var(--border-width);
+  margin-top: var(--space-4);
+  background-color: var(--color-border-current);
+}
+
+/* ---------------------------------------------------------------- values
+   The brand purpose row. Brand messaging, never a measurable claim. */
+
+.our-story__values {
+  position: relative;
+  z-index: var(--z-raised);
+  margin-block-start: var(--space-9);
+}
+
+.our-story__value-list {
+  display: grid;
+  /* 17rem, not 14. The row is capped at --container-standard, so at 1440 it is
+     1344px wide: a 14rem floor fits five tracks there, and the schema's sixth
+     permitted block then sits alone on a second row. A 17rem floor fits four,
+     so six tiles read 4 + 2 and four tiles read as one row. auto-fit collapses
+     the tracks nobody fills, so the shipped three still span the full width. */
+  grid-template-columns: repeat(auto-fit, minmax(min(17rem, 100%), 1fr));
+  gap: var(--grid-gap-large);
+  margin: 0;
+  padding-block-start: var(--space-7);
+  padding-inline: 0;
+  list-style: none;
+  border-block-start: var(--border-width) solid var(--color-border-current);
+}
+
+/* Not gold. Phase 2 §26.5 allows a band two accent marks and the eyebrow is
+   one; three gold value titles would make four, and the prototype's own tiles
+   set their titles in cream, not gold. The weight, tracking and caps carry the
+   hierarchy, and inheriting puts the title at 16.9:1 on ink and 16.7:1 on
+   cream instead of the accent's 11.01 and 4.66. */
+.our-story__value-title {
+  margin: 0;
+  color: inherit;
+  font-family: var(--font-body);
+  font-size: var(--type-label-size);
+  font-weight: var(--type-label-weight);
+  letter-spacing: var(--type-label-ls);
+  text-transform: uppercase;
+}
+
+.our-story__value-body {
+  margin: var(--space-3) 0 0;
+  max-width: var(--measure-narrow);
+  color: var(--color-text-current-muted);
+  font-family: var(--font-body);
+  font-size: var(--type-body-sm-size);
+  line-height: var(--type-body-sm-lh);
+}
+
+/* --------------------------------------------------------------- notice
+   Theme Editor only. Never rendered on the storefront. */
+
+.our-story__notice {
+  position: relative;
+  z-index: var(--z-raised);
+  max-width: var(--container-standard);
+  margin: var(--space-8) auto 0;
+  padding: var(--space-5) var(--gutter);
+  border: var(--border-width) dashed var(--color-border-current-interactive);
+  color: var(--color-text-current-muted);
+  font-family: var(--font-body);
+  font-size: var(--type-body-sm-size);
+  line-height: var(--type-body-sm-lh);
+}
+
+.our-story__notice p { margin: 0; }
+.our-story__notice p + p { margin-block-start: var(--space-3); }
+
+/* ------------------------------------------------------------- breakpoints
+   The rail arrives at --bp-lg 1024. Below it the composition stacks, because
+   a 0.9fr copy track inside a 704px tablet row is 190px and cannot hold the
+   display heading — the same reason the collection row's copy column waits. */
+
+@media (min-width: 1024px) {
+  /* Two rows: the composition, then the values. The media and the copy share
+     row one by both being placed in the same cell, which is what lets the
+     photograph sit behind the copy without absolute positioning — and what
+     keeps the values row out of the photograph entirely. */
+  .our-story {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto;
+  }
+
+  .our-story__media,
+  .our-story__inner {
+    grid-row: 1;
+    grid-column: 1;
+  }
+
+  .our-story__values {
+    grid-row: 2;
+    grid-column: 1;
+  }
+
+  /* The photograph is offset, never centred behind the copy (Phase 2 §26.3
+     rule 3): it takes 70% of the band and bleeds to one edge. */
+  .our-story__media {
+    position: relative;
+    width: 70%;
+    min-height: var(--band-min-height-story);
+    aspect-ratio: auto;
+    z-index: var(--z-base);
+  }
+
+  .our-story--image-right .our-story__media { justify-self: end; }
+  .our-story--image-left  .our-story__media { justify-self: start; }
+
+  /* The scrim turns horizontal and always fades toward the copy, then lifts
+     slightly again at the trailing edge so the photograph ends on a vignette
+     rather than a cut.
+
+     The copy end is measured: it holds 0.96 to 34% because the copy column
+     overlaps the photograph's inner edge, and with it the heading measures
+     16.5-16.9 and the body 9.56-9.70 at every width tested. The trailing 0.45
+     is aesthetic only — the caption rail carries its own backing, for the
+     reason given on that rule. */
+  .our-story--image-right .our-story__scrim {
+    background: linear-gradient(90deg,
+      rgba(var(--os-scrim-rgb), 1) 0%,
+      rgba(var(--os-scrim-rgb), 0.96) 34%,
+      rgba(var(--os-scrim-rgb), 0.2) 62%,
+      rgba(var(--os-scrim-rgb), 0.1) 82%,
+      rgba(var(--os-scrim-rgb), 0.45) 100%);
+  }
+
+  .our-story--image-left .our-story__scrim {
+    background: linear-gradient(270deg,
+      rgba(var(--os-scrim-rgb), 1) 0%,
+      rgba(var(--os-scrim-rgb), 0.96) 34%,
+      rgba(var(--os-scrim-rgb), 0.2) 62%,
+      rgba(var(--os-scrim-rgb), 0.1) 82%,
+      rgba(var(--os-scrim-rgb), 0.45) 100%);
+  }
+
+  /* --split-rail is 0.9fr 1.6fr 0.4fr — copy / image window / caption rail.
+     The track list is written out rather than using the token because each
+     track also needs a minimum: the copy track has to hold the display
+     heading's lockup, which Phase 1 STORY-05 recorded wrapping to three lines
+     at 1440 and four at 1024 in a track of about 350px and 220px.
+
+     26rem is measured, not chosen. With the real face and tracking, the two
+     lines of the approved heading set at 253 / 325 (32px), 285 / 366 (36px)
+     and 316 / 406 (40px). The scale caps at 40px from a 1000px viewport, so
+     the track has to clear 406px or the browser breaks the second line again
+     even with the break already in the markup — which is what the first render
+     did, at a track of 397px. The width comes out of the empty image window
+     track, not out of the photograph, which is 70% of the band either way.
+
+     A longer merchant heading still wraps. That is correct: the floor
+     guarantees the approved lockup sets as drawn, not that any text will. */
+  .our-story__inner {
+    display: grid;
+    grid-template-columns: minmax(26rem, 0.9fr) minmax(0, 1.6fr) minmax(9rem, 0.4fr);
+    gap: var(--grid-gap-large);
+    align-items: center;
+    align-content: center;
+    padding-block: var(--space-9);
+  }
+
+  .our-story__content { grid-column: 1; }
+  .our-story__caption { grid-column: 3; }
+
+  /* Editorial measure again, for the reason given on the base rule. */
+  .our-story__body { max-width: var(--measure-narrow); }
+
+  /* Image on the left mirrors the tracks so the copy stays on the clear side. */
+  .our-story--image-left .our-story__inner {
+    grid-template-columns: minmax(9rem, 0.4fr) minmax(0, 1.6fr) minmax(26rem, 0.9fr);
+  }
+
+  .our-story--image-left .our-story__content { grid-column: 3; }
+  .our-story--image-left .our-story__caption { grid-column: 1; }
+
+  .our-story__caption {
+    display: block;
+    position: relative;
+    margin-block-start: 0;
+    align-self: start;
+  }
+
+  /* The rail's backing, tied to the rail rather than to the photograph.
+
+     Left on open photograph the rail's cream 12px measured 1.69, 2.07, 2.14
+     and 1.86 to one at 1024, 1280, 1440 and 1920 — against the 4.5:1 a tracked
+     12px line needs. A stop in the photograph's own gradient cannot fix it,
+     because the photograph is 70% of a full-bleed band while the rail sits in
+     a container capped at --container-standard, so the rail's position across
+     the picture moves with the viewport: 73.2% at 1024, 78.6% at 1280, 77.8%
+     at 1440, 65.5% at 1920, and further left as the screen grows.
+
+     Anchoring the wash to the rail is exact at every width. It starts fully
+     transparent 10rem to the rail's left, so it reads as the picture fading
+     out behind the words rather than as a panel dropped on top of them, and it
+     darkens nothing the words do not need. */
+  .our-story__caption::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    inset-block: -8rem;
+    inset-inline-start: -10rem;
+    inset-inline-end: calc(var(--gutter) * -1);
+    background: linear-gradient(90deg,
+      rgba(var(--os-scrim-rgb), 0) 0%,
+      rgba(var(--os-scrim-rgb), 0.9) 62%,
+      rgba(var(--os-scrim-rgb), 0.92) 100%);
+    /* The second axis. Without it the wash is a rectangle with two hard cuts
+       across the photograph. The 8rem of extra height above and below puts the
+       words inside the mask's opaque middle, so softening the edges costs them
+       no contrast. */
+    -webkit-mask-image: linear-gradient(180deg,
+      transparent 0%, #000 30%, #000 70%, transparent 100%);
+    mask-image: linear-gradient(180deg,
+      transparent 0%, #000 30%, #000 70%, transparent 100%);
+    pointer-events: none;
+  }
+
+  .our-story--image-left .our-story__caption::before {
+    inset-inline-start: calc(var(--gutter) * -1);
+    inset-inline-end: -10rem;
+    background: linear-gradient(270deg,
+      rgba(var(--os-scrim-rgb), 0) 0%,
+      rgba(var(--os-scrim-rgb), 0.9) 62%,
+      rgba(var(--os-scrim-rgb), 0.92) 100%);
+  }
+
+  .our-story--image-left .our-story__caption { text-align: right; }
+  .our-story--image-left .our-story__caption::after { margin-inline-start: auto; }
+
+  .our-story__values {
+    margin-block-start: 0;
+    padding-block-start: var(--space-8);
+  }
+}
+
+@media (min-width: 1440px) {
+  .our-story__inner {
+    grid-template-columns: minmax(26rem, 0.9fr) minmax(0, 1.6fr) minmax(11rem, 0.4fr);
+  }
+
+  .our-story--image-left .our-story__inner {
+    grid-template-columns: minmax(11rem, 0.4fr) minmax(0, 1.6fr) minmax(26rem, 0.9fr);
+  }
+}
+
+/* ---------------------------------------------------------- reduced motion
+   Nothing in this file transitions, moves or fades at any viewport. The band
+   is legible and complete with JavaScript off, animation off, and CSS
+   gradients unsupported — the scrim only ever softens an edge, it never
+   carries meaning. This block is here so the intent is explicit. */

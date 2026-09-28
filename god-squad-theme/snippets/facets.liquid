@@ -1,0 +1,326 @@
+{%- comment -%}
+  GOD SQUAD — Facets
+  Phase 13. Shopify's native storefront filtering, rendered once.
+
+  Accepts:
+  - results   {Object} required. A collection (or, later, a search) — anything
+                       carrying .filters. Written against `results` rather than
+                       `collection` so the search page can render it unchanged.
+  - form_id   {String} required. The id of the ONE form on this surface. Every
+                       control here is bound to it by the HTML form attribute,
+                       including the sort select, which lives outside this
+                       snippet in the toolbar.
+  - id_prefix {String} optional, default 'Facet'. Scopes generated element ids.
+
+  Usage:
+  {% render 'facets', results: collection, form_id: form_id %}
+
+  ONE FORM, ONE SET OF CONTROLS.
+
+  The filter controls are rendered EXACTLY ONCE in the document. At --bp-md and
+  above they are a horizontal row of dropdowns above the toolbar; below it the
+  same element is a fixed drawer. That is a CSS difference, not a second copy.
+
+  Themes that render a desktop sidebar and a mobile drawer separately have to
+  keep two sets of checkboxes in step, and submit both. Here there is one
+  checked state, one submitted value per choice, and nothing to synchronise.
+
+  WHY A SIDEBAR WAS REJECTED, IN NUMBERS.
+
+  snippets/grid-sizes.liquid derives the card slot from the row left after
+  chrome. Today chrome_d is 96, so at the 1440 container the capped row is 1344
+  and (1344 + 32) / 304 = 4 columns fit. A 240px sidebar plus a 48px gap makes
+  chrome_d 384: the capped row is 1056 and only 3 columns fit — and at the
+  1200px container a merchant may set, only 2. A sidebar narrow enough to keep
+  four columns is about 112px, which is narrower than the word "Availability".
+  The horizontal bar costs one control height plus one gap, once, and leaves
+  every number in grid-sizes untouched.
+
+  APPLY ON CONFIRM, EXCEPT FOR LINKS.
+
+  Checkboxes and the price fields apply on a visible submit. sections/
+  main-collection.liquid already settled this for the sort control and stated
+  the reason: submit-on-change is a WCAG 2.2 SC 3.2.2 On Input failure at Level
+  A, and it is worst for a keyboard user arrowing through options, who triggers
+  a navigation on every option they pass. A checkbox that auto-submits is the
+  same defect under a different control.
+
+  The active-filter chips and Clear all are LINKS, so they act immediately.
+  That is not an inconsistency: SC 3.2.2 governs changing the setting of a
+  control, and activating a link is not that. Do not "harmonise" them into the
+  form.
+
+  NO JAVASCRIPT IS REQUIRED.
+
+  Shopify's filter parameters are ordinary query-string values, and a checkbox
+  named filter.v.option.size with value L submits exactly what Shopify's own
+  url_to_add would have produced. With scripting off this renders in flow above
+  the grid as a stack of collapsed groups, and every control still works. The
+  only thing script adds is the drawer.
+
+  Also: form controls inside a CLOSED <details> are still submitted, so
+  collapsing a group never silently drops what is checked inside it.
+{%- endcomment -%}
+
+{%- liquid
+  assign id_prefix = id_prefix | default: 'Facet'
+
+  comment
+    A group with one value is not a choice. Shopify returns one whenever a
+    collection happens to hold a single vendor or a single product type, and
+    rendering it gives the customer a control whose only effect is to filter
+    nothing out. Dropped here rather than in the section, so every caller gets
+    the same rule.
+
+    A price_range group is kept regardless: its "values" array is empty by
+    design, because its controls come from min_value, max_value and range_max.
+  endcomment
+  assign usable = 0
+  for f in results.filters
+    if f.type == 'price_range'
+      assign usable = usable | plus: 1
+    elsif f.values.size > 1
+      assign usable = usable | plus: 1
+    endif
+  endfor
+
+  assign active_count = 0
+  for f in results.filters
+    assign active_count = active_count | plus: f.active_values.size
+    if f.type == 'price_range'
+      if f.min_value.value != blank or f.max_value.value != blank
+        assign active_count = active_count | plus: 1
+      endif
+    endif
+  endfor
+-%}
+
+{%- if usable > 0 -%}
+  <div class="facets" data-facets>
+    {%- comment -%}
+      The drawer's own header. Present at every width but only visible below
+      --bp-md, because above it the panel is a row in the page rather than a
+      layer over it.
+    {%- endcomment -%}
+    <div class="facets__bar">
+      <p class="facets__bar-title">{{ 'collection.filters.title' | t }}</p>
+      <button
+        type="button"
+        class="facets__close"
+        data-facets-close
+      >
+        {% render 'icon-close' %}
+        <span class="visually-hidden">{{ 'collection.filters.close' | t }}</span>
+      </button>
+    </div>
+
+    <div class="facets__groups">
+      {%- for f in results.filters -%}
+        {%- liquid
+          assign renderable = false
+          if f.type == 'price_range'
+            assign renderable = true
+          elsif f.values.size > 1
+            assign renderable = true
+          endif
+        -%}
+        {%- if renderable -%}
+          {%- comment -%}
+            Open when something inside it is applied, closed otherwise. One
+            rule, correct at both widths: a row of closed dropdowns on desktop,
+            a compact accordion on a phone, and whatever is active is visible.
+
+            <details> and <summary> are the whole disclosure. No aria-expanded,
+            no aria-controls, no role — the same reasoning sections/
+            main-product.liquid records for its description accordion.
+          {%- endcomment -%}
+          <details
+            class="facets__group"
+            {% if f.active_values.size > 0 %}open{% endif %}
+          >
+            <summary class="facets__summary">
+              <span class="facets__summary-label">{{ f.label }}</span>
+              {%- if f.active_values.size > 0 -%}
+                <span class="facets__summary-count">{{ f.active_values.size }}</span>
+              {%- endif -%}
+              {% render 'icon-chevron' %}
+            </summary>
+
+            <div class="facets__values">
+              {%- case f.type -%}
+                {%- when 'price_range' -%}
+                  {%- comment -%}
+                    Shopify's own price filter: two parameters, gte and lte, in
+                    the store's currency. The bounds are whole currency units,
+                    which is what Shopify expects here — no custom arithmetic,
+                    and nothing client-side deciding what is in range.
+
+                    range_max arrives in cents, so it is divided for the
+                    placeholder and the max attribute.
+                  {%- endcomment -%}
+                  {%- assign price_ceiling = f.range_max | divided_by: 100 -%}
+                  <div class="facets__price">
+                    <div class="facets__price-field">
+                      <label for="{{ id_prefix }}-price-min">
+                        {{ 'collection.filters.price_from' | t }}
+                      </label>
+                      <input
+                        id="{{ id_prefix }}-price-min"
+                        form="{{ form_id }}"
+                        class="facets__price-input"
+                        type="number"
+                        inputmode="numeric"
+                        name="{{ f.min_value.param_name | default: 'filter.v.price.gte' }}"
+                        value="{{ f.min_value.value }}"
+                        min="0"
+                        max="{{ price_ceiling }}"
+                        placeholder="0"
+                      >
+                    </div>
+                    <div class="facets__price-field">
+                      <label for="{{ id_prefix }}-price-max">
+                        {{ 'collection.filters.price_to' | t }}
+                      </label>
+                      <input
+                        id="{{ id_prefix }}-price-max"
+                        form="{{ form_id }}"
+                        class="facets__price-input"
+                        type="number"
+                        inputmode="numeric"
+                        name="{{ f.max_value.param_name | default: 'filter.v.price.lte' }}"
+                        value="{{ f.max_value.value }}"
+                        min="0"
+                        max="{{ price_ceiling }}"
+                        placeholder="{{ price_ceiling }}"
+                      >
+                    </div>
+                  </div>
+
+                {%- else -%}
+                  {%- comment -%}
+                    list and boolean render identically: a checkbox per value,
+                    named for the filter's own parameter and carrying Shopify's
+                    own value. Checking two boxes in one group submits the
+                    parameter twice, which is exactly the OR encoding Shopify
+                    documents — so the no-script path produces the same URL the
+                    scripted one would.
+
+                    The count is the number of products the value would leave,
+                    and it comes from Shopify. It is not rendered when Shopify
+                    does not supply one.
+                  {%- endcomment -%}
+                  <ul class="facets__list" role="list">
+                    {%- for v in f.values -%}
+                      {%- assign box_id = id_prefix | append: '-' | append: forloop.parentloop.index | append: '-' | append: forloop.index -%}
+                      <li class="facets__value">
+                        <input
+                          type="checkbox"
+                          class="facets__checkbox visually-hidden"
+                          id="{{ box_id }}"
+                          form="{{ form_id }}"
+                          name="{{ v.param_name }}"
+                          value="{{ v.value }}"
+                          {% if v.active %}checked{% endif %}
+                        >
+                        <label class="facets__label" for="{{ box_id }}">
+                          {%- if f.presentation == 'swatch' and v.swatch.color != blank -%}
+                            <span
+                              class="facets__swatch"
+                              style="--facet-swatch: {{ v.swatch.color }}"
+                              aria-hidden="true"
+                            ></span>
+                          {%- endif -%}
+                          <span class="facets__label-text">{{ v.label }}</span>
+                          {%- if v.count != blank -%}
+                            <span class="facets__count">{{ v.count }}</span>
+                          {%- endif -%}
+                        </label>
+                      </li>
+                    {%- endfor -%}
+                  </ul>
+              {%- endcase -%}
+            </div>
+          </details>
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+
+    {%- comment -%}
+      The drawer's footer. Apply submits the one form; Clear all is a link, so
+      it needs no form. Hidden above --bp-md, where the toolbar's own submit
+      does the same job and the chips carry the clearing.
+    {%- endcomment -%}
+    <div class="facets__footer">
+      <button type="submit" form="{{ form_id }}" class="button button--primary button--full">
+        {{ 'collection.filters.apply' | t }}
+      </button>
+      {%- if active_count > 0 -%}
+        <a class="facets__clear" href="{{ results.url }}">
+          {{ 'collection.filters.clear_all' | t }}
+        </a>
+      {%- endif -%}
+    </div>
+  </div>
+
+  {%- comment -%}
+    The applied filters, as removable chips. Links, not form controls — each one
+    is Shopify's own url_to_remove, so removing a filter is a plain navigation
+    that works with scripting off and leaves the browser's history honest.
+
+    Rendered outside .facets so they stay on the page when the drawer is closed:
+    a customer on a phone has to be able to see what is applied without opening
+    anything.
+  {%- endcomment -%}
+  {%- if active_count > 0 -%}
+    <div class="facets-active" data-facets-active>
+      <h2 class="visually-hidden">{{ 'collection.filters.active_heading' | t }}</h2>
+      <ul class="facets-active__list" role="list">
+        {%- for f in results.filters -%}
+          {%- for v in f.active_values -%}
+            <li>
+              <a class="facets-active__chip" href="{{ v.url_to_remove }}">
+                <span class="facets-active__group">{{ f.label }}:</span>
+                {{ v.label }}
+                {% render 'icon-close' %}
+                <span class="visually-hidden">
+                  {{ 'collection.filters.remove' | t: value: v.label }}
+                </span>
+              </a>
+            </li>
+          {%- endfor -%}
+
+          {%- if f.type == 'price_range' -%}
+            {%- if f.min_value.value != blank or f.max_value.value != blank -%}
+              <li>
+                <a class="facets-active__chip" href="{{ f.url_to_remove }}">
+                  <span class="facets-active__group">{{ f.label }}:</span>
+                  {%- if f.min_value.value != blank -%}
+                    {{ f.min_value.value | times: 100 | money }}
+                  {%- else -%}
+                    {{ 0 | money }}
+                  {%- endif -%}
+                  &ndash;
+                  {%- if f.max_value.value != blank -%}
+                    {{ f.max_value.value | times: 100 | money }}
+                  {%- else -%}
+                    {{ f.range_max | money }}
+                  {%- endif -%}
+                  {% render 'icon-close' %}
+                  <span class="visually-hidden">
+                    {{ 'collection.filters.remove' | t: value: f.label }}
+                  </span>
+                </a>
+              </li>
+            {%- endif -%}
+          {%- endif -%}
+        {%- endfor -%}
+
+        <li>
+          <a class="facets-active__clear" href="{{ results.url }}">
+            {{ 'collection.filters.clear_all' | t }}
+          </a>
+        </li>
+      </ul>
+    </div>
+  {%- endif -%}
+{%- endif -%}

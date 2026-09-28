@@ -1,0 +1,397 @@
+{%- comment -%}
+  GOD SQUAD — Hero
+  Phase 5. The homepage's above-the-fold section.
+
+  Sources of truth:
+  - PHASE-2-DESIGN-SYSTEM.md and PHASE-2-DESIGN-TOKENS.css for type, colour,
+    spacing, scrims and motion.
+  - PHASE-3-ASSET-SYSTEM.md for the canonical hero asset and what is missing.
+  - PHASE-4-HEADER-NAVIGATION.md for how the header overlays this section.
+
+  Composition decisions were taken from the asset, not from a default. Column
+  luminance sampled across images/hero-group.png (1672 x 941, twenty bands)
+  peaks at 0.41 between 15% and 20% of the width and averages 0.29 across the
+  whole left third — the brightest part of the frame is exactly where the copy
+  sits. That is why the approved design carries a left-weighted scrim rather
+  than relying on the photograph to be dark where the words sit.
+
+  Crops were rendered at fixed band sizes and compared before the focal
+  defaults were chosen:
+    narrow 375 x 320   37% and 45% both keep the seated model's chest logo and
+                       the second model's logo legible with no cropped third
+                       figure; 50% starts to admit a sliver of the third and
+                       60% cuts it. The default sits between them, at 40%.
+    tablet 768 x 476   30% to 50% all hold three figures with the back print
+                       readable; 60% cuts the third figure.
+    wide   1440 x 510  the frame is wider than the image is tall, so the full
+                       width is always visible and only the vertical matters.
+
+  ZERO JavaScript. The hero renders from markup and CSS alone.
+{%- endcomment -%}
+
+{{ 'section-hero.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign img = section.settings.image
+  assign img_mobile = section.settings.mobile_image
+  assign heading = section.settings.heading | strip
+  assign eyebrow = section.settings.eyebrow | strip
+  assign scripture = section.settings.scripture | strip
+  assign description = section.settings.description | strip
+  assign btn_label = section.settings.button_label | strip
+  assign btn_link = section.settings.button_link
+
+  comment
+    The call to action renders only when it has somewhere to go. Phase 1 records
+    every destination as BUSINESS INFORMATION REQUIRED and Phase 5 forbids
+    inventing a URL, so a label without a link is treated as not ready.
+  endcomment
+  assign has_cta = false
+  if btn_label != blank and btn_link != blank
+    assign has_cta = true
+  endif
+
+  assign classes = 'hero surface-dark'
+  assign classes = classes | append: ' hero--h-' | append: section.settings.height
+  assign classes = classes | append: ' hero--align-' | append: section.settings.text_alignment
+  assign classes = classes | append: ' hero--pos-' | append: section.settings.text_position
+  assign classes = classes | append: ' hero--overlay-' | append: section.settings.overlay
+  assign classes = classes | append: ' hero--focal-' | append: section.settings.focal_point
+-%}
+
+<section
+  class="{{ classes }}"
+  {{ section.shopify_attributes }}
+>
+  <div class="hero__media">
+    {%- if img != blank -%}
+      {%- if img_mobile != blank -%}
+        {%- comment -%}
+          Two art-directed sources. Phase 3 records that no mobile hero master
+          exists; until one does, leaving this empty falls back to the desktop
+          frame with the narrow focal point applied.
+        {%- endcomment -%}
+        <picture>
+          <source
+            media="(max-width: 749px)"
+            srcset="
+              {{ img_mobile | image_url: width: 420 }} 420w,
+              {{ img_mobile | image_url: width: 640 }} 640w,
+              {{ img_mobile | image_url: width: 750 }} 750w,
+              {{ img_mobile | image_url: width: 900 }} 900w,
+              {{ img_mobile | image_url: width: 1200 }} 1200w
+            "
+            sizes="100vw"
+            width="{{ img_mobile.width }}"
+            height="{{ img_mobile.height }}"
+          >
+          {{
+            img
+            | image_url: width: 3000
+            | image_tag:
+              class: 'hero__image',
+              loading: 'eager',
+              fetchpriority: 'high',
+              decoding: 'async',
+              widths: '640, 750, 960, 1100, 1280, 1440, 1680, 1920, 2200, 2600, 3000',
+              sizes: '100vw',
+              alt: img.alt
+          }}
+        </picture>
+      {%- else -%}
+        {{
+          img
+          | image_url: width: 3000
+          | image_tag:
+            class: 'hero__image',
+            loading: 'eager',
+            fetchpriority: 'high',
+            decoding: 'async',
+            widths: '420, 640, 750, 960, 1100, 1280, 1440, 1680, 1920, 2200, 2600, 3000',
+            sizes: '100vw',
+            alt: img.alt
+        }}
+      {%- endif -%}
+    {%- else -%}
+      {%- comment -%}
+        No image chosen. The bundled photograph stands in so the hero renders its
+        intended composition rather than an empty dark box; an uploaded image
+        takes the responsive branch above. See snippets/image-fallback.liquid.
+      {%- endcomment -%}
+      {% render 'image-fallback',
+        file: 'hero.webp',
+        class: 'hero__image',
+        sizes: '100vw',
+        width: 1672,
+        height: 941,
+        loading: 'eager',
+        priority: true
+      %}
+    {%- endif -%}
+
+    {%- if section.settings.overlay != 'none' -%}
+      <div class="hero__scrim" aria-hidden="true"></div>
+    {%- endif -%}
+  </div>
+
+  <div class="hero__inner container">
+    <div class="hero__content">
+      {%- if eyebrow != blank -%}
+        <p class="hero__eyebrow">{{ eyebrow }}</p>
+      {%- endif -%}
+
+      {%- if heading != blank or section.settings.heading_accent != blank -%}
+        {%- comment -%}
+          One H1, always. Phase 5 section 5 requires a single dominant heading.
+          The accent is a separate setting rather than markup in a text field,
+          so the approved two-tone lockup — cream "Walk By", gold "Faith." —
+          survives without a second heading competing with this one.
+        {%- endcomment -%}
+        <h1 class="hero__heading">
+          {{- heading -}}
+          {%- if section.settings.heading_accent != blank -%}
+            {{ ' ' }}<span class="hero__heading-accent">{{ section.settings.heading_accent | strip }}</span>
+          {%- endif -%}
+        </h1>
+      {%- endif -%}
+
+      {%- if scripture != blank -%}
+        <p class="hero__scripture">{{ scripture }}</p>
+      {%- endif -%}
+
+      {%- if description != blank -%}
+        <p class="hero__description">{{ description }}</p>
+      {%- endif -%}
+
+      {%- if has_cta -%}
+        <a class="hero__cta button button--primary" href="{{ btn_link }}">
+          {{ btn_label }}
+        </a>
+      {%- elsif btn_label != blank -%}
+        {%- comment -%}
+          A label with no destination. Rendering a dead link would reproduce the
+          prototype's six href="#" anchors, so nothing is output. The Theme
+          Editor setting explains what is missing.
+        {%- endcomment -%}
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Hero",
+  "tag": "div",
+  "class": "hero-section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Image"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Desktop image",
+      "info": "The hero image. The theme ships no image of its own, so upload one here — the band renders without it, but the hero is the first thing a customer sees. If you intend to use the image from the approved design mockup, note that it is AI-generated and its usage rights have not been confirmed; settle that before you launch."
+    },
+    {
+      "type": "image_picker",
+      "id": "mobile_image",
+      "label": "Mobile image",
+      "info": "Optional. No mobile master exists yet: the 16:9 desktop frame loses about a third of its width on a phone, which cuts the third figure. Leaving this empty falls back to the desktop image with the focal point below applied."
+    },
+    {
+      "type": "select",
+      "id": "focal_point",
+      "label": "Focal point on narrow screens",
+      "info": "Where the crop centres when the image is narrower than the frame. Centre-left keeps both chest logos legible on a phone. If you set a focal point on the image itself in Shopify admin, that focal point is used instead and this setting has no effect.",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "centre-left",
+          "label": "Centre-left"
+        },
+        {
+          "value": "centre",
+          "label": "Centre"
+        },
+        {
+          "value": "centre-right",
+          "label": "Centre-right"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "centre-left"
+    },
+    {
+      "type": "select",
+      "id": "overlay",
+      "label": "Overlay strength",
+      "info": "The minimum that keeps the words readable. The photography should still read as photography. Subtle, Medium and Strong were all measured against the approved image and all pass WCAG AA. None does not: with no overlay the worst pixel behind the heading measures 1.0:1, so only choose it for an image that is already dark where the words sit.",
+      "options": [
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "subtle",
+          "label": "Subtle"
+        },
+        {
+          "value": "medium",
+          "label": "Medium"
+        },
+        {
+          "value": "strong",
+          "label": "Strong"
+        }
+      ],
+      "default": "medium"
+    },
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "Streetwear With A Purpose."
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Walk By",
+      "info": "Renders as the page's only H1, together with the accent below."
+    },
+    {
+      "type": "text",
+      "id": "heading_accent",
+      "label": "Heading accent",
+      "default": "Faith.",
+      "info": "Appended to the heading in muted gold. This is the approved two-tone lockup; leave it empty for a single-colour heading."
+    },
+    {
+      "type": "text",
+      "id": "scripture",
+      "label": "Scripture reference",
+      "default": "2 Corinthians 5:7"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Supporting statement",
+      "default": "Different People. Same Purpose."
+    },
+    {
+      "type": "header",
+      "content": "Call to action"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label",
+      "default": "Shop The Collection"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button link",
+      "info": "The button is hidden until this points somewhere. No destination has been supplied for the collection yet, so it stays hidden rather than rendering a dead link."
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "height",
+      "label": "Height",
+      "options": [
+        {
+          "value": "small",
+          "label": "Small"
+        },
+        {
+          "value": "medium",
+          "label": "Medium"
+        },
+        {
+          "value": "large",
+          "label": "Large"
+        },
+        {
+          "value": "full",
+          "label": "Full screen"
+        }
+      ],
+      "default": "medium"
+    },
+    {
+      "type": "select",
+      "id": "text_position",
+      "label": "Text position",
+      "options": [
+        {
+          "value": "top",
+          "label": "Top"
+        },
+        {
+          "value": "centre",
+          "label": "Centre"
+        },
+        {
+          "value": "bottom",
+          "label": "Bottom"
+        }
+      ],
+      "default": "centre"
+    },
+    {
+      "type": "select",
+      "id": "text_alignment",
+      "label": "Text alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "centre",
+          "label": "Centre"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "left"
+    }
+  ],
+  "presets": [
+    {
+      "name": "God Squad Hero",
+      "settings": {
+        "eyebrow": "Streetwear With A Purpose.",
+        "heading": "Walk By",
+        "scripture": "2 Corinthians 5:7",
+        "description": "Different People. Same Purpose.",
+        "button_label": "Shop The Collection",
+        "focal_point": "centre-left",
+        "overlay": "medium",
+        "height": "medium",
+        "text_position": "centre",
+        "text_alignment": "left",
+        "heading_accent": "Faith."
+      }
+    }
+  ]
+}
+{% endschema %}

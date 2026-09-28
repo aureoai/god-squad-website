@@ -1,0 +1,505 @@
+{%- comment -%}
+  GOD SQUAD — Our Story
+  Phase 7. The brand band: who God Squad is, and why it exists.
+
+  Sources of truth:
+  - PHASE-2-DESIGN-SYSTEM.md §26.1 (the recurring composition), §26.2 (measure),
+    §26.3 (asymmetry), §14.4 (story images), §29.4 (this section's worked
+    schema), §10 (the one gold CTA per page, dark surfaces only).
+  - PHASE-1-WEBSITE-AUDIT.md for the seven issues assigned to this phase.
+  - PHASE-3-ASSET-MANIFEST.csv for the canonical story asset and its gap.
+
+  THE COPY IS THE APPROVED COPY, NOT NEW COPY.
+  The Phase 7 brief offers a conceptual direction ("More Than Clothing. A
+  Declaration of Faith.") and then says: if the project contains approved
+  existing brand copy, preserve that copy rather than replacing it. It does.
+  The eyebrow, heading, body paragraph and caption rail below are the
+  prototype's own words, which Phase 2 §29.4 already recorded as this section's
+  defaults. Every one of them is a Theme Editor field, so the brief's direction
+  is one edit away rather than imposed.
+
+  Nothing here invents a founder, a date, a place, a partnership, a statistic,
+  a testimonial or a theological claim.
+
+  THE COMPOSITION IS THE THREE-TRACK RAIL, NOT A TWO-COLUMN BLOCK.
+  Phase 2 §26.3 records --split-rail (0.9fr 1.6fr 0.4fr) as the band's
+  signature: copy / image window / caption rail, with the image offset rather
+  than centred behind the copy. The brief asks specifically for the established
+  editorial grid rather than a generic two-column section, and this is it.
+
+  ZERO JavaScript.
+{%- endcomment -%}
+
+{%- liquid
+  assign img = section.settings.image
+  assign img_mobile = section.settings.mobile_image
+  assign eyebrow = section.settings.eyebrow | strip
+  assign heading = section.settings.heading | strip
+  assign caption = section.settings.caption | strip
+  assign btn_label = section.settings.button_label | strip
+  assign btn_url = section.settings.button_url
+
+  assign surface_class = 'surface-dark'
+  assign cta_variant = 'button--accent'
+  if section.settings.surface == 'light'
+    assign surface_class = 'surface-light'
+    comment
+      Gold on cream is 1.55:1, so Phase 2 §10.1 gives the accent variant no
+      light-surface rule at all — used there it would render with no fill and
+      no visible border. On cream the band's single call to action is the
+      primary variant, which §10.2 permits as the band's one primary.
+    endcomment
+    assign cta_variant = 'button--primary'
+  endif
+
+  comment
+    The call to action renders only when it has somewhere to go. Phase 1
+    STORY-03 recorded the prototype's CTA as pointing at "#" while repeating
+    the eyebrow word for word, and UX-07 recorded that neither the nav item nor
+    the CTA led to fuller story content. No Our Story page exists in this
+    project, so the destination is BUSINESS INFORMATION REQUIRED and nothing is
+    invented to fill it.
+  endcomment
+  assign show_cta = false
+  if btn_label != blank and btn_url != blank
+    assign show_cta = true
+  endif
+
+  comment
+    The caption rail. Phase 1 STORY-04 recorded it stacking as a 145px orphan
+    after the CTA below 900px, and asked Phase 7 to decide its small-screen
+    behaviour and expose the choice. The decision: it belongs to the wide
+    composition only, and the stylesheet hides it below the split with
+    display:none so it leaves the accessibility tree as well as the layout.
+    This setting turns it off at every width.
+  endcomment
+  comment
+    The value tiles are h3s under this band's h2. If the merchant clears the
+    heading the h2 goes with it, and three h3s would then hang directly off the
+    hero's h1 with a level skipped. The level follows the heading instead, the
+    same way the Phase 6 rows derive theirs.
+  endcomment
+  assign value_level = 3
+  if heading == blank
+    assign value_level = 2
+  endif
+
+  assign show_caption = false
+  if section.settings.show_caption and caption != blank
+    assign show_caption = true
+  endif
+
+  comment
+    The image's slot, stated in viewport terms because that is what it is.
+    .our-story__media is width:70% of a band that is width:100% with no
+    max-width — only the copy container and the values row are capped at
+    --container-standard, never the photograph. So the slot is 70vw from the
+    split up and the full width below it, at every viewport.
+
+    An earlier version also capped this at 70% of settings.container_width,
+    which on a 1920 screen declared 1008px for a slot that renders 1344px and
+    let the browser settle for a candidate a quarter too small. The cap was the
+    mistake, not the value: there is nothing above --container-standard for the
+    photograph to stop at.
+  endcomment
+  assign img_sizes = '(min-width: 1024px) 70vw, 100vw'
+
+  assign classes = 'our-story '
+  assign classes = classes | append: surface_class
+  assign classes = classes | append: ' our-story--image-' | append: section.settings.image_side
+  assign classes = classes | append: ' our-story--pt-' | append: section.settings.spacing_top
+  assign classes = classes | append: ' our-story--pb-' | append: section.settings.spacing_bottom
+  if show_caption
+    assign classes = classes | append: ' our-story--has-caption'
+  endif
+  if section.blocks.size > 0
+    assign classes = classes | append: ' our-story--has-values'
+  endif
+-%}
+
+{%- comment -%}
+  A band with neither an image nor a heading has nothing to say, so on the live
+  storefront it renders nothing at all. In the Theme Editor it always renders,
+  with a note naming what is missing, so the merchant can see and configure it.
+{%- endcomment -%}
+{%- if img == blank and heading == blank and request.design_mode == false -%}
+  {%- comment -%} Not configured yet: render nothing, and request nothing. {%- endcomment -%}
+{%- else -%}
+
+{{ 'section-our-story.css' | asset_url | stylesheet_tag }}
+
+<div class="{{ classes }}" {% if section.settings.anchor_id != blank %}id="{{ section.settings.anchor_id | handle }}"{% endif %}>
+  {%- comment -%}
+    The wrapper now always renders, because there is always something to put in
+    it: a merchant image, or the bundled stand-in below.
+
+    It used to sit inside the guard. The wrapper carries an aspect ratio and an
+    ink fill, so emitting it with nothing inside shipped a tall empty rectangle
+    above the copy — the state every merchant was in the moment they added the
+    section, because an image_picker cannot have a default, and the state
+    templates/index.json shipped. The stand-in removes that failure mode; the
+    Theme Editor notice at the foot of the band still asks for the real master.
+  {%- endcomment -%}
+  <div class="our-story__media">
+    {%- if img != blank -%}
+      {%- comment -%}
+        Alt text comes from the image the merchant uploaded, and is never
+        invented here — the theme cannot know what is in the photograph. Shopify
+        carries alt text on the image itself, set in admin. When it is empty the
+        image is announced as decorative, which is the correct default for a
+        mood photograph beside a heading that already carries the message, and
+        the editor note below tells the merchant how to change that.
+      {%- endcomment -%}
+      {%- if img_mobile != blank -%}
+        <picture>
+          <source
+            media="(max-width: 1023px)"
+            srcset="
+              {{ img_mobile | image_url: width: 480 }} 480w,
+              {{ img_mobile | image_url: width: 640 }} 640w,
+              {{ img_mobile | image_url: width: 900 }} 900w,
+              {{ img_mobile | image_url: width: 1200 }} 1200w,
+              {{ img_mobile | image_url: width: 1500 }} 1500w,
+              {{ img_mobile | image_url: width: 2048 }} 2048w
+            "
+            sizes="100vw"
+            width="{{ img_mobile.width }}"
+            height="{{ img_mobile.height }}"
+          >
+          {{
+            img
+            | image_url: width: 2400
+            | image_tag:
+              class: 'our-story__image',
+              widths: '480, 640, 900, 1200, 1500, 1800, 2100, 2400',
+              sizes: img_sizes,
+              loading: 'lazy',
+              decoding: 'async',
+              alt: img.alt
+          }}
+        </picture>
+      {%- else -%}
+        {{
+          img
+          | image_url: width: 2400
+          | image_tag:
+            class: 'our-story__image',
+            widths: '480, 640, 900, 1200, 1500, 1800, 2100, 2400',
+            sizes: img_sizes,
+            loading: 'lazy',
+            decoding: 'async',
+            alt: img.alt
+        }}
+      {%- endif -%}
+    {%- else -%}
+      {% render 'image-fallback',
+        file: 'story.webp',
+        class: 'our-story__image',
+        sizes: img_sizes,
+        width: 535,
+        height: 348
+      %}
+    {%- endif -%}
+
+    {%- comment -%}
+      The scrim is not optional and is not a merchant choice. Phase 2 §29.4
+      offers an overlay_style select; it is deliberately not exposed, for the
+      same reason Phase 4 made the header scrim mandatory — the copy sits over
+      the photograph's edge, and a merchant who picked "none" would put cream
+      text on an unknown image. It is derived from the image side instead, so
+      it always fades toward the copy.
+    {%- endcomment -%}
+    <div class="our-story__scrim" aria-hidden="true"></div>
+  </div>
+
+  <div class="our-story__inner container">
+    <div class="our-story__content">
+      {%- if eyebrow != blank -%}
+        <p class="our-story__eyebrow">{{ eyebrow }}</p>
+      {%- endif -%}
+
+      {%- if heading != blank -%}
+        {%- comment -%}
+          An h2, never an h1. Phase 5 established the home page's single h1 in
+          the hero, and Phase 1 HTML-03 recorded the outline as a defect.
+        {%- endcomment -%}
+        {%- comment -%}
+          The break is the merchant's, not the browser's. Phase 2 §26.1 defines
+          the display headline as hard-broken; left to wrap, "Real People.
+          Bigger Purpose." came out on three lines at every width measured,
+          which is the defect Phase 1 STORY-05 recorded.
+        {%- endcomment -%}
+        <h2 class="our-story__heading">{{ heading | newline_to_br }}</h2>
+      {%- endif -%}
+
+      {%- if section.settings.body != blank -%}
+        <div class="our-story__body rte">{{ section.settings.body }}</div>
+      {%- endif -%}
+
+      {%- if show_cta -%}
+        {%- comment -%}
+          On ink this is the page's one gold call to action, which Phase 2
+          §10.1 permits on a dark surface only — ink on gold is 11.01:1 there.
+          On cream the variant switches, for the reason recorded above.
+        {%- endcomment -%}
+        <a class="our-story__cta button {{ cta_variant }}" href="{{ btn_url }}">
+          {{ btn_label }}
+          {% render 'icon-arrow' %}
+        </a>
+      {%- endif -%}
+    </div>
+
+    {%- if show_caption -%}
+      {%- comment -%}
+        The caption rail. Phase 2 §26.1 gives it --type-caption-size 12px and
+        --type-caption-ls 0.20em, and §29.4 names its default. It is decorative
+        editorial texture rather than a second message, so it sits after the
+        content in the DOM and reads last.
+      {%- endcomment -%}
+      <p class="our-story__caption">{{ caption | newline_to_br }}</p>
+    {%- endif -%}
+  </div>
+
+  {%- if section.blocks.size > 0 -%}
+    {%- comment -%}
+      The brand purpose row. The brief permits this treatment inside the Our
+      Story section, and Phase 2 §29.5 scopes a fuller standalone brand-values
+      section — with icons, dividers and up to six tiles — as its own band. This
+      is the small version: a title and one line each, no icons, no dividers, no
+      numbers. Every line is brand messaging, never a measurable claim.
+
+      The copy is the prototype's own, not new copy. Three of the four approved
+      tiles ship as the preset. The fourth — "Worldwide / Shipping Available" —
+      does not, because Phase 1 VAL-04 and UX-05 recorded it as the one value
+      that is a checkable commercial promise with no policy, destination list or
+      rate table behind it anywhere in the project. It is BUSINESS INFORMATION
+      REQUIRED, and a merchant who can stand behind it can add it as a fourth
+      block in one edit.
+    {%- endcomment -%}
+    <div class="our-story__values container">
+      <ul class="our-story__value-list" role="list">
+        {%- for block in section.blocks -%}
+          <li class="our-story__value" {{ block.shopify_attributes }}>
+            {%- if block.settings.title != blank -%}
+              <h{{ value_level }} class="our-story__value-title">{{ block.settings.title }}</h{{ value_level }}>
+            {%- endif -%}
+            {%- if block.settings.body != blank -%}
+              <p class="our-story__value-body">{{ block.settings.body }}</p>
+            {%- endif -%}
+          </li>
+        {%- endfor -%}
+      </ul>
+    </div>
+  {%- endif -%}
+
+  {%- if request.design_mode -%}
+    {%- liquid
+      assign notices = ''
+      if img == blank
+        assign notices = notices | append: 'no_image|'
+      elsif img.alt == blank
+        assign notices = notices | append: 'no_alt|'
+      endif
+      if btn_label != blank and btn_url == blank
+        assign notices = notices | append: 'no_cta_url|'
+      endif
+    -%}
+    {%- if notices != blank -%}
+      <div class="our-story__notice">
+        {%- if notices contains 'no_image' -%}
+          <p>{{ 'sections.our_story.no_image' | t }}</p>
+        {%- endif -%}
+        {%- if notices contains 'no_alt' -%}
+          <p>{{ 'sections.our_story.no_alt' | t }}</p>
+        {%- endif -%}
+        {%- if notices contains 'no_cta_url' -%}
+          <p>{{ 'sections.our_story.no_cta_url' | t }}</p>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+  {%- endif -%}
+</div>
+
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Our Story",
+  "tag": "section",
+  "class": "our-story-section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "Our Story"
+    },
+    {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Real People.\nBigger Purpose.",
+      "info": "Renders as a level-2 heading. The page's only level-1 heading belongs to the hero. Each line you type becomes a line of the heading, so the break is yours rather than the browser's."
+    },
+    {
+      "type": "richtext",
+      "id": "body",
+      "label": "Body",
+      "default": "<p>God Squad is a Philippine streetwear brand built on faith, creativity, and community. We create pieces that inspire a generation to live different — with purpose.</p>",
+      "info": "One paragraph reads best here, though the field accepts up to about four short ones. The column is capped at a comfortable reading width, so longer copy makes the band taller rather than the lines wider."
+    },
+    {
+      "type": "header",
+      "content": "Image"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image",
+      "info": "Upload a master of at least 2000px with no text baked into the image. Set alt text and the focal point on the image itself in Shopify admin: the theme reads the admin focal point when the frame is shorter than the photograph, and adds no second focal control because Shopify writes admin focal point as an inline style a stylesheet cannot override. The approved composition is the three-model community photograph."
+    },
+    {
+      "type": "image_picker",
+      "id": "mobile_image",
+      "label": "Mobile image",
+      "info": "Optional. Below 1024px the image runs full width in a shorter band, so a portrait or squarer crop holds the subject better. Leave empty and the desktop image is used with its own focal point applied."
+    },
+    {
+      "type": "select",
+      "id": "image_side",
+      "label": "Image side",
+      "info": "Which side of the band the photograph occupies. The copy takes the other side and the scrim always fades toward it.",
+      "options": [
+        { "value": "right", "label": "Right" },
+        { "value": "left", "label": "Left" }
+      ],
+      "default": "right"
+    },
+    {
+      "type": "header",
+      "content": "Call to action"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label",
+      "default": "Discover Our Story"
+    },
+    {
+      "type": "url",
+      "id": "button_url",
+      "label": "Button link",
+      "info": "The button is hidden until this points somewhere. No Our Story page exists in this project yet, so it stays hidden rather than rendering a dead link. Create the page in Shopify admin first, then select it here."
+    },
+    {
+      "type": "header",
+      "content": "Caption rail"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_caption",
+      "label": "Show the caption rail",
+      "default": true,
+      "info": "A narrow tracked column at the band's edge. It belongs to the wide composition and is not rendered below 1024px, where it would otherwise stack as an orphan block after the button."
+    },
+    {
+      "type": "textarea",
+      "id": "caption",
+      "label": "Caption",
+      "default": "Faith\nLives\nDifferent\nHere."
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "surface",
+      "label": "Colour scheme",
+      "info": "Ink is the approved treatment for this band. On cream the gold button is replaced automatically, because gold on cream is 1.55:1 and its own edge would disappear.",
+      "options": [
+        { "value": "dark", "label": "Ink" },
+        { "value": "light", "label": "Cream" }
+      ],
+      "default": "dark"
+    },
+    {
+      "type": "select",
+      "id": "spacing_top",
+      "label": "Space above",
+      "options": [
+        { "value": "none", "label": "None" },
+        { "value": "tight", "label": "Tight" },
+        { "value": "standard", "label": "Standard" }
+      ],
+      "default": "standard"
+    },
+    {
+      "type": "select",
+      "id": "spacing_bottom",
+      "label": "Space below",
+      "options": [
+        { "value": "none", "label": "None" },
+        { "value": "tight", "label": "Tight" },
+        { "value": "standard", "label": "Standard" }
+      ],
+      "default": "standard"
+    },
+    {
+      "type": "text",
+      "id": "anchor_id",
+      "label": "Anchor",
+      "info": "Optional. Lets a menu item link to this section, for example story."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "value",
+      "name": "Value",
+      "limit": 6,
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Faith Driven"
+        },
+        {
+          "type": "text",
+          "id": "body",
+          "label": "Line",
+          "default": "More Than Clothing",
+          "info": "One short line of brand messaging. Not a statistic, a claim about reach, or anything a customer could not verify."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Our Story",
+      "settings": {
+        "eyebrow": "Our Story",
+        "heading": "Real People.\nBigger Purpose.",
+        "body": "<p>God Squad is a Philippine streetwear brand built on faith, creativity, and community. We create pieces that inspire a generation to live different — with purpose.</p>",
+        "button_label": "Discover Our Story",
+        "show_caption": true,
+        "caption": "Faith\nLives\nDifferent\nHere.",
+        "image_side": "right",
+        "surface": "dark",
+        "spacing_top": "standard",
+        "spacing_bottom": "standard",
+        "anchor_id": "story"
+      },
+      "blocks": [
+        { "type": "value", "settings": { "title": "Faith Driven", "body": "More Than Clothing" } },
+        { "type": "value", "settings": { "title": "Community", "body": "People With Purpose" } },
+        { "type": "value", "settings": { "title": "Premium Quality", "body": "Crafted To Inspire" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

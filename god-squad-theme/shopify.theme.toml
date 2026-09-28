@@ -1,0 +1,34 @@
+# Shopify CLI theme environments for the GOD SQUAD theme.
+#
+# This file lives INSIDE god-squad-theme/ because every `shopify theme` command
+# must be run from the theme root — the directory holding assets/, config/,
+# layout/, locales/, sections/, snippets/ and templates/. Run it from the project
+# root and the CLI will not recognise a theme.
+#
+# Usage:
+#   shopify theme dev  --environment dev
+#   shopify theme push --environment draft
+#
+# NOTHING HERE PUBLISHES. `dev` serves your local files at a temporary preview
+# URL and creates a development theme that Shopify cleans up on its own; `draft`
+# pushes to an unpublished theme in the Draft themes list. Neither touches the
+# live theme. To publish you would have to pass --live or --publish explicitly,
+# or press Publish in admin — do not add either to this file.
+#
+# NO CREDENTIALS HERE, AND NONE SHOULD BE ADDED. The CLI authenticates through a
+# browser login and stores the session itself. A Theme Access password or an
+# admin API token belongs in the SHOPIFY_CLI_THEME_TOKEN environment variable at
+# the moment you need it, never in a file in the project.
+
+[environments.dev]
+store = "godsquad-intl.myshopify.com"
+# Sections and blocks the theme ships but the store has not configured yet would
+# otherwise be invisible while developing.
+theme-editor-sync = false
+
+[environments.draft]
+store = "godsquad-intl.myshopify.com"
+# `theme` names the draft it pushes to. The CLI creates it on first push with
+# --unpublished and reuses it after that, so repeated pushes update one theme
+# rather than filling the Draft list.
+theme = "GOD SQUAD"

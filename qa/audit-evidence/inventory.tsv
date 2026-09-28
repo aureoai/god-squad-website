@@ -1,0 +1,45 @@
+path	folder	ext	bytes	dims	color	md5	referenced_by	dup_group
+.thumbnail	(root)	thumbnail	25542	640x355	WebP	edf111a01d3bd49bd3495a6d31d7ff00	README	
+01-hero-model-mu98p88t-7jig.webp	(root)	webp	39966	650x480	WebP	74bc4fd45d17d03356eed9bf55ff253b	html	
+God Squad Website.html	(root)	html	15632			787068e36afd46de992d7c5df3cb3443	none	
+chatgpt-image-sep-20-2026-11_06_34-am-mu98j9xl-evm9.png	(root)	png	1989201	1672x941	RGB	c5f73461b639159720504a1153883817	none	DUP-01
+support.js	(root)	js	69150			951ae391b8ae72ef12e671c2fad23353	html	
+white-font-300x300-mu98qi59-mytq.png	(root)	png	23444	244x184	RGBA	ea751d95a0a3f39f18c4e24ea62ea2cc	none	
+white-font-trans-mu98q2ez-zrdd.png	(root)	png	43606	500x500	RGBA	f9359a73df43358377fafa45adae254d	none	
+white-font-trans-mu98qky0-5tt6.png	(root)	png	43606	500x500	RGBA	5fc6d35c11df5c47abff1c85e0f43ede	none	
+images/WHITE FONT LOGO.png	images	png	37836	500x500	RGBA	c247ae94486b0e3ead9f6544eeff3566	html	
+images/hero-group.png	images	png	1989201	1672x941	RGB	c5f73461b639159720504a1153883817	html	DUP-01
+images/hero-model.webp	images	webp	39966	650x480	WebP	6d5452303f50c910a6531e686c3183cf	README	DUP-02
+images/icon-account.png	images	png	28470	110x110	RGBA	d12b20b84f96db95ca0698fcd169b9a2	html	
+images/icon-cart.png	images	png	29127	110x110	RGBA	54215f7ea62a0292b587892b0a9971e3	html	
+images/icon-community.png	images	png	39978	150x110	RGBA	ef83726a1f414d237111449183982f66	html	
+images/icon-crown.png	images	png	33339	130x110	RGBA	c5c6b52c31aea74b254cca93ccc0106b	html	
+images/icon-diamond.png	images	png	34556	130x110	RGBA	866395343a177fbfb3a3cd892c771647	html	
+images/icon-facebook.png	images	png	36771	130x130	RGBA	3e7663b3e84a804b15b0b03a6b626f46	html	
+images/icon-globe.png	images	png	35625	110x110	RGBA	cf59eae0057c207676d0fd16cbab5819	html	
+images/icon-instagram.png	images	png	42319	130x130	RGBA	b549689b95c1328ed80d4958c3e47395	html	
+images/icon-search.png	images	png	28336	110x110	RGBA	7a3a084c2340b1e55cc39585f652279d	html	
+images/icons-sprite.png	images	png	833929	2172x724	RGBA	e5f38184d721286b110dfb56599d71e5	none	DUP-03
+images/logo.png	images	png	47147	500x500	RGBA	01f17bc19d4b3ef6fc607004ab360a5d	README	DUP-04
+images/our-story.webp	images	webp	41004	535x348	WebP	07accc1677a13d5a71c66002b7df1f50	README	DUP-05
+images/product-cap.webp	images	webp	10002	215x190	WebP	6953fcaf1f333fa957c87b453f8ed172	html	DUP-06
+images/product-hoodie.webp	images	webp	12328	235x235	WebP	935f2d96f6bc1428a6ce46ce8a5b9f79	html	DUP-07
+images/product-tee.webp	images	webp	9012	235x230	WebP	1f0e2e02570e498562969aff4a90b90b	html	DUP-08
+images/social-sprite.png	images	png	927973	2172x724	RGBA	59f7085fee667502dcaea1f57683f359	none	DUP-09
+uploads/ChatGPT Image Sep 20, 2026, 10_11_00 AM-34af7243.png	uploads	png	833929	2172x724	RGBA	e5f38184d721286b110dfb56599d71e5	none	DUP-03
+uploads/ChatGPT Image Sep 20, 2026, 10_11_00 AM.png	uploads	png	833929	2172x724	RGBA	e5f38184d721286b110dfb56599d71e5	none	DUP-03
+uploads/ChatGPT Image Sep 20, 2026, 10_56_48 AM.png	uploads	png	927973	2172x724	RGBA	59f7085fee667502dcaea1f57683f359	none	DUP-09
+uploads/ChatGPT Image Sep 20, 2026, 11_06_34 AM.png	uploads	png	1989201	1672x941	RGB	c5f73461b639159720504a1153883817	none	DUP-01
+uploads/GODSQUAD WEBSITE MOCKUP.png	uploads	png	1872888	1024x1536	RGB	5f4df5482a51a66bb61550b4c9dab0c6	none	
+uploads/pasted-1789874083026-0.png	uploads	png	17311	118x77	RGB	4e04ab60c9337f43a375925a39d4fb22	none	
+uploads/pasted-1789874193900-0.png	uploads	png	1541839	1920x1009	RGB	7b34ea3b937e0ae078968833aa18487f	none	
+uploads/pasted-1789874322321-0.png	uploads	png	769319	1920x1009	RGB	eed733bb77d9d2d36bd7b6fb1c6a7498	none	
+uploads/pasted-1789874476205-0.png	uploads	png	1550034	1920x1009	RGB	f33e35efede16fce05df62c4a77c6e63	none	
+uploads/God-Squad-Images/00-full-mockup-reference.webp	uploads/God-Squad-Images	webp	182250	1024x1536	WebP	5d99e52634392a94272ecee2eeaa673d	README	
+uploads/God-Squad-Images/01-hero-model.webp	uploads/God-Squad-Images	webp	39966	650x480	WebP	6d5452303f50c910a6531e686c3183cf	README	DUP-02
+uploads/God-Squad-Images/02-product-oversized-tee.webp	uploads/God-Squad-Images	webp	9012	235x230	WebP	1f0e2e02570e498562969aff4a90b90b	README	DUP-08
+uploads/God-Squad-Images/03-product-heavyweight-hoodie.webp	uploads/God-Squad-Images	webp	12328	235x235	WebP	935f2d96f6bc1428a6ce46ce8a5b9f79	README	DUP-07
+uploads/God-Squad-Images/04-product-utility-cap.webp	uploads/God-Squad-Images	webp	10002	215x190	WebP	6953fcaf1f333fa957c87b453f8ed172	README	DUP-06
+uploads/God-Squad-Images/05-our-story-models.webp	uploads/God-Squad-Images	webp	41004	535x348	WebP	07accc1677a13d5a71c66002b7df1f50	README	DUP-05
+uploads/God-Squad-Images/06-logo.png	uploads/God-Squad-Images	png	47147	500x500	RGBA	01f17bc19d4b3ef6fc607004ab360a5d	README	DUP-04
+uploads/God-Squad-Images/README.txt	uploads/God-Squad-Images	txt	556			bde3e4e866ab2ff8cae142085a27a197	none	

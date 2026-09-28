@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en" class="js cart-js"><head><meta charset="utf-8">
+<script>
+(function () {
+  window.__req = [];
+  window.__mode = 'ok';
+  window.__lines = ['k2:bbb', 'k3:ccc', 'k4:ddd'];   // k1 removed
+
+  function pageHtml(lines) {
+    var items = '';
+    for (var i = 0; i < lines.length; i++) {
+      items += '<li class="cart-line" data-cart-line data-line-key="' + lines[i] + '" data-line-index="' + (i + 1) + '">' +
+        '<div class="quantity" data-quantity data-line-key="' + lines[i] + '">' +
+        '<button type="button" data-quantity-step="-1" aria-disabled="true"></button>' +
+        '<input class="quantity__input" data-quantity-input type="number" name="updates[]" value="1" min="1">' +
+        '<button type="button" data-quantity-step="1"></button></div>' +
+        '<a href="/cart/change?id=' + lines[i] + '&quantity=0" data-cart-remove data-line-key="' + lines[i] + '">Remove</a>' +
+        '</li>';
+    }
+    return '<div id="shopify-section-main" class="shopify-section">' +
+      '<div class="main-cart"><div data-cart-page-inner>' +
+      '<form data-cart-form><ul>' + items + '</ul>' +
+      '<dd data-cart-total>PAGE REFRESHED</dd></form>' +
+      '</div></div></div>';
+  }
+
+  function bubbleHtml(n) {
+    return '<div id="shopify-section-cart-icon-bubble" class="shopify-section">' +
+      '<span data-cart-count>' + n + '</span></div>';
+  }
+
+  window.fetch = function (input, init) {
+    var url = typeof input === 'string' ? input : String(input);
+    var body = init && init.body;
+    var rec = { url: url, headers: (init && init.headers) || null };
+    if (body instanceof FormData) {
+      rec.form = {};
+      body.forEach(function (v, k) { rec.form[k] = String(v); });
+    } else if (typeof body === 'string') {
+      try { rec.json = JSON.parse(body); } catch (e) { rec.raw = body; }
+    }
+    window.__req.push(rec);
+    if (window.__mode === 'network') return Promise.reject(new TypeError('Failed to fetch'));
+    return Promise.resolve({
+      ok: true, status: 200,
+      json: function () {
+        return Promise.resolve({
+          sections: { 'main': pageHtml(window.__lines), 'cart-icon-bubble': bubbleHtml(4) }
+        });
+      }
+    });
+  };
+})();
+</script>
+
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DONE</title>
+<link rel="stylesheet" href="assets/design-tokens.css">
+<link rel="stylesheet" href="assets/base.css">
+<link rel="stylesheet" href="assets/header.css">
+<link rel="stylesheet" href="assets/component-container.css">
+<link rel="stylesheet" href="assets/component-button.css">
+<link rel="stylesheet" href="assets/component-pagination.css">
+<link rel="stylesheet" href="assets/component-quantity.css">
+<link rel="stylesheet" href="assets/component-cart-line.css">
+<script>document.documentElement.classList.replace('no-js','js');</script>
+<script>window.Shopify = window.Shopify || {routes: {root: '/'}};</script>
+<script src="assets/header.js" defer=""></script>
+<script src="assets/cart.js" defer=""></script>
+</head><body class="template-cart">
+<a class="skip-link" href="#MainContent">Skip to content</a>
+<div id="shopify-section-header" class="shopify-section"><header class="header surface-dark" data-header=""><div class="header__inner container"><div class="header__cluster header__cluster--start">
+      <button type="button" class="header__control header__menu-toggle" aria-expanded="false" aria-controls="MobileMenu" data-menu-toggle="">
+        <svg class="icon icon--menu " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3.75 6.5h16.5"></path><path d="M3.75 12h16.5"></path><path d="M3.75 17.5h16.5"></path></svg>
+
+        <span class="visually-hidden">Menu</span>
+      </button>
+    </div><div class="header__branding"><a class="header__logo-link" href="/"><img class="header__logo" src="img/logo.png" srcset="img/logo.png 120w, img/logo.png 180w, img/logo.png 240w, img/logo.png 360w, img/logo.png 480w, img/logo.png 600w" sizes="(min-width: 1024px) 240px, 160px" width="500" height="500" style="--logo-height-desktop: 78px; --logo-height-mobile: 56px;" alt="God Squad">
+        </a></div><nav class="header__nav" aria-label="Primary">
+      <ul class="header__nav-list" role="list"><li class="header__nav-item">
+              <a class="header__nav-link" href="/">Home</a>
+            </li><li class="header__nav-item">
+              <a class="header__nav-link" href="/collections/all">Shop</a>
+            </li><li class="header__nav-item">
+              <a class="header__nav-link" href="/#story">Our Story</a>
+            </li><li class="header__nav-item">
+              <a class="header__nav-link" href="/#verse">Verse</a>
+            </li></ul>
+    </nav><div class="header__cluster header__cluster--end"><a class="header__control" href="/search" data-search-trigger="" aria-haspopup="dialog" aria-expanded="false" aria-controls="HeaderSearch">
+          <svg class="icon icon--search " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="6.25"></circle><path d="M15.6 15.6 20.5 20.5"></path></svg>
+
+          <span class="visually-hidden">Search</span>
+        </a><shopify-account class="header__control header__account" menu="customer-account-main-menu">
+          <span class="header__account-avatar" slot="signed-out-avatar">
+            <svg class="icon icon--account " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="8.25" r="3.75"></circle><path d="M4.75 19.75a7.25 7.25 0 0 1 14.5 0"></path></svg>
+
+            <span class="visually-hidden">Account</span>
+          </span>
+        </shopify-account><a class="header__control header__cart" href="/cart" data-cart-bubble=""><span data-cart-count="">4</span></a></div>
+  </div><div class="header__search" id="HeaderSearch" data-search-panel="" hidden="">
+    <form class="header__search-form" action="/search" method="get" role="search">
+      <label class="visually-hidden" for="HeaderSearchInput">
+        Search the store
+      </label>
+      <input class="header__search-input" id="HeaderSearchInput" type="search" name="q" placeholder="Search the store…" data-search-input=""><input type="hidden" name="type" value="product">
+      <button type="submit" class="button button--primary header__search-submit">
+        Search
+      </button>
+      <button type="button" class="header__control" data-search-close="">
+        <svg class="icon icon--close " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.4 6.4 17.6 17.6"></path><path d="M17.6 6.4 6.4 17.6"></path></svg>
+
+        <span class="visually-hidden">Close search</span>
+      </button>
+    </form>
+  </div><div class="header__panel" id="MobileMenu" data-menu-panel="" hidden="">
+    <div class="header__panel-header">
+      <span class="header__panel-title">Menu</span>
+      <button type="button" class="header__control" data-menu-close="">
+        <svg class="icon icon--close " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.4 6.4 17.6 17.6"></path><path d="M17.6 6.4 6.4 17.6"></path></svg>
+
+        <span class="visually-hidden">Close menu</span>
+      </button>
+    </div>
+
+    <nav class="header__panel-nav" aria-label="Main">
+      <ul class="header__panel-list" role="list"><li>
+              <a class="header__panel-link" href="/">Home</a>
+            </li><li>
+              <a class="header__panel-link" href="/collections/all">Shop</a>
+            </li><li>
+              <a class="header__panel-link" href="/#story">Our Story</a>
+            </li><li>
+              <a class="header__panel-link" href="/#verse">Verse</a>
+            </li></ul>
+    </nav></div>
+
+  <div class="header__overlay" data-menu-overlay="" hidden=""></div>
+</header>
+
+
+</div>
+<main id="MainContent" tabindex="-1">
+<div id="shopify-section-main" class="shopify-section"><link rel="stylesheet" href="assets/section-main-cart.css">
+
+<div class="main-cart surface-dark" data-cart-page="" data-cart-page-section="main">
+  <div class="main-cart__inner container">
+    <h1 class="main-cart__title" tabindex="-1" id="CartPageTitle">Your cart</h1><p class="main-cart__error" data-cart-error="" role="alert">We could not reach the store. Check your connection and try again.</p>
+
+    <div data-cart-page-inner=""><form data-cart-form=""><ul><li class="cart-line" data-cart-line="" data-line-key="k2:bbb" data-line-index="1"><div class="quantity" data-quantity="" data-line-key="k2:bbb"><button type="button" data-quantity-step="-1"></button><input class="quantity__input" data-quantity-input="" type="number" name="updates[]" value="1" min="1"><button type="button" data-quantity-step="1"></button></div><a href="/cart/change?id=k2:bbb&amp;quantity=0" data-cart-remove="" data-line-key="k2:bbb">Remove</a></li><li class="cart-line" data-cart-line="" data-line-key="k3:ccc" data-line-index="2"><div class="quantity" data-quantity="" data-line-key="k3:ccc"><button type="button" data-quantity-step="-1" aria-disabled="true"></button><input class="quantity__input" data-quantity-input="" type="number" name="updates[]" value="1" min="1"><button type="button" data-quantity-step="1"></button></div><a href="/cart/change?id=k3:ccc&amp;quantity=0" data-cart-remove="" data-line-key="k3:ccc">Remove</a></li><li class="cart-line" data-cart-line="" data-line-key="k4:ddd" data-line-index="3"><div class="quantity" data-quantity="" data-line-key="k4:ddd"><button type="button" data-quantity-step="-1" aria-disabled="true"></button><input class="quantity__input" data-quantity-input="" type="number" name="updates[]" value="1" min="1"><button type="button" data-quantity-step="1"></button></div><a href="/cart/change?id=k4:ddd&amp;quantity=0" data-cart-remove="" data-line-key="k4:ddd">Remove</a></li></ul><dd data-cart-total="">PAGE REFRESHED</dd></form></div>
+  </div>
+</div>
+
+
+</div>
+</main>
+
+<div id="CartStatus" class="visually-hidden" role="status" aria-live="polite" data-cart-no-inert="">We could not reach the store. Check your connection and try again.</div>
+<div hidden="" data-cart-no-inert="" data-cart-strings="" data-added="Added to your cart." data-updated="Cart updated." data-removed="Removed from your cart." data-note-saved="Order note saved." data-quantity-announce="Quantity: [count]" data-error-generic="Unable to update your cart. Please try again." data-error-network="We could not reach the store. Check your connection and try again."></div>
+
+<script>
+(function () {
+  var results = [];
+  function t(name, r) { results.push({ name: name, pass: r === true, detail: r === true ? '' : String(r) }); }
+  function q(s) { return document.querySelector(s); }
+  function all(s) { return [].slice.call(document.querySelectorAll(s)); }
+  function wait(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+  function last() { return window.__req[window.__req.length - 1] || {}; }
+
+  function run() {
+    return Promise.resolve()
+      .then(function () {
+        t('the drawer is not rendered on the cart page',
+          q('[data-cart-drawer]') === null || 'a drawer is present');
+        t('the page carries its own render hook',
+          !!q('[data-cart-page-inner]') || 'no [data-cart-page-inner]');
+        t('the page declares its section id',
+          q('[data-cart-page]') && q('[data-cart-page]').getAttribute('data-cart-page-section') === 'main'
+            || 'id=' + (q('[data-cart-page]') && q('[data-cart-page]').getAttribute('data-cart-page-section')));
+        t('the page starts with four lines',
+          all('[data-cart-line]').length === 4 || 'lines=' + all('[data-cart-line]').length);
+
+        window.__req.length = 0;
+        var link = q('[data-cart-remove]');
+        // A real click focuses the link first; a synthetic one does not, and
+        // captureFocusIntent has nothing to restore if focus was never inside
+        // the node being replaced.
+        link.focus();
+        var prevented = !link.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+        t('the removal link does not navigate', prevented === true || 'default not prevented');
+        return wait(160);
+      })
+      .then(function () {
+        var r = last();
+        t('the request asks for the cart page section',
+          r.json && r.json.sections.indexOf('main') !== -1 || 'sections=' + (r.json && r.json.sections));
+        t('the request does NOT ask for a drawer that is not here',
+          r.json && r.json.sections.indexOf('cart-drawer') === -1 || 'sections=' + (r.json && r.json.sections));
+        t('the removed line is gone from the page',
+          all('[data-cart-line]').length === 3 || 'lines=' + all('[data-cart-line]').length);
+        t('the page totals were replaced',
+          q('[data-cart-total]') && q('[data-cart-total]').textContent === 'PAGE REFRESHED'
+            || 'total=' + (q('[data-cart-total]') && q('[data-cart-total]').textContent));
+        t('the header count was replaced',
+          q('[data-cart-count]') && q('[data-cart-count]').textContent === '4'
+            || 'count=' + (q('[data-cart-count]') && q('[data-cart-count]').textContent));
+        t('updates[] now matches the server, one input per surviving line',
+          all('input[name="updates[]"]').length === 3
+            || 'inputs=' + all('input[name="updates[]"]').length);
+        t('focus landed on the page heading, not on <body>',
+          document.activeElement === q('#CartPageTitle')
+            || 'focus on ' + (document.activeElement && (document.activeElement.id || document.activeElement.tagName)));
+        return null;
+      })
+      .then(function () {
+        window.__req.length = 0;
+        var up = q('[data-cart-line] [data-quantity-step="1"]');
+        up.click();
+        return wait(420);
+      })
+      .then(function () {
+        var r = last();
+        t('a quantity change on the page posts to cart/change.js',
+          /\/cart\/change\.js$/.test(r.url) || 'url=' + r.url);
+        t('it identifies the line by key',
+          r.json && r.json.id === 'k2:bbb' || 'id=' + (r.json && r.json.id));
+        t('the page re-rendered after the change',
+          q('[data-cart-total]') && q('[data-cart-total]').textContent === 'PAGE REFRESHED'
+            || 'total=' + (q('[data-cart-total]') && q('[data-cart-total]').textContent));
+        return null;
+      })
+      .then(function () {
+        window.__mode = 'network';
+        window.__req.length = 0;
+        var up = q('[data-cart-line] [data-quantity-step="1"]');
+        up.click();
+        return wait(420);
+      })
+      .then(function () {
+        var box = q('[data-cart-error]');
+        t('a failed change is visible on the page',
+          box && box.hidden === false && box.textContent.length > 0
+            || 'box=' + (box && (box.hidden ? '(hidden)' : box.textContent)));
+        t('a failed change clears the line busy state',
+          q('[data-cart-line] [data-quantity]').getAttribute('aria-busy') === null || 'still busy');
+        return null;
+      })
+      .then(function () {
+        document.title = 'DONE';
+        document.getElementById('o').textContent = '<<<' + JSON.stringify(results) + '>>>';
+      })
+      .catch(function (e) {
+        results.push({ name: 'RUNNER', pass: false, detail: 'threw: ' + e.message });
+        document.title = 'DONE';
+        document.getElementById('o').textContent = '<<<' + JSON.stringify(results) + '>>>';
+      });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function () { setTimeout(run, 150); });
+  } else {
+    setTimeout(run, 150);
+  }
+})();
+</script>
+<pre id="o" style="display:none">&lt;&lt;&lt;[{"name":"the drawer is not rendered on the cart page","pass":true,"detail":""},{"name":"the page carries its own render hook","pass":true,"detail":""},{"name":"the page declares its section id","pass":true,"detail":""},{"name":"the page starts with four lines","pass":true,"detail":""},{"name":"the removal link does not navigate","pass":true,"detail":""},{"name":"the request asks for the cart page section","pass":true,"detail":""},{"name":"the request does NOT ask for a drawer that is not here","pass":true,"detail":""},{"name":"the removed line is gone from the page","pass":true,"detail":""},{"name":"the page totals were replaced","pass":true,"detail":""},{"name":"the header count was replaced","pass":true,"detail":""},{"name":"updates[] now matches the server, one input per surviving line","pass":true,"detail":""},{"name":"focus landed on the page heading, not on &lt;body&gt;","pass":true,"detail":""},{"name":"a quantity change on the page posts to cart/change.js","pass":true,"detail":""},{"name":"it identifies the line by key","pass":true,"detail":""},{"name":"the page re-rendered after the change","pass":true,"detail":""},{"name":"a failed change is visible on the page","pass":true,"detail":""},{"name":"a failed change clears the line busy state","pass":true,"detail":""}]&gt;&gt;&gt;</pre>
+
+</body></html>

@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en" class="js cart-js"><head><meta charset="utf-8">
+<script>
+(function () {
+  window.__req = [];
+  window.__mode = 'ok';
+  window.__lines = ['k2:bbb', 'k3:ccc', 'k4:ddd'];
+
+  function pageHtml(lines) {
+    var items = '';
+    for (var i = 0; i < lines.length; i++) {
+      items += '<li class="cart-line" data-cart-line data-line-key="' + lines[i] + '" data-line-index="' + (i + 1) + '">' +
+        '<div class="quantity" data-quantity data-line-key="' + lines[i] + '">' +
+        '<button type="button" data-quantity-step="-1" aria-disabled="true"></button>' +
+        '<input class="quantity__input" data-quantity-input type="number" name="updates[]" value="1" min="1">' +
+        '<button type="button" data-quantity-step="1"></button></div>' +
+        '<a href="/cart/change?id=' + lines[i] + '&quantity=0" data-cart-remove data-line-key="' + lines[i] + '">Remove</a>' +
+        '</li>';
+    }
+    return '<div id="shopify-section-main" class="shopify-section">' +
+      '<div class="main-cart"><div data-cart-page-inner>' +
+      '<form data-cart-form><ul>' + items + '</ul>' +
+      '<textarea data-cart-note name="note">SERVER NOTE</textarea>' +
+      '<dd data-cart-total>PAGE REFRESHED</dd></form>' +
+      '</div></div></div>';
+  }
+
+  window.fetch = function (input, init) {
+    var url = typeof input === 'string' ? input : String(input);
+    var body = init && init.body;
+    var rec = { url: url, at: Date.now() };
+    if (body instanceof FormData) {
+      rec.form = {};
+      body.forEach(function (v, k) { rec.form[k] = String(v); });
+    } else if (typeof body === 'string') {
+      try { rec.json = JSON.parse(body); } catch (e) { rec.raw = body; }
+    }
+    window.__req.push(rec);
+    if (window.__mode === 'network') return Promise.reject(new TypeError('Failed to fetch'));
+    if (window.__mode === 'error422') {
+      return Promise.resolve({
+        ok: false, status: 422,
+        json: function () {
+          return Promise.resolve({ status: 422, message: 'Cart Error',
+            description: 'All 3 Utility Cap are in your cart.',
+            sections: { 'main': pageHtml(window.__lines) } });
+        }
+      });
+    }
+    return Promise.resolve({
+      ok: true, status: 200,
+      json: function () {
+        return Promise.resolve({ sections: { 'main': pageHtml(window.__lines) } });
+      }
+    });
+  };
+})();
+</script>
+
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DONE</title>
+<link rel="stylesheet" href="assets/design-tokens.css">
+<link rel="stylesheet" href="assets/base.css">
+<link rel="stylesheet" href="assets/header.css">
+<link rel="stylesheet" href="assets/component-container.css">
+<link rel="stylesheet" href="assets/component-button.css">
+<link rel="stylesheet" href="assets/component-pagination.css">
+<link rel="stylesheet" href="assets/component-quantity.css">
+<link rel="stylesheet" href="assets/component-cart-line.css">
+<script>document.documentElement.classList.replace('no-js','js');</script>
+<script>window.Shopify = window.Shopify || {routes: {root: '/'}};</script>
+<script src="assets/header.js" defer=""></script>
+<script src="assets/cart.js" defer=""></script>
+</head><body class="template-cart">
+<a class="skip-link" href="#MainContent">Skip to content</a>
+<div id="shopify-section-header" class="shopify-section"><header class="header surface-dark" data-header=""><div class="header__inner container"><div class="header__cluster header__cluster--start">
+      <button type="button" class="header__control header__menu-toggle" aria-expanded="false" aria-controls="MobileMenu" data-menu-toggle="">
+        <svg class="icon icon--menu " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3.75 6.5h16.5"></path><path d="M3.75 12h16.5"></path><path d="M3.75 17.5h16.5"></path></svg>
+
+        <span class="visually-hidden">Menu</span>
+      </button>
+    </div><div class="header__branding"><a class="header__logo-link" href="/"><img class="header__logo" src="img/logo.png" srcset="img/logo.png 120w, img/logo.png 180w, img/logo.png 240w, img/logo.png 360w, img/logo.png 480w, img/logo.png 600w" sizes="(min-width: 1024px) 240px, 160px" width="500" height="500" style="--logo-height-desktop: 78px; --logo-height-mobile: 56px;" alt="God Squad">
+        </a></div><nav class="header__nav" aria-label="Primary">
+      <ul class="header__nav-list" role="list"><li class="header__nav-item">
+              <a class="header__nav-link" href="/">Home</a>
+            </li><li class="header__nav-item">
+              <a class="header__nav-link" href="/collections/all">Shop</a>
+            </li><li class="header__nav-item">
+              <a class="header__nav-link" href="/#story">Our Story</a>
+            </li><li class="header__nav-item">
+              <a class="header__nav-link" href="/#verse">Verse</a>
+            </li></ul>
+    </nav><div class="header__cluster header__cluster--end"><a class="header__control" href="/search" data-search-trigger="" aria-haspopup="dialog" aria-expanded="false" aria-controls="HeaderSearch">
+          <svg class="icon icon--search " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="6.25"></circle><path d="M15.6 15.6 20.5 20.5"></path></svg>
+
+          <span class="visually-hidden">Search</span>
+        </a><shopify-account class="header__control header__account" menu="customer-account-main-menu">
+          <span class="header__account-avatar" slot="signed-out-avatar">
+            <svg class="icon icon--account " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="8.25" r="3.75"></circle><path d="M4.75 19.75a7.25 7.25 0 0 1 14.5 0"></path></svg>
+
+            <span class="visually-hidden">Account</span>
+          </span>
+        </shopify-account><a class="header__control header__cart" href="/cart" data-cart-bubble="">
+          <svg class="icon icon--cart " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.5 7.75h13l-1.1 11.3a1.4 1.4 0 0 1-1.4 1.2H8a1.4 1.4 0 0 1-1.4-1.2Z"></path><path d="M9 10V6.9a3 3 0 0 1 6 0V10"></path></svg>
+
+<span class="visually-hidden">Cart</span><span class="header__cart-count" data-cart-count="" aria-hidden="true">5</span>
+  <span class="visually-hidden" data-cart-count-text="">5 items</span>
+        </a></div>
+  </div><div class="header__search" id="HeaderSearch" data-search-panel="" hidden="">
+    <form class="header__search-form" action="/search" method="get" role="search">
+      <label class="visually-hidden" for="HeaderSearchInput">
+        Search the store
+      </label>
+      <input class="header__search-input" id="HeaderSearchInput" type="search" name="q" placeholder="Search the store…" data-search-input=""><input type="hidden" name="type" value="product">
+      <button type="submit" class="button button--primary header__search-submit">
+        Search
+      </button>
+      <button type="button" class="header__control" data-search-close="">
+        <svg class="icon icon--close " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.4 6.4 17.6 17.6"></path><path d="M17.6 6.4 6.4 17.6"></path></svg>
+
+        <span class="visually-hidden">Close search</span>
+      </button>
+    </form>
+  </div><div class="header__panel" id="MobileMenu" data-menu-panel="" hidden="">
+    <div class="header__panel-header">
+      <span class="header__panel-title">Menu</span>
+      <button type="button" class="header__control" data-menu-close="">
+        <svg class="icon icon--close " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.4 6.4 17.6 17.6"></path><path d="M17.6 6.4 6.4 17.6"></path></svg>
+
+        <span class="visually-hidden">Close menu</span>
+      </button>
+    </div>
+
+    <nav class="header__panel-nav" aria-label="Main">
+      <ul class="header__panel-list" role="list"><li>
+              <a class="header__panel-link" href="/">Home</a>
+            </li><li>
+              <a class="header__panel-link" href="/collections/all">Shop</a>
+            </li><li>
+              <a class="header__panel-link" href="/#story">Our Story</a>
+            </li><li>
+              <a class="header__panel-link" href="/#verse">Verse</a>
+            </li></ul>
+    </nav></div>
+
+  <div class="header__overlay" data-menu-overlay="" hidden=""></div>
+</header>
+
+
+</div>
+<main id="MainContent" tabindex="-1">
+<div id="shopify-section-main" class="shopify-section"><link rel="stylesheet" href="assets/section-main-cart.css">
+
+<div class="main-cart surface-dark" data-cart-page="" data-cart-page-section="main">
+  <div class="main-cart__inner container">
+    <h1 class="main-cart__title" tabindex="-1" id="CartPageTitle">Your cart</h1><p class="main-cart__error" data-cart-error="" role="alert">All 3 Utility Cap are in your cart.</p>
+
+    <div data-cart-page-inner=""><form data-cart-form=""><ul><li class="cart-line" data-cart-line="" data-line-key="k2:bbb" data-line-index="1"><div class="quantity" data-quantity="" data-line-key="k2:bbb"><button type="button" data-quantity-step="-1"></button><input class="quantity__input" data-quantity-input="" type="number" name="updates[]" value="1" min="1"><button type="button" data-quantity-step="1"></button></div><a href="/cart/change?id=k2:bbb&amp;quantity=0" data-cart-remove="" data-line-key="k2:bbb">Remove</a></li><li class="cart-line" data-cart-line="" data-line-key="k3:ccc" data-line-index="2"><div class="quantity" data-quantity="" data-line-key="k3:ccc"><button type="button" data-quantity-step="-1" aria-disabled="true"></button><input class="quantity__input" data-quantity-input="" type="number" name="updates[]" value="1" min="1"><button type="button" data-quantity-step="1"></button></div><a href="/cart/change?id=k3:ccc&amp;quantity=0" data-cart-remove="" data-line-key="k3:ccc">Remove</a></li><li class="cart-line" data-cart-line="" data-line-key="k4:ddd" data-line-index="3"><div class="quantity" data-quantity="" data-line-key="k4:ddd"><button type="button" data-quantity-step="-1" aria-disabled="true"></button><input class="quantity__input" data-quantity-input="" type="number" name="updates[]" value="1" min="1"><button type="button" data-quantity-step="1"></button></div><a href="/cart/change?id=k4:ddd&amp;quantity=0" data-cart-remove="" data-line-key="k4:ddd">Remove</a></li></ul><textarea data-cart-note="" name="note">SERVER NOTE</textarea><dd data-cart-total="">PAGE REFRESHED</dd></form></div>
+  </div>
+</div>
+
+
+</div>
+<div class="product-card"><form action="/cart/add"><p class="product-card__error" data-cart-error="" hidden=""></p></form></div></main>
+
+<div id="CartStatus" class="visually-hidden" role="status" aria-live="polite" data-cart-no-inert="">All 3 Utility Cap are in your cart.</div>
+<div hidden="" data-cart-no-inert="" data-cart-strings="" data-added="Added to your cart." data-updated="Cart updated." data-removed="Removed from your cart." data-note-saved="Order note saved." data-quantity-announce="Quantity: [count]" data-error-generic="Unable to update your cart. Please try again." data-error-network="We could not reach the store. Check your connection and try again."></div>
+
+<script>
+(function () {
+  var results = [];
+  function t(name, r) {
+    results.push({ name: name, pass: r === true, detail: r === true ? '' : String(r) });
+  }
+  function q(s) { return document.querySelector(s); }
+  function wait(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+  function changes() {
+    return window.__req.filter(function (r) { return /cart\/change\.js$/.test(r.url); });
+  }
+
+  function run() {
+    return Promise.resolve()
+      /* ---------------------------------------------------------------- D4
+         The no-JavaScript Update control is redundant once the cart script is
+         applying changes as they are made, and the theme says so in writing.
+         The rule that hides it has to be in a stylesheet THIS page loads.
+
+         Checked FIRST, before any section swap: the stub's rendered cart page
+         does not carry this control, so a later check would read the stub's
+         markup and report it missing rather than visible. */
+      .then(function () {
+        t('the cart script announced itself',
+          document.documentElement.classList.contains('cart-js') || 'no cart-js class');
+        var update = q('.main-cart__update');
+        t('the cart page has an Update control in the markup', !!update || 'none rendered');
+        if (update) {
+          t('and it is hidden once the cart script is running',
+            getComputedStyle(update).display === 'none'
+              || 'display=' + getComputedStyle(update).display);
+        }
+        return null;
+      })
+      /* ---------------------------------------------------------------- D3
+         A quantity step is debounced by 250ms. Removing the line inside that
+         window must CANCEL it: /cart/change.js with a key the server has just
+         dropped answers 404, so the customer would watch a successful removal
+         be followed by "Unable to update your cart". */
+      .then(function () {
+        window.__req.length = 0;
+        window.__mode = 'ok';
+        var line = document.querySelectorAll('[data-cart-line]')[0];
+        var key = line.getAttribute('data-line-key');
+        window.__key = key;
+        line.querySelector('[data-quantity-step="1"]').click();
+        return wait(40).then(function () {
+          t('the stepper does not fire immediately', changes().length === 0
+            || 'fired ' + changes().length + ' request(s) inside the debounce');
+          document.querySelector('[data-cart-remove][data-line-key="' + key + '"]').click();
+          return wait(600);
+        });
+      })
+      .then(function () {
+        var c = changes();
+        t('removing a line inside the debounce sends ONE request',
+          c.length === 1 || 'sent ' + c.length + ': ' +
+            c.map(function (r) { return r.json && r.json.quantity; }).join(','));
+        t('and that request is the removal, not the stepped quantity',
+          (c.length && c[c.length - 1].json && c[c.length - 1].json.quantity === 0)
+            || 'last quantity=' + (c.length ? c[c.length - 1].json.quantity : 'none'));
+        t('no request carries a quantity for a line already removed',
+          c.every(function (r) { return r.json.quantity === 0; })
+            || 'quantities=' + c.map(function (r) { return r.json.quantity; }).join(','));
+        return null;
+      })
+      /* --------------------------------------------------- RACE CONDITIONS
+         The brief: "Prevent multiple rapid quantity requests from producing
+         inconsistent cart state." Five presses of + is ONE request carrying
+         the fifth value, not five requests racing each other to land last. */
+      .then(function () {
+        window.__req.length = 0;
+        window.__mode = 'ok';
+        var line = document.querySelectorAll('[data-cart-line]')[0];
+        var up = line.querySelector('[data-quantity-step="1"]');
+        var input = line.querySelector('[data-quantity-input]');
+        for (var i = 0; i < 5; i++) up.click();
+        t('the number on screen moves on every press, with no wait',
+          parseInt(input.value, 10) === 6 || 'input reads ' + input.value);
+        return wait(600);
+      })
+      .then(function () {
+        var c = changes();
+        t('five rapid presses send ONE request', c.length === 1 || 'sent ' + c.length);
+        t('and it carries the final quantity, not an intermediate one',
+          c.length === 1 && c[0].json.quantity === 6
+            || 'quantity=' + (c.length && c[0].json.quantity));
+        return null;
+      })
+      /* Two different lines are two different debounces, and must not collapse
+         into one another: the timers are keyed by line. */
+      .then(function () {
+        window.__req.length = 0;
+        var lines = document.querySelectorAll('[data-cart-line]');
+        if (lines.length < 2) { t('two lines are present to race', 'only ' + lines.length); return null; }
+        lines[0].querySelector('[data-quantity-step="1"]').click();
+        lines[1].querySelector('[data-quantity-step="1"]').click();
+        return wait(600).then(function () {
+          var c = changes();
+          t('changing two lines quickly sends one request each',
+            c.length === 2 || 'sent ' + c.length);
+          var keys = c.map(function (r) { return r.json.id; });
+          t('each carries its OWN line key, never an index',
+            c.length === 2 && keys[0] !== keys[1]
+              && keys.every(function (k) { return /:/.test(k); })
+              || 'ids=' + keys.join(','));
+          return null;
+        });
+      })
+      /* ---------------------------------------------------------------- D2
+         A cart-line failure must reach the CART's error line and nothing else.
+         showCartError() selected [data-cart-error] document-wide, which is the
+         attribute a quick-add product card also carries. */
+      .then(function () {
+        var card = document.createElement('div');
+        card.className = 'product-card';
+        card.innerHTML = '<form action="/cart/add"><p class="product-card__error" data-cart-error hidden></p></form>';
+        q('main').appendChild(card);
+        window.__card = card.querySelector('[data-cart-error]');
+
+        window.__req.length = 0;
+        window.__mode = 'error422';
+        var line = document.querySelectorAll('[data-cart-line]')[0];
+        line.querySelector('[data-quantity-step="1"]').click();
+        return wait(700);
+      })
+      .then(function () {
+        var page = q('.main-cart__error');
+        t('the failure is visible on the cart surface',
+          (page && page.hidden === false && page.textContent.indexOf('Utility Cap') !== -1)
+            || 'cart error box: hidden=' + (page && page.hidden) + ' text=' + (page && page.textContent));
+        t('the failure does NOT leak into a product card elsewhere on the page',
+          (window.__card.hidden === true && window.__card.textContent === '')
+            || 'card error box carried: "' + window.__card.textContent + '"');
+        return null;
+      })
+      .then(function () {
+        document.title = 'DONE';
+        document.getElementById('o').textContent = '<<<' + JSON.stringify(results) + '>>>';
+      })
+      .catch(function (e) {
+        results.push({ name: 'RUNNER', pass: false, detail: 'threw: ' + e.message + ' ' + e.stack });
+        document.title = 'DONE';
+        document.getElementById('o').textContent = '<<<' + JSON.stringify(results) + '>>>';
+      });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function () { setTimeout(run, 150); });
+  } else {
+    setTimeout(run, 150);
+  }
+})();
+</script>
+<pre id="o" style="display:none">&lt;&lt;&lt;[{"name":"the cart script announced itself","pass":true,"detail":""},{"name":"the cart page has an Update control in the markup","pass":true,"detail":""},{"name":"and it is hidden once the cart script is running","pass":true,"detail":""},{"name":"the stepper does not fire immediately","pass":true,"detail":""},{"name":"removing a line inside the debounce sends ONE request","pass":true,"detail":""},{"name":"and that request is the removal, not the stepped quantity","pass":true,"detail":""},{"name":"no request carries a quantity for a line already removed","pass":true,"detail":""},{"name":"the number on screen moves on every press, with no wait","pass":true,"detail":""},{"name":"five rapid presses send ONE request","pass":true,"detail":""},{"name":"and it carries the final quantity, not an intermediate one","pass":true,"detail":""},{"name":"changing two lines quickly sends one request each","pass":true,"detail":""},{"name":"each carries its OWN line key, never an index","pass":true,"detail":""},{"name":"the failure is visible on the cart surface","pass":true,"detail":""},{"name":"the failure does NOT leak into a product card elsewhere on the page","pass":true,"detail":""}]&gt;&gt;&gt;</pre>
+
+</body></html>

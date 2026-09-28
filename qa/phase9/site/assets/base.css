@@ -1,0 +1,113 @@
+/* ============================================================================
+   GOD SQUAD — base.css
+
+   The global element layer. Phase 10.
+
+   This is the only stylesheet in the theme that styles bare elements. Every
+   other file styles a component or a section through a class, which is what
+   keeps the cascade flat enough that no rule in this theme needs !important.
+
+   It consumes tokens and defines none: assets/design-tokens.css owns every
+   custom property, and is loaded before this file.
+   ========================================================================== */
+
+/* Border-box everywhere. Every width in the system — the grid's column floor,
+   the drawer's min(90vw, 420px), the container's max-width — is written as the
+   outer box, so the content-box default would make all of them wrong. */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+/* The user agent's 8px body margin would inset every full-bleed band, so the
+   container model — full-bleed section, constrained content — could never reach
+   the viewport edge. Measured in Phase 6: every band came out 16px narrower
+   than the viewport at every width until this was added.
+
+   THE TYPEFACE IS HERE SO THE TWO-TYPEFACE RULE HAS A FLOOR.
+
+   Until the design review this file set only the margin, so the rule "this
+   brand uses two typefaces" was enforced by roughly sixty components each
+   declaring font-family for themselves, with nothing underneath to catch one
+   that forgot. Measured: 223 elements across thirteen surfaces were inheriting
+   Times New Roman — all of them screen-reader-only, so nothing was visibly
+   wrong, but the gap was real and the next component to forget would have
+   rendered in Times with no one noticing.
+
+   Measured blast radius before adding it: 1 element of 919 across 8 surfaces,
+   against a probe noise floor of 756 — i.e. nothing. It only reaches text that
+   had no typeface of its own.
+
+   It does NOT reach form controls. The user agent does not inherit a font into
+   button, input, select or textarea, so those still need their own declaration
+   and every component in this theme gives them one. This is a safety net, not
+   a substitute. */
+body {
+  margin: 0;
+  font-family: var(--font-body);
+}
+
+/* One focus ring for the whole theme, and it is surface-aware: --focus-ring is
+   reassigned by the .surface-dark and .surface-light context classes, because
+   muted gold is 11.01:1 on ink and 1.55:1 on cream and a single fixed ring
+   colour would be invisible on one of them.
+
+   :where() keeps the specificity at zero so a component can override the ring
+   without needing to out-specify a selector with seven element names in it.
+   :focus-visible rather than :focus, so a pointer user does not get a ring on
+   every click while a keyboard user always does. */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: var(--focus-width) solid var(--focus-ring);
+  outline-offset: var(--focus-offset);
+}
+
+/* MERCHANT RICH TEXT. The four surfaces below render HTML the shop owner wrote
+   in Shopify's editor — product descriptions, collection descriptions and page
+   bodies — and the theme cannot know what is in it. Every image the theme
+   itself renders goes through image_url/image_tag with explicit widths, so this
+   is not about those; it is about the size chart, fit photo or care diagram a
+   shop owner will paste into a product description after launch.
+
+   Without this, such an image draws at its intrinsic pixel width. A 2000px size
+   chart pushes the page wider than the viewport and forces the whole document
+   to scroll sideways on a phone — the customer's first sight of the product
+   copy is a broken layout, and nothing in the theme or the QA suite would catch
+   it because the fault ships with the content, not with the code.
+
+   `height: auto` is the other half: without it, an image carrying a hardcoded
+   `height` attribute (which Shopify's editor does emit) keeps that height while
+   the width shrinks, and the picture distorts.
+
+   This is an element rule rather than a component one because that is exactly
+   what it is — a floor under markup no class can be added to. */
+.rte img,
+.rte video,
+.rte iframe,
+.rte table,
+.main-page__content img,
+.main-page__content video,
+.main-page__content iframe,
+.main-page__content table {
+  max-width: 100%;
+}
+
+.rte img,
+.main-page__content img {
+  height: auto;
+}
+
+/* Motion suppression. The token half of this — --duration-*, --hover-image-scale
+   — lives with the other tokens in design-tokens.css; this is the element half,
+   which has to reach declarations that were never written as tokens, including
+   ones inside third-party or app markup.
+
+   !important is correct here and is the one place in the theme that uses it: a
+   user preference must beat an author declaration, which is the only thing
+   !important is actually for. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -1,0 +1,257 @@
+{%- comment -%}
+  GOD SQUAD — Cart drawer
+  Phase 8. Rendered once from layout/theme.liquid, on every template EXCEPT the
+  cart page — a drawer showing the same cart as the page behind it is two views
+  of one thing that can disagree, and it gave every cart line a duplicate DOM
+  id. The layout owns that condition.
+
+  Sources of truth:
+  - PHASE-2-DESIGN-SYSTEM.md §17.3 (a drawer is one of the four things allowed
+    a shadow, and only with a z-index above --z-sticky, a backdrop and a focus
+    trap), §23.6 (the five focus rules, which it says apply to the cart drawer
+    verbatim), §12.4 (quantity), §10 (buttons), §21.4 (the scrim's duration).
+  - PHASE-1-WEBSITE-AUDIT.md ECOM-02: "There is no cart, cart drawer,
+    add-to-cart, quantity control or checkout pathway."
+
+  IT IS A REAL CART FORM FIRST AND A DRAWER SECOND.
+  Everything inside is Shopify's documented no-JavaScript cart: a form posting
+  to routes.cart_url, one updates[] field per line in cart order, a submit
+  named checkout, and item.url_to_remove links. With scripting disabled the
+  drawer is simply not openable and the header's cart control is what it has
+  always been — a link to the cart page.
+
+  MODAL, WITH inert RATHER THAN A HAND-ROLLED TRAP.
+  role="dialog" + aria-modal="true", and on open the script marks the page's
+  other top-level regions inert. inert removes them from the tab order, the
+  accessibility tree, pointer input and find-in-page in one attribute, which a
+  Tab-cycling trap does not do and aria-hidden does worse — aria-hidden leaves
+  content focusable while hiding it.
+
+  BOTH FEEDBACK CHANNELS LIVE INSIDE THE DIALOG.
+  aria-modal="true" tells assistive technology to treat everything outside this
+  element as absent, so the layout's own live region cannot be heard while the
+  drawer is open. The drawer carries its own, and its own visible error line —
+  a failed quantity change used to be reported only to a screen reader, leaving
+  a sighted customer watching a number snap back with no explanation.
+
+  Both sit OUTSIDE [data-cart-drawer-inner], with the heading, because that
+  node is replaced wholesale after every cart change: a focused element inside
+  it is destroyed, and a live region recreated together with its text announces
+  nothing at all.
+
+  WHY IT IS NOT A <dialog>.
+  showModal() would give inertness, the top layer, Escape and focus return for
+  free. It also promotes the panel out of its stacking context, splits the
+  scrim into a ::backdrop pseudo-element that cannot animate as one group with
+  the panel, and brings a live hazard into a cart: any stray method="dialog" on
+  a control inside it silently closes the dialog and discards the POST.
+{%- endcomment -%}
+
+{{ 'section-cart-drawer.css' | asset_url | stylesheet_tag }}
+
+<div
+  class="cart-drawer surface-dark"
+  id="CartDrawer"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="CartDrawerTitle"
+  data-cart-drawer
+  data-auto-open="{{ section.settings.auto_open }}"
+  hidden
+>
+  {%- comment -%}
+    The backdrop. Pointer-only: clicking it closes the drawer, and Escape is
+    the keyboard equivalent, so nothing is reachable only by pointer.
+  {%- endcomment -%}
+  <div class="cart-drawer__overlay" data-cart-overlay aria-hidden="true"></div>
+
+  <div class="cart-drawer__panel">
+    <div class="cart-drawer__header">
+      {%- comment -%}
+        tabindex="-1" so the script can move focus here on open. This is what
+        the dialog pattern asks for when the dialog's body has its own
+        structure, as a list of cart lines does: focusing the close button
+        announces "Close, button" and tells the customer nothing about what
+        just happened, and focusing the first line skips the heading entirely.
+      {%- endcomment -%}
+      <h2 class="cart-drawer__title" id="CartDrawerTitle" tabindex="-1">
+        {{ 'cart.title' | t }}
+      </h2>
+      <button type="button" class="cart-drawer__close" data-cart-close>
+        {% render 'icon-close' %}
+        <span class="visually-hidden">{{ 'cart.close' | t }}</span>
+      </button>
+    </div>
+
+    {%- comment -%}
+      The drawer's own announcement region. Empty on render; the script injects
+      into it while the drawer is open, and into the layout's region when it is
+      closed. See the header note on aria-modal.
+    {%- endcomment -%}
+    <div class="visually-hidden" role="status" aria-live="polite" data-cart-drawer-status></div>
+
+    {%- comment -%}
+      The visible failure line. Hidden until a cart request fails, and never
+      carrying anything but Shopify's own description or one of the theme's own
+      sentences from the locale file.
+    {%- endcomment -%}
+    <p class="cart-drawer__error" data-cart-error role="alert" hidden></p>
+
+    <div class="cart-drawer__inner" data-cart-drawer-inner>
+      {%- if cart.item_count > 0 -%}
+        <form
+          action="{{ routes.cart_url }}"
+          method="post"
+          id="CartDrawerForm"
+          class="cart-drawer__form"
+          data-cart-form
+        >
+          <div class="cart-drawer__scroller" data-cart-scroller>
+            <ul class="cart-drawer__lines" role="list">
+              {%- for item in cart.items -%}
+                {% render 'cart-line-item',
+                  item: item,
+                  index: forloop.index,
+                  form_id: 'CartDrawerForm',
+                  scope: 'CartDrawer',
+                  compact: true
+                %}
+              {%- endfor -%}
+            </ul>
+
+            {%- comment -%}
+              Phase 14. Shopify's own cart note, off unless the merchant turns
+              it on.
+
+              IT IS IN THE SCROLLER, NOT THE FOOTER.
+              The footer is chrome: the totals and the two actions, the things
+              that must stay on screen whatever the cart holds. The note is
+              content, and putting it in the footer made the footer grow with
+              it. Measured at 812x375 — a phone in landscape — with a note
+              written: the footer became 451px tall in a 375px viewport and the
+              line scroller collapsed to 0px against 474px of cart lines. The
+              customer could read their note and could reach Checkout, and
+              could not see or change a single thing they were buying.
+
+              That is the same failure the landscape block in
+              section-cart-drawer.css was written to fix, arriving by a
+              different route, and re-proportioning the chrome would not have
+              fixed it because the note has no fixed size to re-proportion.
+
+              Inside the form still, so a native submit posts it.
+            {%- endcomment -%}
+            {%- if section.settings.show_note -%}
+              {% render 'cart-note', id: 'CartDrawerNote' %}
+            {%- endif -%}
+          </div>
+
+          <div class="cart-drawer__footer">
+            {% render 'cart-totals' %}
+
+            {%- comment -%}
+              The no-JavaScript update control, and it is FIRST in the form's
+              submit order on purpose. A browser submits a form with the first
+              submit button when Enter is pressed in a field, so if the
+              checkout button came first, pressing Enter after typing a
+              quantity would take the customer to checkout instead of applying
+              the change they had just typed.
+            {%- endcomment -%}
+            <button type="submit" name="update" class="cart-drawer__update visually-hidden visually-hidden--until-focus">
+              {{ 'cart.update' | t }}
+            </button>
+
+            <div class="cart-drawer__actions">
+              {%- comment -%}
+                A submit named checkout, which is Shopify's own cart form
+                control: it applies any pending quantity edits and then goes to
+                checkout, in one action. A plain link to /checkout would
+                silently discard an edit the customer had just made.
+              {%- endcomment -%}
+              <button
+                type="submit"
+                name="checkout"
+                class="button button--primary button--full"
+                data-cart-checkout
+              >
+                {{ 'cart.checkout' | t }}
+              </button>
+
+              {%- if section.settings.show_view_cart -%}
+                <a class="button button--secondary button--full" href="{{ routes.cart_url }}">
+                  {{ 'cart.view_cart' | t }}
+                </a>
+              {%- endif -%}
+            </div>
+
+            {%- comment -%}
+              Continue shopping. A BUTTON that closes the drawer, not a link
+              somewhere — the customer is already on the page they were
+              shopping, and the drawer is a layer over it, so returning them to
+              it is the whole action. A link would navigate them away from the
+              thing they were looking at in order to let them carry on looking
+              at it.
+
+              The close X above does the same job; this is the same action
+              named in words, for a customer who does not read an X as "back to
+              what I was doing". It reuses [data-cart-close], so it is the
+              drawer's one close path rather than a second one.
+            {%- endcomment -%}
+            <button type="button" class="cart-drawer__continue" data-cart-close>
+              {{ 'cart.continue_shopping' | t }}
+            </button>
+          </div>
+        </form>
+      {%- else -%}
+        {% render 'cart-empty-state',
+          url: section.settings.empty_link,
+          label: section.settings.empty_link_label
+        %}
+      {%- endif -%}
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Cart drawer",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "auto_open",
+      "label": "Open the drawer after adding to the cart",
+      "default": true,
+      "info": "When this is off, adding still updates the cart count and announces the addition; the customer is simply not interrupted."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_view_cart",
+      "label": "Show the View cart link",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_note",
+      "label": "Let customers add an order note",
+      "default": false,
+      "info": "Adds Shopify's own cart note. Turn this on only if you act on what customers write there — a field nobody reads is worse than no field. The cart page has its own copy of this setting, under Cart."
+    },
+    {
+      "type": "header",
+      "content": "Empty cart"
+    },
+    {
+      "type": "url",
+      "id": "empty_link",
+      "label": "Where the empty-cart button goes",
+      "info": "Leave empty to use the home page. The cart page has its own copy of this setting, under Cart."
+    },
+    {
+      "type": "text",
+      "id": "empty_link_label",
+      "label": "Empty-cart button label",
+      "default": "Shop the collection",
+      "info": "The cart page has its own copy of this setting, under Cart."
+    }
+  ]
+}
+{% endschema %}
